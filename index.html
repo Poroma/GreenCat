@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCG Green Product - Data Dashboard</title>
+    <!-- โหลด Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- โหลด PapaParse และ SheetJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; margin: 0; padding: 0; }
+        
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ส่วนหัวและตัวกรอง */
+        .top-panel {
+            flex-shrink: 0;
+            padding: 1rem;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            z-index: 50;
+        }
+
+        /* ตาราง */
+        .table-container {
+            flex-grow: 1;
+            overflow: auto;
+            background-color: white;
+            position: relative;
+        }
+
+        /* สไตล์ตารางให้เหมือน Excel */
+        table { 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            width: max-content; /* ให้ตารางกว้างตามเนื้อหา */
+            font-size: 0.8rem;
+        }
+        
+        th, td { 
+            border-right: 1px solid #000; 
+            border-bottom: 1px dotted #999; /* เส้นประเหมือน Excel */
+            padding: 4px 8px;
+            white-space: nowrap;
+            text-align: center;
+        }
+        
+        /* ขอบทึบด้านซ้ายสุดและล่างสุดของ Header */
+        thead th { border-bottom: 1px solid #000; }
+        tbody tr:last-child td { border-bottom: 1px solid #000; }
+        th:first-child, td:first-child { border-left: 1px solid #000; }
+
+        /* ตรึงหัวตาราง 5 ชั้น */
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: white;
+        }
+        
+        /* สีพื้นหลังหัวตาราง */
+        .bg-green-header { background-color: #c5e0b4; } /* สีเขียวอ่อน LEED */
+        .bg-yellow-header { background-color: #ffe699; } /* สีเหลืองอ่อน Green Attributes */
+        .bg-gray-header { background-color: #f2f2f2; }
+
+        /* การทำข้อความแนวตั้ง */
+        .vertical-text {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ข้อความแนวตั้งสำหรับ Green Attributes (อนุญาตให้ตัดบรรทัดตาม \n) */
+        .vertical-text-wrap {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            white-space: pre-line;
+            overflow: hidden;
+        }
+
+        /* ตรึงคอลัมน์ซ้ายสุด (ข้อมูลสินค้า) */
+        .sticky-col {
+            position: sticky;
+            z-index: 10;
+            background-color: white;
+        }
+        
+        /* เมื่อ Sticky คอลัมน์ และ Header ตัดกัน */
+        thead .sticky-col {
+            z-index: 30;
+        }
+
+        /* Resizable Column Handler */
+        .resizer {
+            position: absolute;
+            top: 0;
+            right: -3px;
+            width: 6px;
+            cursor: col-resize;
+            user-select: none;
+            height: 100%;
+            z-index: 35;
+        }
+        
+        .resizer:hover, .resizing {
+            background-color: #10b981; /* สีเขียวตอน hover/ลาก */
+        }
+
+        /* Resizable Row Handler: ใช้ลากปรับความสูงแถวชื่อ Credit แนวตั้ง (ตามที่วงในรูปตัวอย่าง) */
+        .row-resizer {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -3px;
+            height: 6px;
+            cursor: row-resize;
+            user-select: none;
+            z-index: 36;
+        }
+
+        .row-resizer:hover {
+            background-color: #10b981; /* สีเขียวตอน hover/ลาก */
+        }
+
+        /* ต้องให้ th เป็น relative เพื่อใช้วาง resizer */
+        th {
+            position: relative;
+        }
+
+        tbody tr:hover td { background-color: #f0fdf4 !important; }
+
+        /* เพิ่ม: ไฮไลท์แถวเมื่อคลิก (เอา transition ออกเพื่อแก้ปัญหาความหน่วงบนตารางขนาดใหญ่) */
+        /* รองรับการเลือกได้หลายแถวพร้อมกัน (toggle ทีละแถว ไม่ล้างแถวอื่น) */
+        .selected-row td { background-color: #fef08a !important; }
+        tbody tr { cursor: pointer; }
+
+        /* ไฮไลท์คอลัมน์ (คลิกที่หัวคอลัมน์) เพื่อดู Focus แบบตัดกับแถวที่เลือก */
+        th[data-colkey] { cursor: pointer; }
+        th[data-colkey]:hover { outline: 2px solid #10b981; outline-offset: -2px; }
+        .col-selected { background-color: #bfdbfe !important; }
+        /* จุดตัดระหว่างแถวและคอลัมน์ที่เลือก ให้เด่นกว่าทั้งสองแบบ (specificity สูงกว่า) */
+        tr.selected-row td.col-selected,
+        tr.selected-row th.col-selected { background-color: #fb923c !important; }
+
+        /* จุดกลมๆ */
+        .dot {
+            height: 6px;
+            width: 6px;
+            background-color: #000;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        /* ไฮไลท์เซลล์ Green Attributes (สีส้ม) */
+        .cell-highlight-attr { background-color: #ffc000 !important; }
+        
+        /* ไฮไลท์เซลล์ Certification (สีฟ้า) */
+        .cell-highlight-cert { background-color: #ccffff !important; }
+
+        /* แถบเทาคั่นกลุ่ม */
+        .group-separator td { background-color: #a6a6a6 !important; border-bottom: 1px solid #000; height: 16px; }
+
+        /* การจัดการการแสดงผลข้อความในเซลล์ Certification */
+        .cert-data-text {
+            color: #d9534f; /* สีแดงสำหรับข้อความพิเศษแบบในรูป (เช่น SDS...) */
+            font-size: 0.7rem;
+            white-space: normal;
+            line-height: 1.1;
+        }
+        
+        .cert-tick {
+            color: #000; /* สีดำสำหรับเครื่องหมายถูก */
+            font-size: 0.9rem;
+        }
+
+        /* ปุ่มทรงแคปซูล (Pill) ใช้กับปุ่ม "ล้างตัวกรอง" และ "ล้าง Highlight" ให้ดูเข้าชุดกับปุ่มอื่นในแถบเครื่องมือ */
+        .btn-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+        }
+        .btn-pill:active { transform: scale(0.96); }
+
+        .btn-pill-gray {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            border-color: #e5e7eb;
+        }
+        .btn-pill-gray:hover {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            border-color: #d1d5db;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+
+        .btn-pill-orange {
+            background-color: #fff7ed;
+            color: #c2410c;
+            border-color: #fed7aa;
+        }
+        .btn-pill-orange:hover {
+            background-color: #ffedd5;
+            border-color: #fdba74;
+            color: #9a3412;
+            box-shadow: 0 1px 2px rgba(249,115,22,0.15);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-top: 1px solid #ccc;}
+        ::-webkit-scrollbar-thumb { background: #888; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+</head>
+<body>
+
+    <!-- โซนอัปโหลด -->
+    <div id="upload-section" class="flex flex-col items-center justify-center h-screen bg-gray-50 p-4">
+        <div class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-green-700 mb-2">SCG Green Products Data</h1>
+            <p class="text-gray-600">อัปโหลดไฟล์ "Product-Certification Map" (.xlsx, .csv)</p>
+        </div>
+        
+        <div id="drop-zone" class="w-full max-w-xl border-2 border-dashed border-green-500 rounded-xl p-16 text-center bg-white cursor-pointer hover:bg-green-50 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-green-600 mb-4"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg>
+            <h3 class="text-xl font-semibold text-gray-700">ลากไฟล์มาวางที่นี่</h3>
+            <p class="text-sm text-gray-500 mt-2">หรือคลิกเพื่อเลือกไฟล์</p>
+            <input type="file" id="file-input" accept=".csv, .xlsx, .xls" class="hidden" />
+        </div>
+        
+        <div id="loading" class="hidden mt-6 text-green-700 font-medium flex items-center">
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-green-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            กำลังประมวลผลข้อมูล โปรดรอสักครู่...
+        </div>
+    </div>
+
+    <!-- โซน Dashboard -->
+    <div id="dashboard-section" class="hidden dashboard-container">
+        
+        <!-- แถบด้านบน (Filters & Actions) -->
+        <div class="top-panel flex flex-col gap-3">
+            <!-- แถวที่ 1: ค้นหาและตัวกรองหลัก -->
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-4 flex-wrap">
+                    <h1 class="text-xl font-bold text-green-700 hidden md:block">Green Products</h1>
+                    
+                    <div class="relative">
+                        <input type="text" id="search" placeholder="ค้นหาชื่อสินค้า..." class="border border-gray-300 rounded px-3 py-1.5 text-sm w-48 lg:w-64 focus:outline-none focus:border-green-500 shadow-sm">
+                    </div>
+
+                    <select id="filter-bu" class="border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none shadow-sm">
+                        <option value="">ทุก BU</option>
+                    </select>
+
+                    <select id="filter-group" class="border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none shadow-sm">
+                        <option value="">ทุก Product Group</option>
+                    </select>
+                    
+                    <button id="btn-clear" class="btn-pill btn-pill-gray">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+                        ล้างตัวกรอง
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-gray-600">พบ <span id="count" class="font-bold text-black text-lg">0</span> รายการ</span>
+                    <span class="text-sm text-gray-600">เลือกไว้ <span id="selected-count" class="font-bold text-orange-600 text-lg">0</span> แถว</span>
+                    <button id="btn-clear-highlight" class="btn-pill btn-pill-orange">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+                        ล้าง Highlight
+                    </button>
+                    <!-- เพิ่มปุ่ม Export Excel -->
+                    <button id="btn-export" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors shadow-sm flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Export
+                    </button>
+                    <button id="btn-new" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-sm transition-colors border border-gray-300 shadow-sm">อัปโหลดใหม่</button>
+                </div>
+            </div>
+            
+            <!-- แถวที่ 2: ตัวเลือกซ่อน/แสดงคอลัมน์ใบรับรอง (เพื่อลดความกว้างตาราง) -->
+            <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
+                <span class="text-xs font-bold text-gray-700">แสดงใบรับรอง:</span>
+                <div id="cert-toggles" class="flex flex-wrap gap-3">
+                    <!-- Checkbox จะถูกสร้างจาก JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ตารางข้อมูล -->
+        <div class="table-container" id="scroll-container">
+            <table id="main-table">
+                <thead id="table-head">
+                    <!-- สร้างจาก JS -->
+                </thead>
+                <tbody id="table-body">
+                    <!-- สร้างจาก JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // โครงสร้างข้อมูลสำหรับตาราง (เหมือนในรูปเป๊ะๆ)
+        const GREEN_ATTRS = [
+            { id: 'Low Corbon Emission', label: 'Low\nCarbon\nEmission' }, // สะกดตามไฟล์ต้นฉบับ
+            { id: 'Operation Carbon', label: 'Operation\nCarbon' },
+            { id: 'Circularity', label: 'Circularity' },
+            { id: 'Well-being', label: 'Well\n-being' }
+        ];
+
+        let masterData = []; // เก็บข้อมูลแถวของสินค้าทั้งหมด
+        let certStructure = {}; // เก็บโครงสร้าง Certification แบบ Tree (Name -> Category -> Credit)
+        let filters = { bu: new Set(), group: new Set() };
+        let activeCerts = new Set(); // เพิ่ม: เก็บรายชื่อ Cert ที่ผู้ใช้เลือกให้แสดงผล
+
+        // เพิ่ม: เก็บสถานะการ Highlight แบบเลือกได้หลายแถว/หลายคอลัมน์พร้อมกัน
+        // ใช้ rowKey/colKey เป็น string คงที่ ไม่อิงตำแหน่ง DOM เพื่อให้ selection อยู่รอดข้าม re-render (เช่นตอนพิมพ์ค้นหา)
+        let selectedRows = new Set();
+        let selectedCols = new Set();
+
+        // ความสูงของแถวชื่อ Credit แนวตั้ง (ตามจุดที่วงในรูปตัวอย่าง) — Default 250px แต่ผู้ใช้ลากปรับเองได้
+        let creditRowHeight = 250;
+        let creditRowStyleEl = null;
+        function applyCreditRowHeight() {
+            if (!creditRowStyleEl) {
+                creditRowStyleEl = document.createElement('style');
+                creditRowStyleEl.id = 'credit-row-style';
+                document.head.appendChild(creditRowStyleEl);
+            }
+            const textMaxHeight = Math.max(creditRowHeight - 10, 20); // เผื่อที่ให้ padding-bottom ของข้อความ
+            creditRowStyleEl.textContent = `
+                tr.credit-name-row > th { height: ${creditRowHeight}px; }
+                tr.credit-name-row > th .vertical-text { max-height: ${textMaxHeight}px; }
+            `;
+        }
+
+        // DOM (cache ไว้ครั้งเดียว ลดการเรียก getElementById ซ้ำๆ ในทุกครั้งที่ render/filter)
+        const elUpload = document.getElementById('upload-section');
+        const elDash = document.getElementById('dashboard-section');
+        const elDrop = document.getElementById('drop-zone');
+        const elFile = document.getElementById('file-input');
+        const elLoad = document.getElementById('loading');
+        const elSearch = document.getElementById('search');
+        const elFilterBu = document.getElementById('filter-bu');
+        const elFilterGroup = document.getElementById('filter-group');
+        const elCount = document.getElementById('count');
+        const elSelectedCount = document.getElementById('selected-count');
+        const elTbody = document.getElementById('table-body');
+        const elThead = document.getElementById('table-head');
+
+        // Debounce ทั่วไป: ลดจำนวนครั้งที่ต้อง re-render ตาราง (ซึ่งราคาแพงบนข้อมูลจำนวนมาก)
+        function debounce(fn, delay) {
+            let timer;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn.apply(this, args), delay);
+            };
+        }
+
+        function rowKeyOf(row) {
+            return `${row.group}_${row.bu}_${row.name}`;
+        }
+        
+        // Setup Drag & Drop
+        elDrop.addEventListener('click', () => elFile.click());
+        elDrop.addEventListener('dragover', e => { e.preventDefault(); elDrop.classList.add('bg-green-50'); });
+        elDrop.addEventListener('dragleave', () => elDrop.classList.remove('bg-green-50'));
+        elDrop.addEventListener('drop', e => {
+            e.preventDefault();
+            elDrop.classList.remove('bg-green-50');
+            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        elFile.addEventListener('change', e => {
+            if(e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        // 1. อ่านไฟล์
+        function handleFile(file) {
+            elLoad.classList.remove('hidden');
+            const name = file.name.toLowerCase();
+            
+            if (name.endsWith('.csv')) {
+                Papa.parse(file, {
+                    header: true, skipEmptyLines: true,
+                    transformHeader: (h, i) => (h.trim() === 'Category' && i > 5) ? 'CertCategory' : h.trim(),
+                    complete: res => processData(res.data)
+                });
+            } else if (name.match(/\.xlsx?$/)) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const wb = XLSX.read(e.target.result, { type: 'array' });
+                    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
+                    
+                    const headers = json[0].map(h => h ? h.toString().trim() : '');
+                    let catCount = 0;
+                    for (let i = 0; i < headers.length; i++) {
+                        if (headers[i] === 'Category') {
+                            catCount++;
+                            if (catCount > 1 || i > 5) headers[i] = 'CertCategory';
+                        }
+                    }
+                    
+                    const data = [];
+                    for (let i = 1; i < json.length; i++) {
+                        if (!json[i].some(c => c !== "")) continue;
+                        let row = {};
+                        headers.forEach((h, j) => { if(h) row[h] = json[i][j]; });
+                        data.push(row);
+                    }
+                    processData(data);
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert('รองรับเฉพาะไฟล์ Excel หรือ CSV');
+                elLoad.classList.add('hidden');
+            }
+        }
+
+        // --- เพิ่มฟังก์ชันสร้าง Checkbox สำหรับซ่อน/แสดง Cert ---
+        function renderCertToggles() {
+            const container = document.getElementById('cert-toggles');
+            container.innerHTML = '';
+            
+            const certNames = Object.keys(certStructure);
+            if (certNames.length === 0) return;
+
+            // 1. สร้างปุ่ม "เลือกทั้งหมด (Select All)"
+            const selectAllLabel = document.createElement('label');
+            selectAllLabel.className = "flex items-center gap-1 text-sm font-bold text-gray-800 cursor-pointer select-none hover:text-green-700 mr-2 border-r pr-3 border-gray-300";
+            
+            const selectAllCb = document.createElement('input');
+            selectAllCb.type = 'checkbox';
+            selectAllCb.className = "accent-green-600 cursor-pointer w-4 h-4";
+            
+            // เช็คว่าปัจจุบันเลือกครบทุกอันอยู่หรือไม่
+            selectAllCb.checked = (activeCerts.size === certNames.length);
+
+            selectAllCb.addEventListener('change', function() {
+                const isChecked = this.checked;
+                const checkboxes = container.querySelectorAll('.cert-cb');
+                
+                if (isChecked) {
+                    certNames.forEach(name => activeCerts.add(name));
+                    checkboxes.forEach(cb => cb.checked = true);
+                } else {
+                    activeCerts.clear();
+                    checkboxes.forEach(cb => cb.checked = false);
+                }
+                
+                // วาดตารางใหม่
+                buildHeader();
+                applyFilters();
+            });
+
+            selectAllLabel.appendChild(selectAllCb);
+            selectAllLabel.appendChild(document.createTextNode('เลือกทั้งหมด'));
+            container.appendChild(selectAllLabel);
+
+            // 2. สร้างปุ่มของแต่ละ Certification
+            certNames.forEach(certName => {
+                const label = document.createElement('label');
+                label.className = "flex items-center gap-1 text-sm cursor-pointer select-none hover:text-green-700";
+                
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = certName;
+                cb.checked = activeCerts.has(certName);
+                cb.className = "cert-cb accent-green-600 cursor-pointer w-4 h-4";
+                
+                cb.addEventListener('change', function() {
+                    if(this.checked) {
+                        activeCerts.add(this.value);
+                    } else {
+                        activeCerts.delete(this.value);
+                    }
+                    
+                    // อัปเดตสถานะของปุ่ม Select All อัตโนมัติ (ถ้าติ๊กครบ ให้ Select All ติดติ๊กถูก)
+                    selectAllCb.checked = (activeCerts.size === certNames.length);
+
+                    // วาดตารางใหม่
+                    buildHeader();
+                    applyFilters();
+                });
+                
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(certName));
+                container.appendChild(label);
+            });
+        }
+
+        // 3. วาดหน้าจอ
+        function renderDashboard() {
+            // อัปเดต Dropdowns
+            const fillSel = (id, set) => {
+                const el = document.getElementById(id);
+                el.innerHTML = '<option value="">' + el.options[0].text + '</option>';
+                Array.from(set).sort().forEach(v => el.innerHTML += `<option value="${v}">${v}</option>`);
+            };
+            fillSel('filter-bu', filters.bu);
+            fillSel('filter-group', filters.group);
+
+            renderCertToggles(); // วาดสวิตช์เปิดปิดคอลัมน์
+
+            buildHeader();
+            applyFilters(); // วาดข้อมูล
+
+            elUpload.classList.add('hidden');
+            elDash.classList.remove('hidden');
+            elLoad.classList.add('hidden');
+            
+            // ปรับความกว้าง Sticky Columns
+            setTimeout(setStickyColumns, 100);
+        }
+
+        // สร้างหัวตาราง (Thead) ให้เหมือนรูป
+        function buildHeader() {
+            const thead = document.getElementById('table-head');
+            thead.innerHTML = '';
+
+            // แถวที่ 1-5 (เก็บเป็น Array ก่อน)
+            let tr1 = '<tr class="h-10">'; // ชื่อ Cert หลัก
+            let tr2 = '<tr class="h-10">'; // Category ย่อยของ Cert
+            let tr3 = '<tr class="credit-name-row">'; // ชื่อ Credit แนวตั้ง (ความสูง Default 250px ควบคุมผ่าน applyCreditRowHeight — ลากปรับเองได้ที่ .row-resizer)
+            let tr4 = '<tr class="h-8">'; // Point
+            let tr5 = '<tr class="h-8 font-bold">'; // Requirement
+
+            // --- ส่วนที่ 1: ข้อมูลสินค้า (ตรึงไว้ซ้ายสุด, ครอบคลุม 5 แถว) ---
+            const pCols = [
+                {id:'group', name:'Product Group', w:120}, 
+                {id:'bu', name:'BU', w:60}, 
+                {id:'cat', name:'Category', w:120}, 
+                {id:'name', name:'Products', w:250}
+            ];
+            
+            pCols.forEach((c, index) => {
+                // ใส่ Resizer เฉพาะคอลัมน์ชื่อสินค้า (คอลัมน์อื่นๆ จัดผ่าน JS ได้ แต่ทำที่หัวคอลัมน์แถวแรกสุดง่ายกว่า)
+                // data-colkey ใช้ระบุคอลัมน์แบบคงที่สำหรับ feature ไฮไลท์คอลัมน์ (คลิกที่หัวตาราง)
+                tr1 += `<th rowspan="5" class="sticky-col bg-white align-middle resizable-th" data-col="${c.id}" data-colkey="p:${c.id}" style="min-width:${c.w}px; width:${c.w}px; white-space:normal;">
+                            ${c.name}
+                            <div class="resizer"></div>
+                        </th>`;
+            });
+
+            // --- ส่วนที่ 2: Green Attributes (ตรึงไว้แถว 1-2, แนวตั้งแถว 3, ผสานแถว 4-5) ---
+            GREEN_ATTRS.forEach(attr => {
+                tr1 += `<th rowspan="2" class="bg-yellow-header font-normal text-xs align-bottom w-8 resizable-th" data-colkey="attr:${attr.id}" style="width: 32px; min-width: 32px; overflow: hidden;"><div class="vertical-text-wrap pb-2" style="padding-right: 8px;">${attr.label}</div><div class="resizer"></div></th>`;
+                tr3 += `<th rowspan="3" class="bg-yellow-header"></th>`; // ว่าง
+            });
+
+            // --- ส่วนที่ 3: Building Certification ---
+            let isFirstCert = true;
+            for (const certName in certStructure) {
+                if (!activeCerts.has(certName)) continue; // ข้ามถ้าผู้ใช้ปิดไม่ให้แสดง
+
+                const cats = certStructure[certName];
+                let certColSpan = 0;
+                let certHtml2 = '', certHtml3 = '', certHtml4 = '', certHtml5 = '';
+
+                for (const catName in cats) {
+                    const credits = cats[catName];
+                    const catColSpan = credits.length;
+                    certColSpan += catColSpan;
+
+                    // แถว 2: SS, WE, EA, etc. (มีเส้นประระหว่าง Cat ตามรูป 2, ยกเว้นอันแรกของกลุ่ม)
+                    certHtml2 += `<th colspan="${catColSpan}" class="bg-white border-b-2 border-black font-bold text-sm tracking-wider" style="border-right: 1px dashed #999;">${catName}</th>`;
+
+                    // วนลูป Credit
+                    credits.forEach((cred, index) => {
+                        // จัดการเส้นประ (Dashed Line) คั่นระหว่างเครดิตในหมวดเดียวกัน
+                        const isLastInCat = (index === credits.length - 1);
+                        const rightBorder = isLastInCat ? 'border-right: 1px dashed #999;' : 'border-right: 1px dotted #999;';
+                        // colKey เดียวกับที่ใช้ตอนวาด tbody (ต้อง match กับ mapKey ใน processData/applyFilters)
+                        const colKey = `cert:${certName}|${catName}|${cred.name}`;
+
+                        // แถว 3: ชื่อ Credit แนวตั้ง (เพิ่ม overflow: hidden และ title tooltip)
+                        // มี resizer สองแบบ: .resizer (ลากขวา ปรับความกว้างคอลัมน์) และ .row-resizer (ลากล่าง ปรับความสูงทั้งแถวชื่อ Credit)
+                        certHtml3 += `<th class="bg-white font-normal text-xs align-bottom resizable-th" data-colkey="${colKey}" style="width: 48px; min-width: 40px; overflow: hidden; ${rightBorder}">
+                                        <div class="vertical-text pb-2" style="padding-right: 10px; width: 100%;" title="${cred.name}">${cred.name}</div>
+                                        <div class="resizer"></div>
+                                        <div class="row-resizer" title="ลากเพื่อปรับความสูงแถวนี้"></div>
+                                      </th>`;
+                        // แถว 4: Point
+                        certHtml4 += `<th class="bg-white font-normal text-xs text-gray-600 border-b border-black" data-colkey="${colKey}" style="${rightBorder}">${cred.point}</th>`;
+                        // แถว 5: Requirement (สีเหลืองอ่อน)
+                        certHtml5 += `<th class="bg-yellow-header text-xs whitespace-normal" data-colkey="${colKey}" style="${rightBorder}"><div style="width:100%; overflow:hidden;">${cred.req}</div></th>`;
+                    });
+                }
+
+                // ขอบซ้ายทึบหนา สำหรับ Cert แต่ละตัว (ยกเว้นตัวแรก)
+                const borderClass = isFirstCert ? '' : 'border-l-2 border-l-black';
+                
+                // แถว 1: LEED v4.1, EDGE
+                tr1 += `<th colspan="${certColSpan}" class="bg-green-header font-bold text-base border-b-2 border-black ${borderClass}" style="border-right: 2px solid black;">${certName}</th>`;
+                
+                tr2 += certHtml2;
+                tr3 += certHtml3;
+                tr4 += certHtml4;
+                tr5 += certHtml5;
+
+                isFirstCert = false;
+            }
+
+            tr1 += '</tr>'; tr2 += '</tr>'; tr3 += '</tr>'; tr4 += '</tr>'; tr5 += '</tr>';
+            thead.innerHTML = tr1 + tr2 + tr3 + tr4 + tr5;
+
+            // เรียกใช้ฟังก์ชันเตรียม Resizer หลังจากสร้าง DOM เสร็จ (ทั้งลากปรับความกว้างคอลัมน์ และลากปรับความสูงแถว Credit)
+            initResizers();
+
+            // header ถูกสร้างใหม่ทั้งหมด ต้องใส่ความสูงแถว Credit ตามค่าที่ผู้ใช้เคยลากปรับไว้ (หรือ 250px ตาม Default)
+            applyCreditRowHeight();
+
+            // header ถูกสร้างใหม่ทั้งหมด ต้องคืน class col-selected ให้คอลัมน์ที่เคยเลือกไว้
+            applyColumnHighlightClasses();
+        }
+
+        // จัดการเรื่อง Sticky Columns
+        // Optimize: แทนที่จะไล่ set el.style.left ทีละเซลล์ (O(จำนวนแถว) ทุกครั้งที่ filter/ค้นหา)
+        // ให้คำนวณตำแหน่ง left แค่ 4 ค่า (ต่อคอลัมน์ sticky) แล้วฉีดเป็น <style> กฎเดียวใช้กับทั้งคอลัมน์
+        // วิธีนี้ทำให้ไม่ต้องเรียกซ้ำเลยตอน re-render tbody (แถวใหม่ก็ match selector อัตโนมัติ)
+        let stickyStyleEl = null;
+        function setStickyColumns() {
+            const table = document.getElementById('main-table');
+            let left = 0;
+            const cols = ['group', 'bu', 'cat', 'name'];
+            let css = '';
+
+            cols.forEach((colId, index) => {
+                const th = table.querySelector(`th[data-col="${colId}"]`);
+                if (th) {
+                    const width = th.offsetWidth;
+                    css += `[data-col="${colId}"] { left: ${left}px; }\n`;
+                    if (index === cols.length - 1) {
+                        css += `[data-col="${colId}"] { border-right: 2px solid black; }\n`; // ขอบหนาขวาสุดของส่วนข้อมูล
+                    }
+                    left += width;
+                }
+            });
+
+            if (!stickyStyleEl) {
+                stickyStyleEl = document.createElement('style');
+                stickyStyleEl.id = 'sticky-col-style';
+                document.head.appendChild(stickyStyleEl);
+            }
+            stickyStyleEl.textContent = css;
+        }
+        
+        // --- ฟังก์ชันสำหรับการ Resize คอลัมน์ ---
+        function initResizers() {
+            const resizers = document.querySelectorAll('.resizer');
+            let currentResizer;
+            
+            resizers.forEach(resizer => {
+                resizer.addEventListener('mousedown', function(e) {
+                    currentResizer = e.target;
+                    
+                    const th = currentResizer.parentElement;
+                    // หา index ของคอลัมน์นั้น (เพื่อไปขยายคอลัมน์ใน tbody ด้วย)
+                    // การทำ resizable กับตารางที่มี rowspan/colspan จะค่อนข้างซับซ้อน
+                    // วิธีที่ง่ายที่สุดสำหรับโครงสร้างนี้คือ การปรับ width แบบ inline ที่ th ตัวนั้นๆ
+                    // และปล่อยให้เบราว์เซอร์จัดการตารางที่เหลือ
+                    
+                    // ป้องกันการเลือกข้อความตอนลาก
+                    document.addEventListener('mousemove', resizeColumn);
+                    document.addEventListener('mouseup', stopResize);
+                    
+                    currentResizer.classList.add('resizing');
+                    
+                    // เริ่มต้นคำนวณจากความกว้างปัจจุบัน
+                    let startX = e.pageX;
+                    let startWidth = th.offsetWidth;
+                    
+                    function resizeColumn(e) {
+                        const newWidth = startWidth + (e.pageX - startX);
+                        if (newWidth > 30) { // ความกว้างขั้นต่ำ
+                            th.style.width = `${newWidth}px`;
+                            th.style.minWidth = `${newWidth}px`;
+                            th.style.maxWidth = `${newWidth}px`;
+                            
+                            // ถ้าเป็นส่วนของ Sticky Column ต้องคำนวณ left ใหม่
+                            if (th.classList.contains('sticky-col')) {
+                                setStickyColumns();
+                            }
+                        }
+                    }
+                    
+                    function stopResize() {
+                        document.removeEventListener('mousemove', resizeColumn);
+                        document.removeEventListener('mouseup', stopResize);
+                        if (currentResizer) currentResizer.classList.remove('resizing');
+                        currentResizer = null;
+                    }
+                });
+            });
+
+            // --- ลากปรับความสูงแถวชื่อ Credit แนวตั้ง (Default 250px, ลากที่ขอบล่างของหัวคอลัมน์เพื่อปรับ) ---
+            document.querySelectorAll('.row-resizer').forEach(resizer => {
+                resizer.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    document.addEventListener('mousemove', resizeRow);
+                    document.addEventListener('mouseup', stopRowResize);
+
+                    resizer.classList.add('resizing');
+
+                    const startY = e.pageY;
+                    const startHeight = creditRowHeight;
+
+                    function resizeRow(e) {
+                        const newHeight = startHeight + (e.pageY - startY);
+                        if (newHeight >= 60 && newHeight <= 900) { // ขั้นต่ำ/สูงสุดกันลากเพี้ยน
+                            creditRowHeight = newHeight;
+                            applyCreditRowHeight(); // อัปเดต <style> เดียว มีผลกับทุกเซลล์ในแถวทันที ไม่ต้องไล่ set ทีละเซลล์
+                        }
+                    }
+
+                    function stopRowResize() {
+                        document.removeEventListener('mousemove', resizeRow);
+                        document.removeEventListener('mouseup', stopRowResize);
+                        resizer.classList.remove('resizing');
+                    }
+                });
+            });
+        }
+
+        // ฟังก์ชันจัดรูปแบบการแสดงผลข้อมูลในเซลล์ Certification (ภาพที่ 2)
+        function formatCertData(data) {
+            if (!data) return '';
+            
+            const strData = String(data).trim();
+            // ถ้าเป็น Yes, 1, √ หรือ √ ให้แสดงเครื่องหมายถูกสีดำ
+            if (strData.toLowerCase() === 'yes' || strData === '1' || strData === '√' || strData === '✓') {
+                return '<span class="cert-tick">√</span>';
+            } 
+            
+            // ถ้ามีคำว่า √ และมีข้อความตามมา (เช่นในรูปแรก)
+            if (strData.includes('√') || strData.includes('✓')) {
+                let text = strData.replace(/√|✓/g, '').trim();
+                return `<span class="cert-tick">√</span><br><span class="cert-data-text">${text}</span>`;
+            }
+            
+            // ถ้าเป็นข้อความอื่นๆ ล้วนๆ (เช่น "คำนวณร่วมกับสินค้าอื่น" ในรูปที่ 2)
+            return `<span class="cert-data-text">${strData}</span>`;
+        }
+
+        // 4. วาดข้อมูล (Tbody)
+        function applyFilters() {
+            const q = elSearch.value.toLowerCase();
+            const bu = elFilterBu.value;
+            const grp = elFilterGroup.value;
+
+            const data = masterData.filter(d =>
+                (bu === '' || d.bu === bu) &&
+                (grp === '' || d.group === grp) &&
+                (d.name.toLowerCase().includes(q))
+            );
+
+            elCount.textContent = data.length;
+
+            if (data.length === 0) {
+                elTbody.innerHTML = `<tr><td colspan="50" class="py-8 text-gray-500 text-center bg-white">ไม่พบข้อมูล</td></tr>`;
+                return;
+            }
+
+            let prevGroup = null;
+            // ใช้ Array + join แทนการต่อ string ด้วย += ในลูปยาวๆ ลดการสร้าง string ชั่วคราวซ้ำๆ
+            const chunks = [];
+
+            data.forEach(row => {
+                // แทรกแถบสีเทาคั่นกลุ่ม เมื่อ Group เปลี่ยน
+                if (prevGroup !== null && prevGroup !== row.group) {
+                    chunks.push(`<tr class="group-separator"><td colspan="50"></td></tr>`);
+                }
+                prevGroup = row.group;
+
+                const rowKey = rowKeyOf(row);
+                const isSelected = selectedRows.has(rowKey);
+                chunks.push(`<tr class="bg-white${isSelected ? ' selected-row' : ''}" data-rowkey="${rowKey.replace(/"/g, '&quot;')}">`);
+
+                // คอลัมน์ข้อมูลสินค้า (Sticky)
+                chunks.push(`<td class="sticky-col text-left" data-col="group" data-colkey="p:group">${row.group}</td>`);
+                chunks.push(`<td class="sticky-col" data-col="bu" data-colkey="p:bu">${row.bu}</td>`);
+                chunks.push(`<td class="sticky-col text-left" data-col="cat" data-colkey="p:cat">${row.cat}</td>`);
+                chunks.push(`<td class="sticky-col text-left font-medium" data-col="name" data-colkey="p:name" style="white-space:normal;">${row.name}</td>`);
+
+                // คอลัมน์ Green Attributes
+                GREEN_ATTRS.forEach(attr => {
+                    const hasAttr = row.attrs[attr.id];
+                    // เซลล์สีเหลืองส้ม ถ้ามี (ภาพแรก)
+                    const cellClass = hasAttr ? 'cell-highlight-attr' : '';
+                    const dot = hasAttr ? '<span class="dot"></span>' : '';
+                    chunks.push(`<td class="${cellClass}" data-colkey="attr:${attr.id}">${dot}</td>`);
+                });
+
+                // คอลัมน์ Certification
+                let isFirstCert = true;
+                for (const certName in certStructure) {
+                    if (!activeCerts.has(certName)) continue; // ข้ามถ้าผู้ใช้ปิดไม่ให้แสดง
+
+                    for (const catName in certStructure[certName]) {
+                        // ค้นหาว่าใน Category นี้ ตัวไหนเป็นตัวสุดท้าย เพื่อตีเส้นประ
+                        const credits = certStructure[certName][catName];
+
+                        credits.forEach((cred, index) => {
+                            const key = `${certName}|${catName}|${cred.name}`;
+                            // ในระบบเดิมเก็บแค่ true/false แต่เราจะอ่านค่าจริงๆ มาจาก Mapped Column (ปรับปรุงตอน processData)
+                            // เพื่อความเข้ากันได้ จะเช็คว่ามีใน certs ไหม
+                            const certValue = row.certs[key];
+
+                            // ภาพที่ 2: ไฮไลท์พื้นหลังสีฟ้า และแสดงเนื้อหา
+                            const cellClass = certValue ? 'cell-highlight-cert' : '';
+                            const cellContent = certValue ? formatCertData(certValue) : '';
+
+                            // จัดการเส้นแบ่ง Cert หลัก (เส้นทึบ) กับเส้นแบ่งปกติ (เส้นประ)
+                            let extraStyle = '';
+                            if (isFirstCert && cred === credits[0]) {
+                                // อันแรกสุด ไม่ต้องตีเส้นซ้ายทึบซ้ำ เพราะ Product name ตีแล้ว
+                            } else if (cred === credits[0] && catName === Object.keys(certStructure[certName])[0]) {
+                                // เริ่ม Cert ตัวใหม่ ตีเส้นซ้ายทึบ
+                                extraStyle += 'border-left: 2px solid black; ';
+                            }
+
+                            // ตีเส้นขวาแบบจุดหรือแบบประ ตามขอบ Cat
+                            const isLastInCat = (index === credits.length - 1);
+                            if (isLastInCat) {
+                                extraStyle += 'border-right: 1px dashed #999; ';
+                            } else {
+                                extraStyle += 'border-right: 1px dotted #999; ';
+                            }
+
+                            const colKey = `cert:${key}`;
+                            chunks.push(`<td class="${cellClass}" data-colkey="${colKey}" style="${extraStyle}">${cellContent}</td>`);
+                        });
+                    }
+                    isFirstCert = false;
+                }
+                chunks.push(`</tr>`);
+            });
+
+            elTbody.innerHTML = chunks.join('');
+
+            // คอลัมน์ที่เคยถูกเลือกไว้ ต้องคืน class ให้เซลล์ชุดใหม่ที่เพิ่งสร้าง (เดิม sticky ใช้ style.left ทีละเซลล์
+            // ตอนนี้ตำแหน่ง sticky ผูกกับ [data-col] ผ่าน <style> ที่ตั้งไว้ครั้งเดียวหลังสร้าง header แล้ว จึงไม่ต้องเรียกซ้ำที่นี่)
+            applyColumnHighlightClasses();
+        }
+
+        // 2. ประมวลผลข้อมูล (Pivot) — รองรับทั้งชื่อคอลัมน์เดิมและชื่อคอลัมน์ไฟล์ใหม่
+        function processData(rawData) {
+            const prodMap = new Map();
+            certStructure = {};
+            filters.bu.clear(); filters.group.clear();
+
+            rawData.forEach(row => {
+                const pName = row['Products'];
+                if (!pName) return;
+
+                const group = row['Product Group'] || '';
+                const bu = row['BU'] || '';
+                const cat = row['Category'] || '';
+                const pId = `${group}_${bu}_${pName}`;
+
+                if (bu) filters.bu.add(bu);
+                if (group) filters.group.add(group);
+
+                // สร้างแถวสินค้าถ้ายังไม่มี
+                if (!prodMap.has(pId)) {
+                    prodMap.set(pId, {
+                        group, bu, cat, name: pName,
+                        attrs: {}, // เก็บ Green Attributes
+                        certs: {}  // เก็บ Certification Credits
+                    });
+                }
+                const prod = prodMap.get(pId);
+
+                // ดึงค่า Green Attributes
+                GREEN_ATTRS.forEach(attr => {
+                    const val = row[attr.id];
+                    // สมมติว่าถ้ามีค่า ให้ถือว่ามี attribute นี้
+                    if (val && val.toString().toLowerCase() !== 'no' && val.toString().trim() !== '') {
+                        prod.attrs[attr.id] = true;
+                    }
+                });
+
+                // --- แก้ไข: ดึงข้อมูล Certification ให้รองรับชื่อคอลัมน์ใหม่ (Sub Category, Score, Document) ---
+                const certName = row['Building Certification'];
+                // หา Category ฝั่ง Cert (รองรับกรณีโดนเปลี่ยนชื่อตอนอ่านไฟล์ หรือไฟล์ใหม่มีแค่ Category เดียว)
+                const certCat = row['CertCategory'] || row['Category (Cert)'] || row['Category']; 
+                // รองรับทั้งชื่อเดิม (Credit) และชื่อใหม่ (Sub Category)
+                const credit = row['Sub Category'] || row['Credit']; 
+                // รองรับทั้งชื่อเดิม (Point) และชื่อใหม่ (Score)
+                const pt = row['Score'] || row['Point'];
+                // รองรับทั้งชื่อเดิม (Requirement) และชื่อใหม่ (Document)
+                const req = row['Document'] || row['Requirement'];
+                
+                const isMapped = row['Mapped'];
+                const rawMark = row['Certification Mark'];
+
+                // ตรวจสอบเงื่อนไขว่าสินค้านี้ได้ Cert หรือไม่ (ต้องมีข้อมูลหลักครบก่อน)
+                if (certName && certCat && credit) {
+                    
+                    let isValid = false;
+                    let certMark = '√';
+
+                    // 1. ถ้ามีคอลัมน์ Mapped และระบุว่า Yes
+                    if (isMapped && (isMapped.toString().toLowerCase() === 'yes' || isMapped.toString() === '1')) {
+                        isValid = true;
+                        if(rawMark) certMark = rawMark;
+                    } 
+                    // 2. ถ้ามีคอลัมน์ Mapped แต่ระบุว่า No ให้ข้ามไปเลย
+                    else if (isMapped && (isMapped.toString().toLowerCase() === 'no' || isMapped.toString() === '0')) {
+                        isValid = false;
+                    }
+                    // 3. ถ้าไม่มีคำว่า Yes/No ตรงๆ แต่มีการพิมพ์สัญลักษณ์อะไรสักอย่างใน Certification Mark
+                    else if (rawMark && rawMark.toString().trim() !== '') {
+                        isValid = true;
+                        certMark = rawMark;
+                    }
+                    // 4. กรณีไฟล์ใหม่ "ตัดคอลัมน์ Mapped ทิ้งไปแล้ว" ให้ถือว่าบรรทัดไหนที่มีข้อมูลอยู่ใน Sheet คือ Map แล้ว
+                    else if (!isMapped && !rawMark) {
+                        isValid = true;
+                    }
+
+                    // ถ้าระบุว่าสินค้านี้ได้คะแนนจริงๆ ค่อยเอาไปวาดหัวตารางและติ๊กถูก
+                    if (isValid) {
+                        // สร้างโครงสร้างหัวตาราง (Tree)
+                        if (!certStructure[certName]) certStructure[certName] = {};
+                        if (!certStructure[certName][certCat]) certStructure[certName][certCat] = new Map();
+                        
+                        const creditKey = credit;
+                        if (!certStructure[certName][certCat].has(creditKey)) {
+                            // เก็บ point และ req ไว้แสดงผลที่หัวตาราง
+                            certStructure[certName][certCat].set(creditKey, { point: pt || '', req: req || '' });
+                        }
+
+                        // บันทึกเครื่องหมาย/ข้อความ ลงในสินค้านั้นๆ
+                        const mapKey = `${certName}|${certCat}|${credit}`;
+                        prod.certs[mapKey] = certMark; 
+                    }
+                }
+            });
+
+            masterData = Array.from(prodMap.values());
+
+            // แปลง Map กลับเป็น Array สำหรับวาดตาราง และคำนวณ Colspan
+            activeCerts.clear();
+            for(let name in certStructure) {
+                activeCerts.add(name); // ให้แสดงทุก Cert เป็นค่าเริ่มต้น
+                for(let cat in certStructure[name]) {
+                    certStructure[name][cat] = Array.from(certStructure[name][cat].entries()).map(([k, v]) => ({name: k, ...v}));
+                }
+            }
+
+            // อัปโหลดไฟล์ใหม่ = ล้างสถานะ Highlight เดิมทิ้ง (คีย์ของแถว/คอลัมน์อาจไม่ตรงกับข้อมูลชุดใหม่)
+            selectedRows.clear();
+            selectedCols.clear();
+
+            renderDashboard();
+        }
+
+        // Event Listeners สำหรับ Filter
+        // ค้นหาข้อความ: debounce ไว้ เพราะการ re-render ตารางทั้งชุดทุกครั้งที่กดคีย์บอร์ดจะหน่วงมากบนข้อมูลจำนวนมาก
+        elSearch.addEventListener('input', debounce(applyFilters, 200));
+        elFilterBu.addEventListener('change', applyFilters);
+        elFilterGroup.addEventListener('change', applyFilters);
+        document.getElementById('btn-clear').addEventListener('click', () => {
+            elSearch.value = '';
+            elFilterBu.value = '';
+            elFilterGroup.value = '';
+            applyFilters();
+        });
+
+        // ปุ่มล้าง Highlight (ทั้งแถวและคอลัมน์ที่เลือกไว้)
+        document.getElementById('btn-clear-highlight').addEventListener('click', () => {
+            selectedRows.clear();
+            selectedCols.clear();
+            document.querySelectorAll('.selected-row').forEach(el => el.classList.remove('selected-row'));
+            document.querySelectorAll('.col-selected').forEach(el => el.classList.remove('col-selected'));
+            elSelectedCount.textContent = '0';
+        });
+
+        // ปุ่มอัปโหลดใหม่
+        document.getElementById('btn-new').addEventListener('click', () => {
+            elDash.classList.add('hidden');
+            elUpload.classList.remove('hidden');
+            elFile.value = '';
+        });
+
+        // เพิ่มฟังก์ชัน Export Excel
+        document.getElementById('btn-export').addEventListener('click', () => {
+            const table = document.getElementById('main-table');
+            // ทำสำเนาตารางเพื่อนำมาแต่งก่อน Export (ลบ div resizer ออก เพื่อไม่ให้รกใน Excel)
+            const cloneTable = table.cloneNode(true);
+            const resizers = cloneTable.querySelectorAll('.resizer');
+            resizers.forEach(r => r.remove());
+
+            const wb = XLSX.utils.table_to_book(cloneTable, {sheet: "Green Products"});
+            XLSX.writeFile(wb, "SCG_Green_Products_Export.xlsx");
+        });
+
+        // --- Event delegation สำหรับ Highlight แถว/คอลัมน์ ---
+        // ผูก listener แค่ครั้งเดียวที่ container แม่ แทนการผูกทีละแถว/ทีละหัวคอลัมน์ทุกครั้งที่ render
+        // (เดิมโค้ดผูก listener ใหม่ทุกแถวทุกครั้งที่ applyFilters ทำงาน ซึ่งช้ามากเมื่อข้อมูลมีหลายพันแถว)
+        elTbody.addEventListener('click', (e) => {
+            const tr = e.target.closest('tr:not(.group-separator)');
+            if (!tr || !tr.dataset.rowkey) return;
+            const key = tr.dataset.rowkey;
+            if (selectedRows.has(key)) {
+                selectedRows.delete(key);
+                tr.classList.remove('selected-row');
+            } else {
+                selectedRows.add(key);
+                tr.classList.add('selected-row');
+            }
+            elSelectedCount.textContent = selectedRows.size;
+        });
+
+        elThead.addEventListener('click', (e) => {
+            if (e.target.closest('.resizer') || e.target.closest('.row-resizer')) return; // ไม่ให้การลากปรับความกว้าง/ความสูงไปสั่ง toggle คอลัมน์
+            const th = e.target.closest('th[data-colkey]');
+            if (!th) return;
+            const key = th.dataset.colkey;
+            if (selectedCols.has(key)) selectedCols.delete(key); else selectedCols.add(key);
+            applyColumnHighlightClasses();
+        });
+
+        // ใส่/ลบ class col-selected ให้ตรงกับ selectedCols ปัจจุบัน (เรียกหลัง render header/body ใหม่)
+        function applyColumnHighlightClasses() {
+            document.querySelectorAll('[data-colkey]').forEach(el => {
+                if (selectedCols.has(el.dataset.colkey)) {
+                    el.classList.add('col-selected');
+                } else {
+                    el.classList.remove('col-selected');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
