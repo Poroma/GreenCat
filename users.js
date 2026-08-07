@@ -19,7 +19,7 @@
 // ============================================================================
 
 const GATE_USERS = [
-    { username: 'admin',   password: 'scg-green-2026', role: 'admin',  name: 'Administrator' },
+    { username: 'admin',   password: '1234', role: 'admin',  name: 'Administrator' },
     // { username: 'somchai', password: 'password123',   role: 'viewer', name: 'สมชาย ใจดี' },
     // { username: 'sirinya', password: 'password456',   role: 'editor', name: 'สิรินยา รักษ์โลก' },
 ];
