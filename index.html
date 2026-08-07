@@ -892,6 +892,18 @@
             setTimeout(setStickyColumns, 100);
         }
 
+        // Escape ข้อความก่อนแทรกลงใน HTML attribute (เช่น data-colkey="...", title="...")
+        // จำเป็นเพราะชื่อ Credit/Requirement มาจากข้อมูลจริงของผู้ใช้ (CSV/Excel) ซึ่งอาจมีอักขระพิเศษปนอยู่
+        // เช่น เครื่องหมายนิ้ว (") ในหน่วยวัด ถ้าไม่ escape แล้วแทรกตรงๆ ตัว " จะไปตัด attribute ให้จบก่อนเวลา
+        // ทำให้ HTML ของ th ตัวนั้นพังทั้งตัว (data-colkey ถูกตัดครึ่ง, resize/highlight คอลัมน์นั้นใช้งานไม่ได้เลย)
+        function escAttr(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
         // สร้างหัวตาราง (Thead) ให้เหมือนรูป
         function buildHeader() {
             const thead = document.getElementById('table-head');
@@ -968,15 +980,15 @@
 
                         // แถว 3: ชื่อ Credit แนวตั้ง (เพิ่ม overflow: hidden และ title tooltip)
                         // มี resizer สองแบบ: .resizer (ลากขวา ปรับความกว้างคอลัมน์) และ .row-resizer (ลากล่าง ปรับความสูงทั้งแถวชื่อ Credit)
-                        certHtml3 += `<th class="bg-white font-normal text-xs align-bottom resizable-th" data-colkey="${colKey}" style="overflow: hidden; ${rightBorder}">
-                                        <div class="vertical-text pb-2" style="padding-right: 10px; width: 100%;" title="${cred.name}">${cred.name}</div>
+                        certHtml3 += `<th class="bg-white font-normal text-xs align-bottom resizable-th" data-colkey="${escAttr(colKey)}" style="overflow: hidden; ${rightBorder}">
+                                        <div class="vertical-text pb-2" style="padding-right: 10px; width: 100%;" title="${escAttr(cred.name)}">${cred.name}</div>
                                         <div class="resizer"></div>
                                         <div class="row-resizer" title="ลากเพื่อปรับความสูงแถวนี้"></div>
                                       </th>`;
                         // แถว 4: Point
-                        certHtml4 += `<th class="bg-white font-normal text-xs text-gray-600" data-colkey="${colKey}" style="${rightBorder} border-bottom: 2px solid #000;">${cred.point}</th>`;
+                        certHtml4 += `<th class="bg-white font-normal text-xs text-gray-600" data-colkey="${escAttr(colKey)}" style="${rightBorder} border-bottom: 2px solid #000;">${cred.point}</th>`;
                         // แถว 5: Requirement (สีเหลืองอ่อน)
-                        certHtml5 += `<th class="bg-yellow-header text-xs whitespace-normal header-seal" data-colkey="${colKey}" style="${rightBorder}"><div style="width:100%; overflow:hidden;">${cred.req}</div></th>`;
+                        certHtml5 += `<th class="bg-yellow-header text-xs whitespace-normal header-seal" data-colkey="${escAttr(colKey)}" style="${rightBorder}"><div style="width:100%; overflow:hidden;">${cred.req}</div></th>`;
 
                         columnDefs.push({ colKey, width: 48 });
                     });
@@ -1005,8 +1017,7 @@
             // (ขนาดที่เคย Resize ไว้จะรีเซ็ตกลับ Default ตรงนี้ เหมือนพฤติกรรมเดิมของระบบก่อนแยก table)
             let colgroupHtml = '';
             columnDefs.forEach(c => {
-                const safeKey = c.colKey.replace(/"/g, '&quot;');
-                colgroupHtml += `<col data-col-sync="${safeKey}" data-default-width="${c.width}" style="width:${c.width}px;">`;
+                colgroupHtml += `<col data-col-sync="${escAttr(c.colKey)}" data-default-width="${c.width}" style="width:${c.width}px;">`;
             });
             elHeaderColgroup.innerHTML = colgroupHtml;
             elBodyColgroup.innerHTML = colgroupHtml;
@@ -1060,10 +1071,17 @@
 
         // ตั้งความกว้างคอลัมน์ผ่าน <col> ใน colgroup ของทั้ง header-table และ body-table พร้อมกัน
         // (ต้องอัปเดตทั้งคู่เสมอ ไม่งั้นคอลัมน์จะไม่ตรงกันระหว่างสอง table ตอนเลื่อนแนวนอน)
+        // หมายเหตุ: เดิมค้นหา <col> ด้วยการสร้าง CSS selector string เอง (querySelectorAll(`col[data-col-sync="${key}"]`))
+        // ซึ่งถ้าชื่อ Credit ในข้อมูลจริงมีอักขระพิเศษที่ทำให้ selector พัง (เช่น เครื่องหมายคำพูด " ที่ escape ไม่ครบ
+        // ตามสเปค CSS หรืออักขระอื่นๆ ที่คาดไม่ถึง) จะทำให้ querySelectorAll หาไม่เจอเลยสักตัว (หรือโยน error)
+        // ผลคือคอลัมน์นั้นลาก Resize ไม่ได้เลยแบบเงียบๆ โดยไม่มี error ให้เห็น — แก้โดยเปลี่ยนมาเทียบค่าด้วย JS
+        // string equality ตรงๆ (dataset.colSync === colKey) แทนการสร้าง selector เอง ทำให้ไม่ว่าชื่อ Credit
+        // จะมีอักขระอะไรก็ตาม (เครื่องหมายคำพูด, วงเล็บ, จุลภาค ฯลฯ) จะยังหาคอลัมน์เจอและ resize ได้เสมอ
         function setColWidth(colKey, widthPx) {
-            const safeKey = colKey.replace(/"/g, '\\"');
-            document.querySelectorAll(`col[data-col-sync="${safeKey}"]`).forEach(col => {
-                col.style.width = `${widthPx}px`;
+            document.querySelectorAll('col').forEach(col => {
+                if (col.dataset.colSync === colKey) {
+                    col.style.width = `${widthPx}px`;
+                }
             });
             syncTableWidths();
         }
@@ -1105,81 +1123,110 @@
 
         // --- ฟังก์ชันสำหรับการ Resize คอลัมน์ ---
         function initResizers() {
-            const resizers = document.querySelectorAll('.resizer');
-            let currentResizer;
-            
-            resizers.forEach(resizer => {
-                resizer.addEventListener('mousedown', function(e) {
-                    currentResizer = e.target;
-                    
-                    const th = currentResizer.parentElement;
-                    // หา index ของคอลัมน์นั้น (เพื่อไปขยายคอลัมน์ใน tbody ด้วย)
-                    // การทำ resizable กับตารางที่มี rowspan/colspan จะค่อนข้างซับซ้อน
-                    // วิธีที่ง่ายที่สุดสำหรับโครงสร้างนี้คือ การปรับ width แบบ inline ที่ th ตัวนั้นๆ
-                    // และปล่อยให้เบราว์เซอร์จัดการตารางที่เหลือ
-                    
-                    // ป้องกันการเลือกข้อความตอนลาก
-                    document.addEventListener('mousemove', resizeColumn);
-                    document.addEventListener('mouseup', stopResize);
-                    
-                    currentResizer.classList.add('resizing');
-                    
-                    // เริ่มต้นคำนวณจากความกว้างปัจจุบัน
-                    let startX = e.pageX;
-                    let startWidth = th.offsetWidth;
-                    
-                    function resizeColumn(e) {
-                        const newWidth = startWidth + (e.pageX - startX);
-                        if (newWidth > 30) { // ความกว้างขั้นต่ำ
-                            // ตั้งความกว้างผ่าน <col> ใน colgroup (คุมทั้ง header-table และ body-table พร้อมกัน)
-                            // แทนการตั้ง th.style.width ตรงๆ แบบเดิม เพราะตอนนี้ th อยู่คนละ table กับ td ของคอลัมน์เดียวกัน
-                            setColWidth(th.dataset.colkey, newWidth);
+            // เปลี่ยนจาก mousedown/mousemove/mouseup แบบเดิม (ผูก listener ไว้ที่ document) มาใช้ Pointer Events
+            // ร่วมกับ setPointerCapture แทน เหตุผล: ของเดิมถ้าผู้ใช้ปล่อยเมาส์เร็วมาก/ปล่อยตอนเมาส์ออกนอกกรอบ
+            // เบราว์เซอร์ หรือ event ไปโดน element/iframe อื่นแทรก บางครั้ง 'mouseup' จะไม่ยิงกลับมาที่ document เลย
+            // ทำให้ listener 'mousemove' ตัวเดิมค้างอยู่ตลอดไป (ไม่เคยถูก removeEventListener) แล้วคอลัมน์ที่ลาก
+            // ครั้งแรกจะขยายไปเรื่อยๆ ทุกครั้งที่ขยับเมาส์ในหน้าเว็บหลังจากนั้น (ตามที่ผู้ใช้เจอ: คอลัมน์แรกขยายเอง
+            // ส่วนคอลัมน์อื่นลากไม่ได้ เพราะ listener ค้างตัวเก่ามาแย่งประมวลผลทุก mousemove ตลอด)
+            // setPointerCapture การันตีว่า pointerup/pointercancel จะถูกส่งกลับมาที่ resizer element เดิมเสมอ
+            // ไม่ว่าผู้ใช้จะปล่อยเมาส์ที่ตำแหน่งไหนในหน้าจอ จึงไม่มีทางเกิด listener ค้างแบบนี้ได้อีก
 
-                            // ถ้าเป็นส่วนของ Sticky Column ต้องคำนวณ left ใหม่
-                            if (th.classList.contains('sticky-col')) {
-                                setStickyColumns();
-                            }
-                        }
+            let colResizeState = null; // เก็บสถานะการลากคอลัมน์ปัจจุบัน (มีได้แค่ 1 ตัวพร้อมกัน)
+
+            function onColPointerMove(e) {
+                if (!colResizeState) return;
+                const newWidth = colResizeState.startWidth + (e.clientX - colResizeState.startX);
+                if (newWidth > 30) { // ความกว้างขั้นต่ำ
+                    // ตั้งความกว้างผ่าน <col> ใน colgroup (คุมทั้ง header-table และ body-table พร้อมกัน)
+                    setColWidth(colResizeState.colKey, newWidth);
+                    if (colResizeState.isSticky) {
+                        setStickyColumns();
                     }
-                    
-                    function stopResize() {
-                        document.removeEventListener('mousemove', resizeColumn);
-                        document.removeEventListener('mouseup', stopResize);
-                        if (currentResizer) currentResizer.classList.remove('resizing');
-                        currentResizer = null;
-                        forceStickyRepaint();
-                    }
+                }
+            }
+
+            function endColResize(e) {
+                if (!colResizeState) return;
+                const { resizerEl, pointerId } = colResizeState;
+                try { resizerEl.releasePointerCapture(pointerId); } catch (err) { /* เผื่อ pointer หมดอายุไปแล้ว */ }
+                resizerEl.classList.remove('resizing');
+                resizerEl.removeEventListener('pointermove', onColPointerMove);
+                resizerEl.removeEventListener('pointerup', endColResize);
+                resizerEl.removeEventListener('pointercancel', endColResize);
+                colResizeState = null;
+                forceStickyRepaint();
+            }
+
+            document.querySelectorAll('.resizer').forEach(resizer => {
+                resizer.addEventListener('pointerdown', function(e) {
+                    // กันไว้เผื่อมีสถานะลากค้างจากรอบก่อน (ไม่ควรเกิดขึ้นแล้วเพราะมี pointer capture แต่ปลอดภัยไว้ก่อน)
+                    if (colResizeState) endColResize();
+
+                    const th = resizer.parentElement;
+                    resizer.setPointerCapture(e.pointerId);
+
+                    colResizeState = {
+                        pointerId: e.pointerId,
+                        resizerEl: resizer,
+                        colKey: th.dataset.colkey,
+                        startX: e.clientX,
+                        startWidth: th.offsetWidth, // เริ่มต้นคำนวณจากความกว้างปัจจุบัน
+                        isSticky: th.classList.contains('sticky-col')
+                    };
+
+                    resizer.classList.add('resizing');
+                    resizer.addEventListener('pointermove', onColPointerMove);
+                    resizer.addEventListener('pointerup', endColResize);
+                    resizer.addEventListener('pointercancel', endColResize);
+                    e.preventDefault();
                 });
             });
 
             // --- ลากปรับความสูงแถวชื่อ Credit แนวตั้ง (Default 250px, ลากที่ขอบล่างของหัวคอลัมน์เพื่อปรับ) ---
+            // ใช้ Pointer Events + setPointerCapture ด้วยเหตุผลเดียวกับด้านบน
+            let rowResizeState = null;
+
+            function onRowPointerMove(e) {
+                if (!rowResizeState) return;
+                const newHeight = rowResizeState.startHeight + (e.clientY - rowResizeState.startY);
+                if (newHeight >= 60 && newHeight <= 900) { // ขั้นต่ำ/สูงสุดกันลากเพี้ยน
+                    creditRowHeight = newHeight;
+                    applyCreditRowHeight(); // อัปเดต <style> เดียว มีผลกับทุกเซลล์ในแถวทันที ไม่ต้องไล่ set ทีละเซลล์
+                }
+            }
+
+            function endRowResize(e) {
+                if (!rowResizeState) return;
+                const { resizerEl, pointerId } = rowResizeState;
+                try { resizerEl.releasePointerCapture(pointerId); } catch (err) {}
+                resizerEl.classList.remove('resizing');
+                resizerEl.removeEventListener('pointermove', onRowPointerMove);
+                resizerEl.removeEventListener('pointerup', endRowResize);
+                resizerEl.removeEventListener('pointercancel', endRowResize);
+                rowResizeState = null;
+                forceStickyRepaint();
+            }
+
             document.querySelectorAll('.row-resizer').forEach(resizer => {
-                resizer.addEventListener('mousedown', function(e) {
+                resizer.addEventListener('pointerdown', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
 
-                    document.addEventListener('mousemove', resizeRow);
-                    document.addEventListener('mouseup', stopRowResize);
+                    if (rowResizeState) endRowResize();
+
+                    resizer.setPointerCapture(e.pointerId);
+                    rowResizeState = {
+                        pointerId: e.pointerId,
+                        resizerEl: resizer,
+                        startY: e.clientY,
+                        startHeight: creditRowHeight
+                    };
 
                     resizer.classList.add('resizing');
-
-                    const startY = e.pageY;
-                    const startHeight = creditRowHeight;
-
-                    function resizeRow(e) {
-                        const newHeight = startHeight + (e.pageY - startY);
-                        if (newHeight >= 60 && newHeight <= 900) { // ขั้นต่ำ/สูงสุดกันลากเพี้ยน
-                            creditRowHeight = newHeight;
-                            applyCreditRowHeight(); // อัปเดต <style> เดียว มีผลกับทุกเซลล์ในแถวทันที ไม่ต้องไล่ set ทีละเซลล์
-                        }
-                    }
-
-                    function stopRowResize() {
-                        document.removeEventListener('mousemove', resizeRow);
-                        document.removeEventListener('mouseup', stopRowResize);
-                        resizer.classList.remove('resizing');
-                        forceStickyRepaint();
-                    }
+                    resizer.addEventListener('pointermove', onRowPointerMove);
+                    resizer.addEventListener('pointerup', endRowResize);
+                    resizer.addEventListener('pointercancel', endRowResize);
                 });
             });
         }
@@ -1248,7 +1295,7 @@
 
                 const rowKey = rowKeyOf(row);
                 const isSelected = selectedRows.has(rowKey);
-                chunks.push(`<tr class="bg-white${isSelected ? ' selected-row' : ''}" data-rowkey="${rowKey.replace(/"/g, '&quot;')}">`);
+                chunks.push(`<tr class="bg-white${isSelected ? ' selected-row' : ''}" data-rowkey="${escAttr(rowKey)}">`);
 
                 // คอลัมน์ข้อมูลสินค้า (Sticky)
                 chunks.push(`<td class="sticky-col text-left" data-col="group" data-colkey="p:group">${row.group}</td>`);
@@ -1298,7 +1345,7 @@
                             extraStyle += 'border-right: 2px solid #000; ';
 
                             const colKey = `cert:${key}`;
-                            chunks.push(`<td class="${cellClass}" data-colkey="${colKey}" style="${extraStyle}">${cellContent}</td>`);
+                            chunks.push(`<td class="${cellClass}" data-colkey="${escAttr(colKey)}" style="${extraStyle}">${cellContent}</td>`);
                         });
                     }
                     isFirstCert = false;
