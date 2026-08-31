@@ -656,6 +656,18 @@
             elHeaderScroll.scrollLeft = elScrollContainer.scrollLeft;
         }, { passive: true });
 
+        // แก้บั๊ก: header-scroll (overflow: hidden ไม่มี scrollbar) กว้างกว่า scroll-container (overflow: auto
+        // มี scrollbar แนวตั้งกิน 10px ตาม ::-webkit-scrollbar ที่ตั้งไว้) ทำให้ scrollLeft สูงสุดที่ทำได้จริง
+        // ของสองกล่องนี้ไม่เท่ากัน — เลื่อนไปสุดขวาแล้ว header จะ "สุด" ก่อน body ตามส่วนต่างของความกว้าง
+        // scrollbar พอดี ทำให้คอลัมน์ header กับ data เหลื่อมกันเฉพาะตอนอยู่สุดขอบขวา จึงต้องเผื่อที่ว่างขวา
+        // (padding-right) ให้ header-scroll เท่ากับความกว้าง scrollbar จริงของเบราว์เซอร์ ณ ขณะนั้นเสมอ
+        function syncHeaderScrollGutter() {
+            const hasVScroll = elScrollContainer.scrollHeight > elScrollContainer.clientHeight;
+            const gutter = hasVScroll ? Math.max(0, elScrollContainer.offsetWidth - elScrollContainer.clientWidth) : 0;
+            elHeaderScroll.style.paddingRight = `${gutter}px`;
+        }
+        window.addEventListener('resize', debounce(syncHeaderScrollGutter, 150));
+
         // Debounce ทั่วไป: ลดจำนวนครั้งที่ต้อง re-render ตาราง (ซึ่งราคาแพงบนข้อมูลจำนวนมาก)
         function debounce(fn, delay) {
             let timer;
@@ -934,9 +946,13 @@
             elLoadingScreen.classList.add('hidden');
             elDash.classList.remove('hidden');
             elLoad.classList.add('hidden');
-            
+
             // ปรับความกว้าง Sticky Columns
             setTimeout(setStickyColumns, 100);
+            // ต้องเรียกซ้ำตรงนี้ (นอกเหนือจากใน applyFilters) เพราะตอน applyFilters() ทำงานด้านบน
+            // #dashboard-section ยังมี class "hidden" อยู่ (display:none) ทำให้ scroll-container กว้าง/สูง
+            // เป็น 0 ไปหมด คำนวณว่ามี scrollbar แนวตั้งหรือไม่ผิดเสมอ ต้องรอให้ Dashboard โชว์จริงก่อนค่อยวัดใหม่
+            setTimeout(syncHeaderScrollGutter, 100);
         }
 
         // Escape ข้อความก่อนแทรกลงใน HTML attribute (เช่น data-colkey="...", title="...")
@@ -1408,6 +1424,10 @@
             // คอลัมน์ที่เคยถูกเลือกไว้ ต้องคืน class ให้เซลล์ชุดใหม่ที่เพิ่งสร้าง (เดิม sticky ใช้ style.left ทีละเซลล์
             // ตอนนี้ตำแหน่ง sticky ผูกกับ [data-col] ผ่าน <style> ที่ตั้งไว้ครั้งเดียวหลังสร้าง header แล้ว จึงไม่ต้องเรียกซ้ำที่นี่)
             applyColumnHighlightClasses();
+
+            // จำนวนแถวเปลี่ยน (กรอง/ค้นหา) อาจทำให้ scrollbar แนวตั้งของ scroll-container ปรากฏ/หายไป
+            // ต้องคำนวณ gutter ใหม่ทุกครั้ง ไม่งั้นคอลัมน์ header กับ body จะเลื่อนไม่สุดตรงกันตอนดันไปขวาสุด
+            syncHeaderScrollGutter();
         }
 
         // 2. ประมวลผลข้อมูล (Pivot) — รองรับทั้งชื่อคอลัมน์เดิมและชื่อคอลัมน์ไฟล์ใหม่
