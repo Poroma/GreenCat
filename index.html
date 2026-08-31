@@ -502,6 +502,11 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                         Export
                     </button>
+                    <!-- ดึงไฟล์ Master.xlsx จาก repo มาโหลดใหม่ (เผื่อไฟล์มีการอัปเดตระหว่างที่เปิดหน้านี้ค้างไว้) -->
+                    <button id="btn-refresh-master" class="btn-pill btn-pill-blue" title="โหลดไฟล์ Master.xlsx ล่าสุดจาก repo ใหม่อีกครั้ง">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                        รีเฟรชข้อมูล
+                    </button>
                     <button id="btn-new" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-sm transition-colors border border-gray-300 shadow-sm">อัปโหลดใหม่</button>
 
                     <!-- แสดงว่าตอนนี้ Login ด้วย User ไหน/Role อะไร (มาจาก users.js) -->
@@ -687,6 +692,7 @@
             elGateUserInput.value = '';
             elGateInput.value = '';
             showWhoami(username, role);
+            loadMasterFile();
         }
 
         function tryUnlock() {
@@ -754,11 +760,35 @@
             if(e.target.files.length) handleFile(e.target.files[0]);
         });
 
+        // แปลง ArrayBuffer ของไฟล์ Excel เป็นแถวข้อมูล (ใช้ร่วมกันทั้งตอนอัปโหลดเองและตอน Auto-load Master.xlsx)
+        function parseXlsxArrayBuffer(buffer) {
+            const wb = XLSX.read(buffer, { type: 'array' });
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
+
+            const headers = json[0].map(h => h ? h.toString().trim() : '');
+            let catCount = 0;
+            for (let i = 0; i < headers.length; i++) {
+                if (headers[i] === 'Category') {
+                    catCount++;
+                    if (catCount > 1 || i > 5) headers[i] = 'CertCategory';
+                }
+            }
+
+            const data = [];
+            for (let i = 1; i < json.length; i++) {
+                if (!json[i].some(c => c !== "")) continue;
+                let row = {};
+                headers.forEach((h, j) => { if(h) row[h] = json[i][j]; });
+                data.push(row);
+            }
+            return data;
+        }
+
         // 1. อ่านไฟล์
         function handleFile(file) {
             elLoad.classList.remove('hidden');
             const name = file.name.toLowerCase();
-            
+
             if (name.endsWith('.csv')) {
                 Papa.parse(file, {
                     header: true, skipEmptyLines: true,
@@ -767,32 +797,28 @@
                 });
             } else if (name.match(/\.xlsx?$/)) {
                 const reader = new FileReader();
-                reader.onload = e => {
-                    const wb = XLSX.read(e.target.result, { type: 'array' });
-                    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
-                    
-                    const headers = json[0].map(h => h ? h.toString().trim() : '');
-                    let catCount = 0;
-                    for (let i = 0; i < headers.length; i++) {
-                        if (headers[i] === 'Category') {
-                            catCount++;
-                            if (catCount > 1 || i > 5) headers[i] = 'CertCategory';
-                        }
-                    }
-                    
-                    const data = [];
-                    for (let i = 1; i < json.length; i++) {
-                        if (!json[i].some(c => c !== "")) continue;
-                        let row = {};
-                        headers.forEach((h, j) => { if(h) row[h] = json[i][j]; });
-                        data.push(row);
-                    }
-                    processData(data);
-                };
+                reader.onload = e => processData(parseXlsxArrayBuffer(e.target.result));
                 reader.readAsArrayBuffer(file);
             } else {
                 alert('รองรับเฉพาะไฟล์ Excel หรือ CSV');
                 elLoad.classList.add('hidden');
+            }
+        }
+
+        // โหลดไฟล์ "Master.xlsx" จาก repo เดียวกันโดยอัตโนมัติหลัง Login สำเร็จ (ไม่ต้องกดอัปโหลดเอง)
+        // หมายเหตุ: ต้องเปิดผ่าน http(s) เช่น GitHub Pages เท่านั้น — เปิดไฟล์ในเครื่องตรงๆ (file://)
+        // แล้ว fetch จะโดน browser บล็อกด้วยข้อจำกัด CORS ของ local file
+        async function loadMasterFile() {
+            elLoad.classList.remove('hidden');
+            try {
+                const res = await fetch('Master.xlsx', { cache: 'no-store' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const buffer = await res.arrayBuffer();
+                processData(parseXlsxArrayBuffer(buffer));
+            } catch (err) {
+                elLoad.classList.add('hidden');
+                console.error('โหลด Master.xlsx อัตโนมัติไม่สำเร็จ:', err);
+                alert('ไม่สามารถโหลดไฟล์ Master.xlsx อัตโนมัติได้ กรุณาอัปโหลดไฟล์ด้วยตนเองแทน');
             }
         }
 
@@ -1607,6 +1633,13 @@
             elDash.classList.add('hidden');
             elUpload.classList.remove('hidden');
             elFile.value = '';
+        });
+
+        // ปุ่มรีเฟรชข้อมูล: ดึง Master.xlsx จาก repo มาโหลดใหม่โดยไม่ต้อง Logout/อัปโหลดเอง
+        document.getElementById('btn-refresh-master').addEventListener('click', () => {
+            elDash.classList.add('hidden');
+            elUpload.classList.remove('hidden');
+            loadMasterFile();
         });
 
         // เพิ่มฟังก์ชัน Export Excel
