@@ -590,6 +590,7 @@
         ];
 
         let masterData = []; // เก็บข้อมูลแถวของสินค้าทั้งหมด
+        let totalLeafColumnCount = 0; // จำนวนคอลัมน์จริงทั้งหมด (ตั้งค่าใน buildHeader) ใช้เป็น colspan ใน tbody
         let certStructure = {}; // เก็บโครงสร้าง Certification แบบ Tree (Name -> Category -> Credit)
         let filters = { bu: new Set(), group: new Set() };
         let activeCerts = new Set(); // เพิ่ม: เก็บรายชื่อ Cert ที่ผู้ใช้เลือกให้แสดงผล
@@ -1080,6 +1081,12 @@
             // ชุดเดียวกัน (columnDefs เก็บลำดับคอลัมน์ไว้ระหว่างสร้าง header ด้านบน) — ต้องสร้างใหม่ทุกครั้งที่
             // buildHeader() ทำงาน (อัปโหลดไฟล์ใหม่ / ติ๊กเปิดปิด Cert) เพราะจำนวนคอลัมน์เปลี่ยนได้ตามชุด Cert ที่เลือก
             // (ขนาดที่เคย Resize ไว้จะรีเซ็ตกลับ Default ตรงนี้ เหมือนพฤติกรรมเดิมของระบบก่อนแยก table)
+            // เก็บจำนวนคอลัมน์จริงทั้งหมดไว้ใช้เป็น colspan ของแถบคั่นกลุ่ม/ข้อความ "ไม่พบข้อมูล" ใน tbody
+            // (ต้องเป็นค่าจริงตามชุด Cert ที่เลือกอยู่ ไม่ hardcode ตัวเลขคงที่ เพราะจำนวน Credit รวมเปลี่ยนได้
+            // ตามไฟล์ข้อมูล — ถ้า hardcode ไว้ต่ำกว่าจำนวนจริง แถบคั่นกลุ่มจะไม่ครอบคลุมคอลัมน์ขวาสุด ทำให้
+            // เส้นตารางแนวตั้งขาดหายเฉพาะแถวนั้น)
+            totalLeafColumnCount = columnDefs.length;
+
             let colgroupHtml = '';
             columnDefs.forEach(c => {
                 colgroupHtml += `<col data-col-sync="${escAttr(c.colKey)}" data-default-width="${c.width}" style="width:${c.width}px;">`;
@@ -1343,7 +1350,7 @@
             elCount.textContent = data.length;
 
             if (data.length === 0) {
-                elTbody.innerHTML = `<tr><td colspan="50" class="py-8 text-gray-500 text-center bg-white">ไม่พบข้อมูล</td></tr>`;
+                elTbody.innerHTML = `<tr><td colspan="${totalLeafColumnCount}" class="py-8 text-gray-500 text-center bg-white">ไม่พบข้อมูล</td></tr>`;
                 return;
             }
 
@@ -1354,7 +1361,7 @@
             data.forEach(row => {
                 // แทรกแถบสีเทาคั่นกลุ่ม เมื่อ Group เปลี่ยน
                 if (prevGroup !== null && prevGroup !== row.group) {
-                    chunks.push(`<tr class="group-separator"><td colspan="50"></td></tr>`);
+                    chunks.push(`<tr class="group-separator"><td colspan="${totalLeafColumnCount}"></td></tr>`);
                 }
                 prevGroup = row.group;
 
