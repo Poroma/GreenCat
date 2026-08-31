@@ -976,7 +976,9 @@
                         // เปลี่ยนจากเส้นประ/เส้นจุดสีเทาเดิม เป็นเส้นทึบสีดำหนาให้เหมือนกันหมดตามที่ต้องการ
                         const rightBorder = 'border-right: 2px solid #000;';
                         // colKey เดียวกับที่ใช้ตอนวาด tbody (ต้อง match กับ mapKey ใน processData/applyFilters)
-                        const colKey = `cert:${certName}|${catName}|${cred.name}`;
+                        // ใช้ cred.key (identity ผสม Sub Category+Score+Document) ไม่ใช่ cred.name เพราะ cred.name
+                        // (Sub Category เฉยๆ) อาจซ้ำกันได้จริงระหว่าง Credit คนละตัว (ดูหมายเหตุใน processData)
+                        const colKey = `cert:${certName}|${catName}|${cred.key}`;
 
                         // แถว 3: ชื่อ Credit แนวตั้ง (เพิ่ม overflow: hidden และ title tooltip)
                         // มี resizer สองแบบ: .resizer (ลากขวา ปรับความกว้างคอลัมน์) และ .row-resizer (ลากล่าง ปรับความสูงทั้งแถวชื่อ Credit)
@@ -1322,7 +1324,8 @@
                         const credits = certStructure[certName][catName];
 
                         credits.forEach((cred, index) => {
-                            const key = `${certName}|${catName}|${cred.name}`;
+                            // ใช้ cred.key (identity ผสม) แทน cred.name เดิม — ดูเหตุผลเดียวกับ colKey ด้านบน
+                            const key = `${certName}|${catName}|${cred.key}`;
                             // ในระบบเดิมเก็บแค่ true/false แต่เราจะอ่านค่าจริงๆ มาจาก Mapped Column (ปรับปรุงตอน processData)
                             // เพื่อความเข้ากันได้ จะเช็คว่ามีใน certs ไหม
                             const certValue = row.certs[key];
@@ -1453,15 +1456,30 @@
                     if (!certStructure[certName]) certStructure[certName] = {};
                     if (!certStructure[certName][certCatKey]) certStructure[certName][certCatKey] = new Map();
 
-                    const creditKey = credit;
+                    // แก้บั๊ก: เดิมใช้ Sub Category (credit) เพียวๆ เป็น key แต่บางกรณี Sub Category ข้อความ
+                    // ซ้ำกันได้จริงๆ ในข้อมูลต้นฉบับ โดยแยกกันด้วย Document ที่ต่างกัน (เช่น JCI ข้อ
+                    // "3. Healthcare Organization Management..." มี 3 รายการซ้อนกัน แยกด้วย Document
+                    // VOC/Asbestos/Lead — หรือ WELL "X01.3 Material Restrictions, Restrict Lead" แยกด้วย
+                    // Document "Lead (paint)"/"Lead (material for water)") ถ้าใช้ credit เพียวๆ เป็น key
+                    // รายการที่ 2-3 จะถูกมองว่า "มีคอลัมน์นี้อยู่แล้ว" แล้วโดนข้ามไปเงียบๆ ทั้งคอลัมน์ ทั้งที่
+                    // เป็นคนละข้อกำหนดกันจริงๆ — เปลี่ยนเป็น key ผสม (Sub Category + Score + Document) แทน
+                    // ส่วนข้อความที่แสดงบนหัวตาราง (name) ยังคงเป็น Sub Category เดิม ไม่กระทบการแสดงผล
+                    // ใส่ certCatKey (Category ฝั่ง Cert เช่น SS/WE/MR หรือว่างสำหรับ JCI) เข้าไปใน key ให้ครบ
+                    // ด้วย แม้ว่าโครงสร้าง certStructure[certName][certCatKey] จะแยกตาม Category นี้อยู่แล้ว
+                    // ก็ตาม (ใส่ซ้ำแบบตั้งใจ กัน key ไม่ unique เองในตัวถ้าในอนาคตมีการปรับโครงสร้างเป็น
+                    // flat map เดียว) — ใช้ certCatKey ฝั่ง Cert เท่านั้น ห้ามใช้ Category ฝั่งสินค้า (cat/row['Category'])
+                    // เพราะ Category ฝั่งสินค้าเป็นคุณสมบัติของสินค้าแต่ละตัว ไม่ใช่ของตัว Credit เอง
+                    const creditKey = JSON.stringify([certCatKey, credit, pt, req]);
                     if (!certStructure[certName][certCatKey].has(creditKey)) {
-                        // เก็บ point และ req ไว้แสดงผลที่หัวตาราง
-                        certStructure[certName][certCatKey].set(creditKey, { point: pt || '', req: req || '' });
+                        // เก็บชื่อที่จะแสดงผล (Sub Category) แยกจาก key ที่ใช้อ้างอิงภายใน
+                        certStructure[certName][certCatKey].set(creditKey, { name: credit, point: pt || '', req: req || '' });
                     }
 
                     // บันทึกเครื่องหมาย/ข้อความ ลงในสินค้านั้นๆ เฉพาะตอนที่ Mapped จริงเท่านั้น (ไม่กระทบหัวตาราง)
+                    // ใช้ creditKey ผสมตัวเดียวกับข้างบน ไม่ใช่ credit เพียวๆ — กันไม่ให้ Mapped ของรายการที่ 2-3
+                    // (Document ต่างกันแต่ Sub Category ข้อความซ้ำ) เขียนทับ Mapped ของรายการแรกที่บันทึกไว้ก่อน
                     if (isValid) {
-                        const mapKey = `${certName}|${certCatKey}|${credit}`;
+                        const mapKey = `${certName}|${certCatKey}|${creditKey}`;
                         prod.certs[mapKey] = certMark; 
                     }
                 }
@@ -1474,7 +1492,7 @@
             for(let name in certStructure) {
                 activeCerts.add(name); // ให้แสดงทุก Cert เป็นค่าเริ่มต้น
                 for(let cat in certStructure[name]) {
-                    certStructure[name][cat] = Array.from(certStructure[name][cat].entries()).map(([k, v]) => ({name: k, ...v}));
+                    certStructure[name][cat] = Array.from(certStructure[name][cat].entries()).map(([k, v]) => ({key: k, ...v}));
                 }
             }
 
