@@ -968,7 +968,7 @@
                     // แถว 2: SS, WE, EA, etc. (เดิมใช้เส้นประสีเทาคั่นระหว่าง Cat ตอนนี้เปลี่ยนเป็นเส้นทึบสีดำหนาตามที่ต้องการ)
                     // หมายเหตุ: ใช้ inline style แทน Tailwind class (border-b-2 border-black) เพราะถ้า Tailwind CDN
                     // โหลดไม่ทัน/ถูกบล็อกจากเครือข่ายบางที่ เส้นแบ่งจะหายไปเงียบๆ โดยไม่มีการแจ้งเตือน
-                    certHtml2 += `<th colspan="${catColSpan}" class="bg-white font-bold text-sm tracking-wider" style="border-right: 2px solid #000; border-bottom: 2px solid #000;">${catName}</th>`;
+                    certHtml2 += `<th colspan="${catColSpan}" class="bg-white font-bold text-sm tracking-wider" style="border-right: 2px solid #000; border-bottom: 2px solid #000;">${catName || '-'}</th>`;
 
                     // วนลูป Credit
                     credits.forEach((cred, index) => {
@@ -1400,7 +1400,13 @@
                 // --- แก้ไข: ดึงข้อมูล Certification ให้รองรับชื่อคอลัมน์ใหม่ (Sub Category, Score, Document) ---
                 const certName = row['Building Certification'];
                 // หา Category ฝั่ง Cert (รองรับกรณีโดนเปลี่ยนชื่อตอนอ่านไฟล์ หรือไฟล์ใหม่มีแค่ Category เดียว)
-                const certCat = row['CertCategory'] || row['Category (Cert)'] || row['Category']; 
+                // หมายเหตุ (แก้บั๊ก): เดิมใช้ || ไล่ทีละคอลัมน์ ซึ่งจะปนกันไม่ออกระหว่าง "ไม่มีคอลัมน์นี้เลย"
+                // กับ "มีคอลัมน์นี้แต่ค่าว่างจริงๆ ตามข้อมูลต้นฉบับ" (เช่น Scheme อย่าง JCI ที่ Category ว่าง
+                // ทุกแถวโดยตั้งใจ) ทำให้ตกไปใช้ค่า Category ของสินค้าแทนแบบผิดๆ (คนละความหมายกันเลย)
+                // เปลี่ยนมาเช็คว่าคีย์นั้น "มีอยู่ในแถวหรือไม่" (in) แทนการเช็คค่าความจริง (truthy)
+                const certCat = ('CertCategory' in row) ? row['CertCategory']
+                    : ('Category (Cert)' in row) ? row['Category (Cert)']
+                    : row['Category'];
                 // รองรับทั้งชื่อเดิม (Credit) และชื่อใหม่ (Sub Category)
                 const credit = row['Sub Category'] || row['Credit']; 
                 // รองรับทั้งชื่อเดิม (Point) และชื่อใหม่ (Score)
@@ -1411,9 +1417,14 @@
                 const isMapped = row['Mapped'];
                 const rawMark = row['Certification Mark'];
 
-                // ตรวจสอบเงื่อนไขว่าสินค้านี้ได้ Cert หรือไม่ (ต้องมีข้อมูลหลักครบก่อน)
-                if (certName && certCat && credit) {
-                    
+                // ตรวจสอบเงื่อนไขว่าแถวนี้เป็น Credit ของ Certification ไหม (ต้องมีชื่อ Cert + ชื่อ Credit)
+                // หมายเหตุ (แก้บั๊ก): เดิมเงื่อนไขนี้บังคับว่า certCat ต้องมีค่าด้วย (ห้ามว่าง) ทำให้ Scheme ที่
+                // ไม่มี Category ย่อยจริงๆ ตามข้อมูลต้นฉบับ (เช่น JCI ซึ่ง Category ว่างทุกแถว) ถูกข้ามทั้ง Scheme
+                // ไปเลยแบบเงียบๆ — ทั้งที่ Building Certification + Credit มีข้อมูลครบ ไม่ได้ขาดอะไรจริงๆ
+                // certCat จึงเปลี่ยนเป็น optional (ใช้ '' แทนถ้าไม่มี) ไม่ใช่เงื่อนไขที่ทำให้ทั้งแถวถูกข้าม
+                if (certName && credit) {
+                    const certCatKey = certCat || ''; // Scheme ที่ไม่มี Category ย่อย (เช่น JCI) จะได้คีย์ว่าง แทนที่จะหายไปทั้ง Scheme
+
                     let isValid = false;
                     let certMark = '√';
 
@@ -1436,20 +1447,21 @@
                         isValid = true;
                     }
 
-                    // ถ้าระบุว่าสินค้านี้ได้คะแนนจริงๆ ค่อยเอาไปวาดหัวตารางและติ๊กถูก
-                    if (isValid) {
-                        // สร้างโครงสร้างหัวตาราง (Tree)
-                        if (!certStructure[certName]) certStructure[certName] = {};
-                        if (!certStructure[certName][certCat]) certStructure[certName][certCat] = new Map();
-                        
-                        const creditKey = credit;
-                        if (!certStructure[certName][certCat].has(creditKey)) {
-                            // เก็บ point และ req ไว้แสดงผลที่หัวตาราง
-                            certStructure[certName][certCat].set(creditKey, { point: pt || '', req: req || '' });
-                        }
+                    // สร้างโครงสร้างหัวตาราง (Tree) เสมอ ไม่ว่าสินค้าแถวนี้จะ Mapped=Yes หรือ No ก็ตาม
+                    // (แก้บั๊ก: เดิมสร้างเฉพาะตอน isValid=true เท่านั้น ทำให้ Credit ที่ไม่มีสินค้าตัวไหนเลย
+                    // Mapped=Yes ในทั้งไฟล์ ถูกซ่อนทั้งคอลัมน์แบบเงียบๆ ไม่มีทางรู้ว่า Credit นั้นมีอยู่ในข้อมูล)
+                    if (!certStructure[certName]) certStructure[certName] = {};
+                    if (!certStructure[certName][certCatKey]) certStructure[certName][certCatKey] = new Map();
 
-                        // บันทึกเครื่องหมาย/ข้อความ ลงในสินค้านั้นๆ
-                        const mapKey = `${certName}|${certCat}|${credit}`;
+                    const creditKey = credit;
+                    if (!certStructure[certName][certCatKey].has(creditKey)) {
+                        // เก็บ point และ req ไว้แสดงผลที่หัวตาราง
+                        certStructure[certName][certCatKey].set(creditKey, { point: pt || '', req: req || '' });
+                    }
+
+                    // บันทึกเครื่องหมาย/ข้อความ ลงในสินค้านั้นๆ เฉพาะตอนที่ Mapped จริงเท่านั้น (ไม่กระทบหัวตาราง)
+                    if (isValid) {
+                        const mapKey = `${certName}|${certCatKey}|${credit}`;
                         prod.certs[mapKey] = certMark; 
                     }
                 }
