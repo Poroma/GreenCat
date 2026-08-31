@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Certification Map Converter</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --bg: #F6F6F3;
@@ -197,9 +198,9 @@
 
     <div class="row" style="margin-top:16px">
       <button class="primary" id="downloadBtn">Save ลงเครื่อง</button>
-      <button class="primary" id="saveGitBtn">Save ลง Git</button>
+      <button class="primary" id="saveDriveBtn">Save ลง Google Drive</button>
     </div>
-    <div id="gitSaveMsg"></div>
+    <div id="driveSaveMsg"></div>
 
     <div style="margin-top:22px">
       <label class="field-label">Preview (first 20 rows)</label>
@@ -207,39 +208,6 @@
     </div>
   </div>
 
-</div>
-
-<!-- Modal กรอกข้อมูล GitHub ก่อน "Save ลง Git" — ต้องใช้ Personal Access Token ของผู้ใช้เอง เพราะหน้านี้
-     รันฝั่ง Client ล้วนๆ ไม่มี Server คอยเก็บ Credential ให้ Token จะถูกเก็บไว้ใน sessionStorage ของเบราว์เซอร์
-     เท่านั้น (หายเมื่อปิดแท็บ) และถูกส่งตรงไปที่ api.github.com เท่านั้น ไม่ผ่านที่อื่น -->
-<div id="gitModal" style="display:none; position:fixed; inset:0; z-index:100; align-items:center; justify-content:center; background:rgba(28,30,32,0.45);">
-  <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:28px 26px; width:100%; max-width:420px; margin:16px; box-sizing:border-box;">
-    <h3 style="margin:0 0 6px; font-size:16px; font-weight:650;">อัปเดต Master.xlsx บน GitHub</h3>
-    <p style="margin:0 0 16px; font-size:13px; color:var(--ink-soft); line-height:1.5;">
-      ต้องใช้ GitHub Personal Access Token ที่มีสิทธิ์เขียนไฟล์ (แนะนำใช้ Fine-grained token ที่จำกัดสิทธิ์
-      "Contents: Read and write" เฉพาะ repo นี้เท่านั้น) Token จะถูกเก็บไว้ใน session ของเบราว์เซอร์นี้ชั่วคราว
-      (หายเมื่อปิดแท็บ) และส่งตรงไปที่ GitHub เท่านั้น — ห้ามแชร์ Token นี้ให้ผู้อื่น
-    </p>
-    <label class="field-label">Personal Access Token</label>
-    <input type="password" id="ghToken" style="width:100%; margin-bottom:12px; box-sizing:border-box;" autocomplete="off">
-    <label class="field-label">Repository (owner/repo)</label>
-    <input type="text" id="ghRepo" value="Poroma/GreenCat" style="width:100%; margin-bottom:12px; box-sizing:border-box;">
-    <div class="row" style="gap:16px;">
-      <div style="flex:1;">
-        <label class="field-label">Branch</label>
-        <input type="text" id="ghBranch" value="main" style="width:100%; box-sizing:border-box;">
-      </div>
-      <div style="flex:1;">
-        <label class="field-label">ไฟล์ปลายทาง</label>
-        <input type="text" id="ghPath" value="Master.xlsx" style="width:100%; box-sizing:border-box;">
-      </div>
-    </div>
-    <div id="gitModalMsg" style="margin-top:10px;"></div>
-    <div style="margin-top:18px; display:flex; gap:10px; justify-content:flex-end;">
-      <button id="ghCancelBtn" style="font-family:var(--sans); font-size:14px; background:none; border:1px solid var(--line); border-radius:3px; padding:9px 18px; cursor:pointer; color:var(--ink);">ยกเลิก</button>
-      <button class="primary" id="ghConfirmBtn" style="margin-top:0;">อัปเดตขึ้น GitHub</button>
-    </div>
-  </div>
 </div>
 
 <footer>runs entirely client-side · no data leaves this page</footer>
@@ -533,88 +501,80 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
 });
 
 // ============================================================================
-// "Save ลง Git" — อัปเดตไฟล์ Master.xlsx บน GitHub โดยตรงผ่าน Contents API
-// (หน้านี้รัน Client-side ล้วนๆ ไม่มี Server กลาง จึงต้องใช้ Personal Access Token ของผู้ใช้เอง)
+// "Save ลง Google Drive" — อัปเดตไฟล์ Master.xlsx บน Google Drive โดยตรงผ่าน Drive API
+// ผู้ใช้ Sign in ด้วยบัญชี Google ของตัวเอง (OAuth Token Client ของ Google Identity Services)
+// ไม่ต้องกรอก/เก็บ Credential ใดๆ เองเลย — ต่างจาก GitHub PAT เดิมที่ต้องกรอก Token เอง
 // ============================================================================
-const GH_TOKEN_SESSION_KEY = "gh_pat_token"; // เก็บใน sessionStorage เท่านั้น หายเมื่อปิดแท็บ
+const GOOGLE_OAUTH_CLIENT_ID = "356081706685-1t4c8mumsvnq5u3qbo6hm5g6ub4uj63r.apps.googleusercontent.com";
+const DRIVE_FILE_ID = "1kRJaUJiaA3NmBwj48IcKWhs4Fqs2I_hg";
+// ใช้ scope เต็ม (ไม่ใช่ drive.file) เพราะไฟล์นี้ถูกอัปโหลดขึ้น Drive มาก่อนแล้ว ไม่ได้ถูกสร้าง/เปิดผ่านแอปนี้
+// (scope drive.file จะเข้าไฟล์นี้ไม่ได้ถ้าไม่ผ่าน Google Picker ให้ผู้ใช้เลือกไฟล์เองก่อน)
+const DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive";
 
-const gitModal = document.getElementById("gitModal");
-const ghTokenInput = document.getElementById("ghToken");
-const ghRepoInput = document.getElementById("ghRepo");
-const ghBranchInput = document.getElementById("ghBranch");
-const ghPathInput = document.getElementById("ghPath");
-const gitModalMsg = document.getElementById("gitModalMsg");
-const gitSaveMsg = document.getElementById("gitSaveMsg");
-const ghConfirmBtn = document.getElementById("ghConfirmBtn");
+const driveSaveMsg = document.getElementById("driveSaveMsg");
+const saveDriveBtn = document.getElementById("saveDriveBtn");
+let driveTokenClient = null;
 
-document.getElementById("saveGitBtn").addEventListener("click", () => {
+function uint8ArrayFromBase64(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function uploadResultToDrive(accessToken) {
+  const base64Content = XLSX.write(buildResultWorkbook(), { bookType: "xlsx", type: "base64" });
+  const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_FILE_ID}?uploadType=media`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    body: uint8ArrayFromBase64(base64Content)
+  });
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(errBody.error?.message || `HTTP ${res.status}`);
+  }
+}
+
+saveDriveBtn.addEventListener("click", () => {
   if (!lastResult) return;
-  gitSaveMsg.innerHTML = "";
-  gitModalMsg.innerHTML = "";
-  try { ghTokenInput.value = sessionStorage.getItem(GH_TOKEN_SESSION_KEY) || ""; } catch (e) { /* ignore */ }
-  gitModal.style.display = "flex";
-});
-
-document.getElementById("ghCancelBtn").addEventListener("click", () => {
-  gitModal.style.display = "none";
-});
-
-ghConfirmBtn.addEventListener("click", async () => {
-  const token = ghTokenInput.value.trim();
-  const repo = ghRepoInput.value.trim();
-  const branch = ghBranchInput.value.trim() || "main";
-  const path = ghPathInput.value.trim() || "Master.xlsx";
-
-  if (!token || !repo) {
-    gitModalMsg.innerHTML = '<div class="msg error">กรุณากรอก Token และ Repository ให้ครบ</div>';
+  if (typeof google === "undefined") {
+    driveSaveMsg.innerHTML = '<div class="msg error">โหลด Google Sign-in ไม่สำเร็จ (เช็คการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่)</div>';
     return;
   }
 
-  try { sessionStorage.setItem(GH_TOKEN_SESSION_KEY, token); } catch (e) { /* ignore */ }
+  driveSaveMsg.innerHTML = "";
+  saveDriveBtn.disabled = true;
+  saveDriveBtn.textContent = "กำลังอัปเดต...";
 
-  ghConfirmBtn.disabled = true;
-  ghConfirmBtn.textContent = "กำลังอัปเดต...";
-  gitModalMsg.innerHTML = "";
-
-  try {
-    const apiUrl = `https://api.github.com/repos/${repo}/contents/${encodeURIComponent(path)}`;
-    const headers = { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" };
-
-    // ต้องดึง sha ของไฟล์เดิมมาก่อน ไม่งั้น GitHub จะปฏิเสธการ Update (ยกเว้นไฟล์ยังไม่เคยมีมาก่อน)
-    let sha;
-    const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, { headers });
-    if (getRes.ok) {
-      sha = (await getRes.json()).sha;
-    } else if (getRes.status !== 404) {
-      throw new Error(`ดึงข้อมูลไฟล์เดิมไม่สำเร็จ (HTTP ${getRes.status})`);
-    }
-
-    const base64Content = XLSX.write(buildResultWorkbook(), { bookType: "xlsx", type: "base64" });
-    const putRes = await fetch(apiUrl, {
-      method: "PUT",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        message: `Update ${path} via Certification Map Converter`,
-        content: base64Content,
-        branch,
-        ...(sha ? { sha } : {})
-      })
+  if (!driveTokenClient) {
+    driveTokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_OAUTH_CLIENT_ID,
+      scope: DRIVE_WRITE_SCOPE,
+      callback: () => {} // แทนที่จริงด้านล่างทุกครั้งก่อนเรียก requestAccessToken()
     });
-
-    if (!putRes.ok) {
-      const errBody = await putRes.json().catch(() => ({}));
-      throw new Error(errBody.message || `HTTP ${putRes.status}`);
-    }
-
-    gitModalMsg.innerHTML = '<div class="msg ok">อัปเดตสำเร็จ</div>';
-    gitSaveMsg.innerHTML = `<div class="msg ok">อัปเดต ${path} บน GitHub (${repo}@${branch}) สำเร็จแล้ว</div>`;
-    setTimeout(() => { gitModal.style.display = "none"; }, 1000);
-  } catch (err) {
-    gitModalMsg.innerHTML = `<div class="msg error">${err.message}</div>`;
-  } finally {
-    ghConfirmBtn.disabled = false;
-    ghConfirmBtn.textContent = "อัปเดตขึ้น GitHub";
   }
+
+  driveTokenClient.callback = async (resp) => {
+    if (resp.error) {
+      driveSaveMsg.innerHTML = `<div class="msg error">Sign in ไม่สำเร็จ: ${resp.error}</div>`;
+      saveDriveBtn.disabled = false;
+      saveDriveBtn.textContent = "Save ลง Google Drive";
+      return;
+    }
+    try {
+      await uploadResultToDrive(resp.access_token);
+      driveSaveMsg.innerHTML = '<div class="msg ok">อัปเดต Master.xlsx บน Google Drive สำเร็จแล้ว</div>';
+    } catch (err) {
+      driveSaveMsg.innerHTML = `<div class="msg error">${err.message}</div>`;
+    } finally {
+      saveDriveBtn.disabled = false;
+      saveDriveBtn.textContent = "Save ลง Google Drive";
+    }
+  };
+  driveTokenClient.requestAccessToken();
 });
 </script>
 </body>
