@@ -446,6 +446,13 @@
         </div>
     </div>
 
+    <!-- หน้า Loading ระหว่างดึงไฟล์ Master.xlsx จาก repo มาประมวลผลอัตโนมัติ (คนละหน้ากับโซนอัปโหลดไฟล์เอง
+         ด้านบน — ผู้ใช้ทั่วไปไม่ควรเห็นหน้าอัปโหลดเลยตราบใดที่ดึง Master.xlsx สำเร็จ) -->
+    <div id="loading-section" class="hidden flex flex-col items-center justify-center h-screen bg-gray-50 p-4">
+        <svg class="animate-spin h-10 w-10 text-green-700 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        <p class="text-green-700 font-medium">กำลังโหลดข้อมูลจาก Master.xlsx โปรดรอสักครู่...</p>
+    </div>
+
     <!-- โซน Dashboard -->
     <div id="dashboard-section" class="hidden dashboard-container">
         
@@ -604,6 +611,7 @@
 
         // DOM (cache ไว้ครั้งเดียว ลดการเรียก getElementById ซ้ำๆ ในทุกครั้งที่ render/filter)
         const elUpload = document.getElementById('upload-section');
+        const elLoadingScreen = document.getElementById('loading-section');
         const elDash = document.getElementById('dashboard-section');
         const elDrop = document.getElementById('drop-zone');
         const elFile = document.getElementById('file-input');
@@ -688,7 +696,6 @@
 
         function unlockGate(username, role) {
             elGate.style.display = 'none';
-            elUpload.classList.remove('hidden');
             elGateUserInput.value = '';
             elGateInput.value = '';
             showWhoami(username, role);
@@ -809,16 +816,19 @@
         // หมายเหตุ: ต้องเปิดผ่าน http(s) เช่น GitHub Pages เท่านั้น — เปิดไฟล์ในเครื่องตรงๆ (file://)
         // แล้ว fetch จะโดน browser บล็อกด้วยข้อจำกัด CORS ของ local file
         async function loadMasterFile() {
-            elLoad.classList.remove('hidden');
+            elDash.classList.add('hidden');
+            elUpload.classList.add('hidden');
+            elLoadingScreen.classList.remove('hidden');
             try {
                 const res = await fetch('Master.xlsx', { cache: 'no-store' });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const buffer = await res.arrayBuffer();
-                processData(parseXlsxArrayBuffer(buffer));
+                processData(parseXlsxArrayBuffer(buffer)); // renderDashboard() ในนี้จะซ่อน loading-section เองตอนจบ
             } catch (err) {
-                elLoad.classList.add('hidden');
+                elLoadingScreen.classList.add('hidden');
                 console.error('โหลด Master.xlsx อัตโนมัติไม่สำเร็จ:', err);
                 alert('ไม่สามารถโหลดไฟล์ Master.xlsx อัตโนมัติได้ กรุณาอัปโหลดไฟล์ด้วยตนเองแทน');
+                elUpload.classList.remove('hidden'); // fallback ให้อัปโหลดเองแทน
             }
         }
 
@@ -911,6 +921,7 @@
             applyFilters(); // วาดข้อมูล
 
             elUpload.classList.add('hidden');
+            elLoadingScreen.classList.add('hidden');
             elDash.classList.remove('hidden');
             elLoad.classList.add('hidden');
             
@@ -1637,8 +1648,6 @@
 
         // ปุ่มรีเฟรชข้อมูล: ดึง Master.xlsx จาก repo มาโหลดใหม่โดยไม่ต้อง Logout/อัปโหลดเอง
         document.getElementById('btn-refresh-master').addEventListener('click', () => {
-            elDash.classList.add('hidden');
-            elUpload.classList.remove('hidden');
             loadMasterFile();
         });
 
