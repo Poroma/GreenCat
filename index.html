@@ -828,7 +828,8 @@
             elUpload.classList.add('hidden');
             elLoadingScreen.classList.remove('hidden');
             try {
-                const url = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media&key=${GOOGLE_API_KEY}`;
+                // ใส่ timestamp ต่อท้าย URL ทุกครั้ง กัน Google/เบราว์เซอร์ cache response ของไฟล์เดิมไว้
+                const url = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media&key=${GOOGLE_API_KEY}&_=${Date.now()}`;
                 const res = await fetch(url, { cache: 'no-store' });
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const buffer = await res.arrayBuffer();
