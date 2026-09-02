@@ -340,7 +340,10 @@ function extractRecords(sheet) {
 
   function flagVal(r, col) {
     if (col === undefined || col === null) return null;
-    return cellVal(sheet, r, col) === FLAG_MARK ? "x" : null;
+    const v = cellVal(sheet, r, col);
+    // ใช้ includes() แทน === เพราะบางเซลล์มี Remark ต่อท้ายเครื่องหมาย (เช่น "° หมายเหตุ...")
+    // เทียบตรงเป๊ะแบบเดิมจะพลาดเซลล์แบบนี้ไปเงียบๆ ทั้งที่จริงๆ ควรนับเป็น flag ที่ติ๊กไว้
+    return typeof v === "string" && v.includes(FLAG_MARK) ? "x" : null;
   }
 
   const records = [];
@@ -360,8 +363,13 @@ function extractRecords(sheet) {
 
     for (const item of certItems) {
       const cellv = cellVal(sheet, r, item.col);
-      const mapped = cellv === CHECK_MARK ? "Yes" : "No";
-      const mark = mapped === "Yes" ? CHECK_MARK : null;
+      // ใช้ includes() แทน === เพราะบางเซลล์เป็น "Mark + Remark" (เช่น "√\n(280 ksc, 320 ksc)")
+      // เทียบตรงเป๊ะแบบเดิมจะมองว่าไม่ mapped แล้วข้ามแถวนั้นไปเงียบๆ ทั้งที่จริงๆ ติ๊กไว้แล้ว
+      const cellvStr = typeof cellv === "string" ? cellv : (cellv === null || cellv === undefined ? "" : String(cellv));
+      const isMapped = cellvStr.includes(CHECK_MARK);
+      const mapped = isMapped ? "Yes" : "No";
+      // เก็บข้อความทั้งเซลล์ไว้ (รวม Remark ถ้ามี) แทนที่จะทิ้งเหลือแค่เครื่องหมาย √ เฉยๆ
+      const mark = isMapped ? cellvStr : null;
       records.push([
         currentGroup, buVal, categoryVal, productsVal,
         lowCarbon, opCarbon, circularity, wellbeing,
