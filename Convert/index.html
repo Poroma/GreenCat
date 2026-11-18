@@ -131,6 +131,27 @@
   .msg.error{ background: var(--warn-soft); color: var(--warn); border: 1px solid #E9C99A; }
   .msg.ok{ background: var(--good-soft); color: var(--good); border: 1px solid #BEDBCB; }
 
+  /* ตัวเลือกประเภทไฟล์ผลลัพธ์ (Master / Linked Master) */
+  .mode-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .mode-card{
+    display:flex; flex-direction:column; gap: 4px;
+    border: 1.5px solid var(--line); border-radius: 3px;
+    padding: 14px 16px; cursor: pointer; background: var(--panel);
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .mode-card:hover{ border-color: var(--accent); }
+  .mode-card:has(input:checked){ border-color: var(--accent); background: var(--accent-soft); }
+  .mode-card input{ position:absolute; opacity:0; pointer-events:none; }
+  .mode-card:has(input:focus-visible){ outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mode-name{ font-size: 15px; font-weight: 650; display:flex; align-items:center; gap: 8px; }
+  .mode-name::before{
+    content:""; width: 12px; height: 12px; border-radius: 50%;
+    border: 1.5px solid var(--ink-soft); flex-shrink: 0;
+  }
+  .mode-card:has(input:checked) .mode-name::before{ border-color: var(--accent); background: var(--accent); box-shadow: inset 0 0 0 2px var(--panel); }
+  .mode-desc{ font-size: 13px; color: var(--ink-soft); }
+  .mode-file{ font-family: var(--mono); font-size: 12px; color: var(--accent); }
+
   footer{
     text-align:center; font-size: 12px; color: var(--ink-soft);
     margin-top: 36px; font-family: var(--mono);
@@ -142,17 +163,39 @@
 
   <header>
     <div class="kicker">SCG · GREEN PRODUCTS DATA</div>
-    <h1>Certification Map Converter</h1>
-    <p>Turns the wide "Product Data" export into the long Product-Certification Map format — one row per product × certification item. New certification columns are picked up automatically, wherever they're added in the sheet.</p>
+    <h1 id="pageTitle">Certification Map Converter</h1>
+    <p id="pageDesc">Turns the wide "Product Data" export into the long Product-Certification Map format — one row per product × certification item. New certification columns are picked up automatically, wherever they're added in the sheet.</p>
   </header>
+
+  <!-- STEP 0: เลือกประเภทไฟล์ผลลัพธ์ -->
+  <div class="step" id="step0">
+    <div class="step-head">
+      <span class="step-num">01</span>
+      <span class="step-title">เลือกประเภทไฟล์ที่ต้องการอัปเดต</span>
+    </div>
+    <div class="mode-grid" role="radiogroup" aria-label="ประเภทไฟล์ผลลัพธ์">
+      <label class="mode-card">
+        <input type="radio" name="convertMode" value="master" checked>
+        <span class="mode-name">Master</span>
+        <span class="mode-desc">Sheet "Product Data" → Product-Certification Map (ใช้ในหน้า Main)</span>
+        <span class="mode-file">→ Master.xlsx</span>
+      </label>
+      <label class="mode-card">
+        <input type="radio" name="convertMode" value="linked">
+        <span class="mode-name">Linked Master</span>
+        <span class="mode-desc">Sheet "Link เอกสาร" → รายการเอกสารของสินค้า (ใช้ในหน้า Document) แปลงแบบเดียวกับ Power Query ในไฟล์ Product Mapping</span>
+        <span class="mode-file">→ Linked Master.xlsx</span>
+      </label>
+    </div>
+  </div>
 
   <!-- STEP 1 -->
   <div class="step" id="step1">
     <div class="step-head">
-      <span class="step-num">01</span>
+      <span class="step-num">02</span>
       <span class="step-title">Upload the source file</span>
     </div>
-    <div class="step-sub">The .xlsx export with the "Product Data" sheet (wide format).</div>
+    <div class="step-sub" id="uploadSub">The .xlsx export with the "Product Data" sheet (wide format).</div>
 
     <div class="dropzone" id="dropzone">
       <input type="file" id="fileInput" accept=".xlsx,.xls">
@@ -165,7 +208,7 @@
   <!-- STEP 2 -->
   <div class="step" id="step2" style="display:none">
     <div class="step-head">
-      <span class="step-num">02</span>
+      <span class="step-num">03</span>
       <span class="step-title">Confirm the sheet</span>
     </div>
     <div class="row">
@@ -181,18 +224,18 @@
   <!-- STEP 3 -->
   <div class="step done" id="step3" style="display:none">
     <div class="step-head">
-      <span class="step-num">03</span>
+      <span class="step-num">04</span>
       <span class="step-title">Result</span>
     </div>
 
     <div class="stat-grid">
-      <div class="stat"><div class="n" id="statProducts">–</div><div class="l">products detected</div></div>
-      <div class="stat"><div class="n" id="statCerts">–</div><div class="l">certification items detected</div></div>
-      <div class="stat"><div class="n" id="statRows">–</div><div class="l">output rows</div></div>
+      <div class="stat"><div class="n" id="stat1">–</div><div class="l" id="statLabel1">products detected</div></div>
+      <div class="stat"><div class="n" id="stat2">–</div><div class="l" id="statLabel2">certification items detected</div></div>
+      <div class="stat"><div class="n" id="stat3">–</div><div class="l" id="statLabel3">output rows</div></div>
     </div>
 
     <details>
-      <summary>Show detected certification items</summary>
+      <summary id="detailsSummary">Show detected certification items</summary>
       <div class="cert-list" id="certListBox"></div>
     </details>
 
@@ -203,7 +246,7 @@
     <div id="driveSaveMsg"></div>
 
     <div style="margin-top:22px">
-      <label class="field-label">Preview (first 20 rows)</label>
+      <label class="field-label" id="previewLabel">Preview (first 20 rows)</label>
       <table class="preview" id="previewTable"></table>
     </div>
   </div>
@@ -383,11 +426,243 @@ function extractRecords(sheet) {
 }
 
 // ============================================================================
+// LINKED MASTER TRANSFORM START
+// แปลง Sheet "Link เอกสาร" ให้ได้ผลแบบเดียวกับ Power Query "Link เอกสาร" ในไฟล์ Product Mapping.xlsx ทุกขั้น:
+//   Source        = Excel.Workbook(...){[Item="Link เอกสาร",Kind="Sheet"]}[Data]
+//   Table.Skip(1)                           → ตัดแถวแรก ("* ข้อมูลที่จำเป็นต้องกรอก") ทิ้ง
+//   Table.PromoteHeaders(PromoteAllScalars) → แถวถัดไปเป็นหัวคอลัมน์ (ช่องหัวที่ว่าง = "ColumnN" ตามตำแหน่ง)
+//   RenameColumns "Column1" → "ประเภทเอกสาร" + ChangeType เป็น text
+//   SelectRows    → เก็บเฉพาะแถวที่ Link ไม่ว่าง, Link ไม่ใช่ " " และ Group Name ไม่ว่าง
+// แล้วเติม 2 คอลัมน์ท้าย "ชื่อเอกสาร" + "URL" ให้ได้ Format เดียวกับ Product Mapping.xlsx
+// (Power Query อ่าน Hyperlink ในเซลล์ไม่ได้ ในไฟล์เดิม 2 คอลัมน์นี้จึงต้องเติมเองด้วยมือ และพบว่าบางแถว
+//  เลื่อนไม่ตรงกับ Link แล้ว — ที่นี่อ่าน URL จาก Hyperlink ที่ฝังในเซลล์ Link ของแถวเดียวกันโดยตรง จึงตรงกันเสมอ)
+// ============================================================================
+const LINKED_SOURCE_SHEET = "Link เอกสาร";
+const LINKED_LINK_HEADER = "Link*\n(เอกสารใน SharePoint Site 'CBM_CPAC_Products Documentation')";
+const LINKED_GROUP_HEADER = "Group Name (Products)*\n(เลือกจาก drop down)";
+const LINKED_TYPE_HEADER = "ประเภทเอกสาร";
+const LINKED_DOCNAME_HEADER = "ชื่อเอกสาร";
+const LINKED_URL_HEADER = "URL";
+
+// ค่าดิบของเซลล์แบบ Power Query: ไม่ trim (เช่นชื่อสินค้าที่มีวรรคท้ายก็คงไว้), เซลล์ว่าง = null
+// เซลล์ Error (เช่น #N/A จาก VLOOKUP ในคอลัมน์ A) ให้เป็น null และนับไว้แจ้งเตือน
+function linkedCell(sheet, r, c, counters) {
+  const cell = sheet[XLSX.utils.encode_cell({ r, c })];
+  if (!cell || cell.v === undefined || cell.v === null) return null;
+  if (cell.t === "e") { if (counters) counters.errorCells++; return null; }
+  return cell.v;
+}
+
+// SheetJS 0.18.5 คืนค่า Hyperlink Target แบบยังไม่ถอดรหัส XML (เช่น "&amp;" แทน "&") ทำให้ URL ของ SharePoint
+// ที่มี ?d=...&csf=1&web=1 ใช้งานไม่ได้ ต้องถอดรหัสเองก่อนใช้
+function decodeXmlEntities(s) {
+  return s.replace(/&(amp|lt|gt|quot|apos|#x[0-9a-f]+|#\d+);/gi, (m, e) => {
+    const k = e.toLowerCase();
+    if (k === "amp") return "&";
+    if (k === "lt") return "<";
+    if (k === "gt") return ">";
+    if (k === "quot") return '"';
+    if (k === "apos") return "'";
+    const code = k.startsWith("#x") ? parseInt(k.slice(2), 16) : parseInt(k.slice(1), 10);
+    return Number.isFinite(code) ? String.fromCodePoint(code) : m;
+  });
+}
+
+// Table.PromoteHeaders: หัวที่ว่างใช้ชื่อเดิม "ColumnN", หัวซ้ำต่อท้าย _1, _2, ...
+function pqPromoteHeaders(values, firstColIndex) {
+  const used = new Set();
+  return values.map((v, i) => {
+    const base = (v === null || v === "") ? `Column${firstColIndex + i + 1}` : String(v).replace(/\r\n/g, "\n");
+    let name = base, n = 1;
+    while (used.has(name)) name = `${base}_${n++}`;
+    used.add(name);
+    return name;
+  });
+}
+
+// หาคอลัมน์ตามชื่อเป๊ะก่อน ถ้าไม่เจอค่อยเทียบแบบไม่สนช่องว่าง/ขึ้นบรรทัด (กันหัวคอลัมน์ถูกแก้ขึ้นบรรทัดนิดหน่อย)
+function findLinkedHeader(headers, exactName, prefix) {
+  const exact = headers.indexOf(exactName);
+  if (exact >= 0) return exact;
+  const norm = s => s.replace(/\s+/g, "");
+  return headers.findIndex(h => norm(h).startsWith(norm(prefix)));
+}
+
+function transformLinkedMaster(sheet) {
+  if (!sheet || !sheet["!ref"]) throw new Error(`ไม่พบข้อมูลใน Sheet "${LINKED_SOURCE_SHEET}"`);
+  const range = XLSX.utils.decode_range(sheet["!ref"]);
+  const counters = { errorCells: 0 };
+
+  // Power Query ไม่นับคอลัมน์ท้ายตารางที่ว่างทั้งคอลัมน์ (เช่นคอลัมน์ L ในไฟล์ต้นทางที่มีแค่ Format ไม่มีค่า)
+  let lastCol = range.s.c;
+  for (let c = range.e.c; c >= range.s.c; c--) {
+    let hasValue = false;
+    for (let r = range.s.r; r <= range.e.r && !hasValue; r++) {
+      if (linkedCell(sheet, r, c) !== null) hasValue = true;
+    }
+    if (hasValue) { lastCol = c; break; }
+  }
+  const cols = [];
+  for (let c = range.s.c; c <= lastCol; c++) cols.push(c);
+
+  const headerRow = range.s.r + 1; // Table.Skip(1) แล้ว PromoteHeaders แถวถัดไป
+  if (headerRow > range.e.r) throw new Error('Sheet นี้มีข้อมูลไม่ถึง 2 แถว ไม่น่าใช่ Sheet "Link เอกสาร"');
+  const headers = pqPromoteHeaders(cols.map(c => linkedCell(sheet, headerRow, c)), range.s.c);
+
+  const col1 = headers.indexOf("Column1");
+  if (col1 >= 0) headers[col1] = LINKED_TYPE_HEADER;
+  const typeIdx = headers.indexOf(LINKED_TYPE_HEADER);
+
+  const linkIdx = findLinkedHeader(headers, LINKED_LINK_HEADER, "Link*");
+  const groupIdx = findLinkedHeader(headers, LINKED_GROUP_HEADER, "Group Name (Products)");
+  if (linkIdx < 0 || groupIdx < 0) {
+    throw new Error('ไม่พบคอลัมน์ "Link*" หรือ "Group Name (Products)*" ในแถวที่ 2 ของ Sheet — Power Query เดิมก็จะ Refresh ไม่ผ่านเช่นกัน กรุณาตรวจสอบหัวคอลัมน์ในไฟล์ต้นทาง');
+  }
+
+  // คอลัมน์ "ชื่อเอกสาร"/"URL" เผื่ออนาคตไฟล์ต้นทางมีคอลัมน์ชื่อนี้อยู่แล้ว ให้เขียนทับค่าเดิม ไม่สร้างซ้ำ
+  const outHeaders = headers.slice();
+  let docNameIdx = outHeaders.indexOf(LINKED_DOCNAME_HEADER);
+  if (docNameIdx < 0) { outHeaders.push(LINKED_DOCNAME_HEADER); docNameIdx = outHeaders.length - 1; }
+  let urlIdx = outHeaders.indexOf(LINKED_URL_HEADER);
+  if (urlIdx < 0) { outHeaders.push(LINKED_URL_HEADER); urlIdx = outHeaders.length - 1; }
+
+  const stats = { sourceRows: 0, skippedNoLink: 0, skippedNoGroup: 0, withUrl: 0, typeCounts: {} };
+  const rows = [];
+  for (let r = headerRow + 1; r <= range.e.r; r++) {
+    // นับเซลล์ Error เฉพาะแถวที่ผ่าน Filter (แถวที่ถูกตัดทิ้งมี #N/A จาก VLOOKUP อยู่เยอะ แต่ไม่กระทบผลลัพธ์)
+    const rowCounter = { errorCells: 0 };
+    const values = cols.map(c => linkedCell(sheet, r, c, rowCounter));
+    if (values.every(v => v === null)) continue; // แถวว่างล้วน (ยังไงก็ถูก Filter ทิ้งอยู่แล้ว ไม่นับเป็นแถวข้อมูล)
+    stats.sourceRows++;
+
+    if (typeIdx >= 0 && values[typeIdx] !== null) values[typeIdx] = String(values[typeIdx]); // ChangeType → text
+
+    const link = values[linkIdx];
+    if (link === null || link === " ") { stats.skippedNoLink++; continue; }
+    if (values[groupIdx] === null) { stats.skippedNoGroup++; continue; }
+
+    const linkCell = sheet[XLSX.utils.encode_cell({ r, c: cols[linkIdx] })];
+    const linkText = String(link);
+    let url = linkCell && linkCell.l && linkCell.l.Target ? decodeXmlEntities(String(linkCell.l.Target)) : null;
+    if (!url && /^https?:\/\//i.test(linkText.trim())) url = linkText.trim();
+    if (url && !/^https?:\/\//i.test(url)) url = null; // ลิงก์ภายในไฟล์ (#Sheet!A1) ไม่ใช่ URL เอกสาร
+
+    const out = values.slice();
+    while (out.length < outHeaders.length) out.push(null);
+    out[docNameIdx] = linkText;
+    out[urlIdx] = url;
+    if (url) stats.withUrl++;
+    counters.errorCells += rowCounter.errorCells;
+
+    const typeKey = (typeIdx >= 0 && out[typeIdx]) || "(ไม่ระบุประเภท)";
+    stats.typeCounts[typeKey] = (stats.typeCounts[typeKey] || 0) + 1;
+    rows.push(out);
+  }
+
+  const groups = new Set(rows.map(r => r[groupIdx]));
+  return { headers: outHeaders, rows, stats, errorCells: counters.errorCells, groupCount: groups.size, urlIdx };
+}
+
+function buildLinkedWorkbook(result) {
+  const ws = XLSX.utils.aoa_to_sheet([result.headers, ...result.rows]);
+  // ใส่ Hyperlink ให้คอลัมน์ URL ด้วย เปิดใน Excel แล้วคลิกได้ทันที
+  result.rows.forEach((row, i) => {
+    const url = row[result.urlIdx];
+    if (!url) return;
+    const cell = ws[XLSX.utils.encode_cell({ r: i + 1, c: result.urlIdx })];
+    if (cell) cell.l = { Target: url };
+  });
+  ws["!cols"] = result.headers.map(h => ({ wch: h === LINKED_URL_HEADER ? 50 : Math.min(40, Math.max(10, String(h).split("\n")[0].length + 2)) }));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, LINKED_SOURCE_SHEET);
+  return wb;
+}
+// LINKED MASTER TRANSFORM END
+// ============================================================================
+
+// ============================================================================
+// โหมดการแปลงไฟล์ (Master / Linked Master) — แต่ละโหมดมี Sheet ต้นทาง, ไฟล์ปลายทางบน Drive และวิธีแปลงของตัวเอง
+// ============================================================================
+const GOOGLE_OAUTH_CLIENT_ID = "356081706685-1t4c8mumsvnq5u3qbo6hm5g6ub4uj63r.apps.googleusercontent.com";
+const MASTER_DRIVE_FILE_ID = "1kRJaUJiaA3NmBwj48IcKWhs4Fqs2I_hg";
+// File ID ของไฟล์ Linked Master บน Google Drive ("Link Master.xlsx" — ต้องเป็น .xlsx ไม่แปลงเป็น Google Sheets,
+// แชร์ Anyone with the link: Viewer) — ถ้าเปลี่ยนไฟล์ ต้องแก้ค่าเดียวกันที่ LINKED_DRIVE_FILE_ID ใน ../index.html ด้วย
+const LINKED_DRIVE_FILE_ID = "1uPABIAxwXlKCWoCCqLmUUvLCe897_rj8";
+
+const MODES = {
+  master: {
+    title: "Certification Map Converter",
+    desc: "Turns the wide \"Product Data\" export into the long Product-Certification Map format — one row per product × certification item. New certification columns are picked up automatically, wherever they're added in the sheet.",
+    uploadSub: "The .xlsx export with the \"Product Data\" sheet (wide format).",
+    defaultSheet: "Product Data",
+    driveFileId: MASTER_DRIVE_FILE_ID,
+    driveFileName: "Master.xlsx",
+    downloadName: "Product-Certification-Map.xlsx",
+    statLabels: ["products detected", "certification items detected", "output rows"],
+    detailsLabel: "Show detected certification items",
+    convert(sheet) {
+      const { records, certItems } = extractRecords(sheet);
+      const productKeys = new Set(records.map(r => r.slice(0, 4).join("\u0001")));
+      return {
+        headers: OUTPUT_HEADERS,
+        rows: records,
+        stats: [productKeys.size, certItems.length, records.length],
+        detailsText: certItems.map((it, i) =>
+          `${i + 1}. [${it.buildingCert || "-"}] ${it.category || "-"} — ${(it.subCategory || "").toString().replace(/\n/g, " / ")}`
+        ).join("\n"),
+        warning: null,
+        buildWorkbook: () => buildMasterWorkbook(records)
+      };
+    }
+  },
+  linked: {
+    title: "Linked Master Converter",
+    desc: "แปลง Sheet \"Link เอกสาร\" ในไฟล์ SCG Green Products Directory ให้เป็นรายการเอกสารของสินค้า ด้วยขั้นตอนเดียวกับ Power Query ในไฟล์ Product Mapping.xlsx พร้อมดึง URL จาก Hyperlink ในเซลล์ Link ให้อัตโนมัติ",
+    uploadSub: "ไฟล์ \"SCG Green Products Directory\" (.xlsx) ที่มี Sheet \"Link เอกสาร\"",
+    defaultSheet: LINKED_SOURCE_SHEET,
+    driveFileId: LINKED_DRIVE_FILE_ID,
+    driveFileName: "Link Master.xlsx",
+    downloadName: "Linked Master.xlsx",
+    statLabels: ["document rows", "product groups", "rows with URL"],
+    detailsLabel: "Show summary by document type",
+    convert(sheet) {
+      const result = transformLinkedMaster(sheet);
+      const s = result.stats;
+      const typeLines = Object.entries(s.typeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([t, n]) => `${String(n).padStart(4)}  ${t.replace(/\n/g, " ")}`);
+      const detailsText = [
+        `แถวข้อมูลในต้นทาง: ${s.sourceRows}`,
+        `ตัดออก (ไม่มี Link): ${s.skippedNoLink}`,
+        `ตัดออก (ไม่มี Group Name): ${s.skippedNoGroup}`,
+        `ผลลัพธ์: ${result.rows.length} แถว`,
+        "",
+        "จำนวนเอกสารตามประเภท:",
+        ...typeLines
+      ].join("\n");
+      const warnings = [];
+      const noUrl = result.rows.length - s.withUrl;
+      if (noUrl > 0) warnings.push(`${noUrl} แถวไม่มี Hyperlink ในเซลล์ Link (คอลัมน์ URL จะว่าง)`);
+      if (result.errorCells > 0) warnings.push(`พบเซลล์ Error (เช่น #N/A) ${result.errorCells} เซลล์ — ถือเป็นค่าว่าง`);
+      return {
+        headers: result.headers,
+        rows: result.rows,
+        stats: [result.rows.length, result.groupCount, s.withUrl],
+        detailsText,
+        warning: warnings.length ? warnings.join(" · ") : null,
+        buildWorkbook: () => buildLinkedWorkbook(result)
+      };
+    }
+  }
+};
+
+// ============================================================================
 // UI wiring
 // ============================================================================
 
 let workbook = null;
 let lastResult = null;
+let currentMode = "master";
 
 const dropzone = document.getElementById("dropzone");
 const fileInput = document.getElementById("fileInput");
@@ -397,6 +672,47 @@ const step3 = document.getElementById("step3");
 const sheetSelect = document.getElementById("sheetSelect");
 const convertBtn = document.getElementById("convertBtn");
 const convertMsg = document.getElementById("convertMsg");
+const driveSaveMsg = document.getElementById("driveSaveMsg");
+const saveDriveBtn = document.getElementById("saveDriveBtn");
+
+function mode() { return MODES[currentMode]; }
+
+function saveDriveLabel() { return `Save ลง Google Drive (${mode().driveFileName})`; }
+
+function fillSheetSelect() {
+  sheetSelect.innerHTML = "";
+  if (!workbook) return;
+  workbook.SheetNames.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name; opt.textContent = name;
+    if (name === mode().defaultSheet) opt.selected = true;
+    sheetSelect.appendChild(opt);
+  });
+}
+
+function applyMode() {
+  const m = mode();
+  document.getElementById("pageTitle").textContent = m.title;
+  document.getElementById("pageDesc").textContent = m.desc;
+  document.getElementById("uploadSub").textContent = m.uploadSub;
+  m.statLabels.forEach((l, i) => { document.getElementById(`statLabel${i + 1}`).textContent = l; });
+  document.getElementById("detailsSummary").textContent = m.detailsLabel;
+  saveDriveBtn.textContent = saveDriveLabel();
+  // เปลี่ยนโหมด = ผลลัพธ์เดิมใช้ไม่ได้แล้ว ต้องกด Convert ใหม่ (ไฟล์ที่อัปโหลดไว้ยังอยู่ เลือก Sheet ตั้งต้นของโหมดใหม่ให้)
+  lastResult = null;
+  step3.style.display = "none";
+  convertMsg.innerHTML = "";
+  driveSaveMsg.innerHTML = "";
+  fillSheetSelect();
+}
+
+document.querySelectorAll('input[name="convertMode"]').forEach(radio => {
+  radio.addEventListener("change", () => {
+    if (!radio.checked) return;
+    currentMode = radio.value;
+    applyMode();
+  });
+});
 
 dropzone.addEventListener("click", () => fileInput.click());
 ["dragover", "dragenter"].forEach(evt =>
@@ -418,70 +734,69 @@ function handleFile(file) {
     fileChip.innerHTML = "";
     const chip = document.createElement("div");
     chip.className = "file-chip";
-    chip.innerHTML = `<span>${file.name}</span>`;
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = file.name;
+    chip.appendChild(nameSpan);
     const clearBtn = document.createElement("button");
     clearBtn.textContent = "remove";
-    clearBtn.onclick = () => { workbook = null; fileChip.innerHTML = ""; step2.style.display = "none"; step3.style.display = "none"; };
+    clearBtn.onclick = () => { workbook = null; lastResult = null; fileChip.innerHTML = ""; fileInput.value = ""; step2.style.display = "none"; step3.style.display = "none"; };
     chip.appendChild(clearBtn);
     fileChip.appendChild(chip);
 
-    sheetSelect.innerHTML = "";
-    workbook.SheetNames.forEach(name => {
-      const opt = document.createElement("option");
-      opt.value = name; opt.textContent = name;
-      if (name === "Product Data") opt.selected = true;
-      sheetSelect.appendChild(opt);
-    });
+    fillSheetSelect();
     step2.style.display = "";
     step3.style.display = "none";
     convertMsg.innerHTML = "";
+    driveSaveMsg.innerHTML = "";
   };
   reader.readAsArrayBuffer(file);
 }
 
+function showMsg(el, kind, text) {
+  el.innerHTML = "";
+  const div = document.createElement("div");
+  div.className = `msg ${kind}`;
+  div.textContent = text;
+  el.appendChild(div);
+}
+
 convertBtn.addEventListener("click", () => {
   convertMsg.innerHTML = "";
+  driveSaveMsg.innerHTML = "";
   if (!workbook) return;
-  const sheetName = sheetSelect.value;
-  const sheet = workbook.Sheets[sheetName];
+  const sheet = workbook.Sheets[sheetSelect.value];
   try {
-    const { records, certItems } = extractRecords(sheet);
-    const productKeys = new Set(records.map(r => r.slice(0, 4).join("\u0001")));
+    const result = mode().convert(sheet);
+    lastResult = result;
 
-    lastResult = { records, certItems };
-
-    document.getElementById("statProducts").textContent = productKeys.size;
-    document.getElementById("statCerts").textContent = certItems.length;
-    document.getElementById("statRows").textContent = records.length;
-
-    const certListBox = document.getElementById("certListBox");
-    certListBox.textContent = certItems.map((it, i) =>
-      `${i + 1}. [${it.buildingCert || "-"}] ${it.category || "-"} — ${(it.subCategory || "").toString().replace(/\n/g, " / ")}`
-    ).join("\n");
-
-    renderPreview(records);
+    result.stats.forEach((n, i) => { document.getElementById(`stat${i + 1}`).textContent = n; });
+    document.getElementById("certListBox").textContent = result.detailsText;
+    renderPreview(result.headers, result.rows);
 
     step3.style.display = "";
-    convertMsg.innerHTML = `<div class="msg ok">Converted successfully.</div>`;
+    if (result.warning) showMsg(convertMsg, "error", `Converted — แต่มีข้อควรระวัง: ${result.warning}`);
+    else showMsg(convertMsg, "ok", "Converted successfully.");
   } catch (err) {
+    lastResult = null;
     step3.style.display = "none";
-    convertMsg.innerHTML = `<div class="msg error">${err.message}</div>`;
+    showMsg(convertMsg, "error", err.message);
   }
 });
 
-function renderPreview(records) {
+function renderPreview(headers, rows) {
   const table = document.getElementById("previewTable");
   table.innerHTML = "";
   const thead = document.createElement("tr");
-  OUTPUT_HEADERS.forEach(h => {
+  headers.forEach(h => {
     const th = document.createElement("th");
-    th.textContent = h;
+    th.textContent = String(h).replace(/\n/g, " / ");
     thead.appendChild(th);
   });
   table.appendChild(thead);
-  records.slice(0, 20).forEach(rec => {
+  rows.slice(0, 20).forEach(rec => {
     const tr = document.createElement("tr");
-    rec.forEach(v => {
+    headers.forEach((_, i) => {
+      const v = rec[i];
       const td = document.createElement("td");
       td.textContent = v === null || v === undefined ? "" : String(v).replace(/\n/g, " / ");
       tr.appendChild(td);
@@ -490,8 +805,8 @@ function renderPreview(records) {
   });
 }
 
-function buildResultWorkbook() {
-  const wsData = [OUTPUT_HEADERS, ...lastResult.records];
+function buildMasterWorkbook(records) {
+  const wsData = [OUTPUT_HEADERS, ...records];
   const ws = XLSX.utils.aoa_to_sheet(wsData);
   ws["!cols"] = [
     { wch: 16 }, { wch: 10 }, { wch: 16 }, { wch: 40 }, { wch: 12 }, { wch: 12 },
@@ -505,22 +820,17 @@ function buildResultWorkbook() {
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (!lastResult) return;
-  XLSX.writeFile(buildResultWorkbook(), "Product-Certification-Map.xlsx");
+  XLSX.writeFile(lastResult.buildWorkbook(), mode().downloadName);
 });
 
 // ============================================================================
-// "Save ลง Google Drive" — อัปเดตไฟล์ Master.xlsx บน Google Drive โดยตรงผ่าน Drive API
+// "Save ลง Google Drive" — เขียนทับไฟล์ของโหมดที่เลือก (Master.xlsx / Linked Master.xlsx) บน Google Drive โดยตรง
 // ผู้ใช้ Sign in ด้วยบัญชี Google ของตัวเอง (OAuth Token Client ของ Google Identity Services)
-// ไม่ต้องกรอก/เก็บ Credential ใดๆ เองเลย — ต่างจาก GitHub PAT เดิมที่ต้องกรอก Token เอง
+// ต้องเป็นบัญชีที่มีสิทธิ์ Editor ของไฟล์ปลายทางเท่านั้น
 // ============================================================================
-const GOOGLE_OAUTH_CLIENT_ID = "356081706685-1t4c8mumsvnq5u3qbo6hm5g6ub4uj63r.apps.googleusercontent.com";
-const DRIVE_FILE_ID = "1kRJaUJiaA3NmBwj48IcKWhs4Fqs2I_hg";
-// ใช้ scope เต็ม (ไม่ใช่ drive.file) เพราะไฟล์นี้ถูกอัปโหลดขึ้น Drive มาก่อนแล้ว ไม่ได้ถูกสร้าง/เปิดผ่านแอปนี้
+// ใช้ scope เต็ม (ไม่ใช่ drive.file) เพราะไฟล์ปลายทางถูกอัปโหลดขึ้น Drive มาก่อนแล้ว ไม่ได้ถูกสร้าง/เปิดผ่านแอปนี้
 // (scope drive.file จะเข้าไฟล์นี้ไม่ได้ถ้าไม่ผ่าน Google Picker ให้ผู้ใช้เลือกไฟล์เองก่อน)
 const DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive";
-
-const driveSaveMsg = document.getElementById("driveSaveMsg");
-const saveDriveBtn = document.getElementById("saveDriveBtn");
 let driveTokenClient = null;
 
 function uint8ArrayFromBase64(base64) {
@@ -530,9 +840,9 @@ function uint8ArrayFromBase64(base64) {
   return bytes;
 }
 
-async function uploadResultToDrive(accessToken) {
-  const base64Content = XLSX.write(buildResultWorkbook(), { bookType: "xlsx", type: "base64" });
-  const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_FILE_ID}?uploadType=media`, {
+async function uploadResultToDrive(accessToken, fileId, wb) {
+  const base64Content = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+  const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
     method: "PATCH",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -548,8 +858,13 @@ async function uploadResultToDrive(accessToken) {
 
 saveDriveBtn.addEventListener("click", () => {
   if (!lastResult) return;
+  const m = mode();
+  if (!m.driveFileId) {
+    showMsg(driveSaveMsg, "error", `ยังไม่ได้ตั้งค่าไฟล์ ${m.driveFileName} บน Google Drive — ให้กด "Save ลงเครื่อง" แล้วอัปโหลดไฟล์ขึ้น Drive ตั้งแชร์ Anyone with the link: Viewer จากนั้นใส่ File ID ที่ LINKED_DRIVE_FILE_ID ในโค้ด (Convert/index.html และ index.html)`);
+    return;
+  }
   if (typeof google === "undefined") {
-    driveSaveMsg.innerHTML = '<div class="msg error">โหลด Google Sign-in ไม่สำเร็จ (เช็คการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่)</div>';
+    showMsg(driveSaveMsg, "error", "โหลด Google Sign-in ไม่สำเร็จ (เช็คการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่)");
     return;
   }
 
@@ -565,25 +880,29 @@ saveDriveBtn.addEventListener("click", () => {
     });
   }
 
+  // จับโหมด/ผลลัพธ์ ณ ตอนกดไว้ กันผู้ใช้สลับโหมดระหว่างรอ Sign in แล้วไฟล์ไปเขียนผิดที่
+  const fileId = m.driveFileId, fileName = m.driveFileName, result = lastResult;
   driveTokenClient.callback = async (resp) => {
     if (resp.error) {
-      driveSaveMsg.innerHTML = `<div class="msg error">Sign in ไม่สำเร็จ: ${resp.error}</div>`;
+      showMsg(driveSaveMsg, "error", `Sign in ไม่สำเร็จ: ${resp.error}`);
       saveDriveBtn.disabled = false;
-      saveDriveBtn.textContent = "Save ลง Google Drive";
+      saveDriveBtn.textContent = saveDriveLabel();
       return;
     }
     try {
-      await uploadResultToDrive(resp.access_token);
-      driveSaveMsg.innerHTML = '<div class="msg ok">อัปเดต Master.xlsx บน Google Drive สำเร็จแล้ว</div>';
+      await uploadResultToDrive(resp.access_token, fileId, result.buildWorkbook());
+      showMsg(driveSaveMsg, "ok", `อัปเดต ${fileName} บน Google Drive สำเร็จแล้ว`);
     } catch (err) {
-      driveSaveMsg.innerHTML = `<div class="msg error">${err.message}</div>`;
+      showMsg(driveSaveMsg, "error", err.message);
     } finally {
       saveDriveBtn.disabled = false;
-      saveDriveBtn.textContent = "Save ลง Google Drive";
+      saveDriveBtn.textContent = saveDriveLabel();
     }
   };
   driveTokenClient.requestAccessToken();
 });
+
+applyMode();
 </script>
 </body>
 </html>

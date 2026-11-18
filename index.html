@@ -330,6 +330,228 @@
             font-weight: bold;
         }
 
+        /* --- เมนูหลัก (ปุ่ม Burger มุมซ้ายบน) สลับหน้า Main / Document / Health Check / Setting --- */
+        /* ใช้ class ของตัวเองแทน "hidden" ของ Tailwind เพราะบาง element (เช่น .table-outer) ตั้ง display ไว้เองใน CSS นี้
+           ถ้าพึ่ง Tailwind อย่างเดียว ลำดับการโหลด style อาจทำให้ซ่อนไม่ติด */
+        .page-hidden { display: none !important; }
+        .nav-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+            background: none;
+            color: #15803d;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .nav-menu-btn:hover,
+        .nav-menu-btn[aria-expanded="true"] {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .nav-menu-panel {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            z-index: 60;
+            min-width: 210px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            padding: 6px;
+        }
+        .nav-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 8px 10px;
+            border: none;
+            border-radius: 6px;
+            background: none;
+            color: #374151;
+            font-size: 0.875rem;
+            text-align: left;
+            cursor: pointer;
+        }
+        .nav-menu-item svg { flex-shrink: 0; color: #6b7280; }
+        .nav-menu-item:hover { background-color: #f3f4f6; }
+        .nav-menu-item.active { background-color: #f0fdf4; color: #15803d; font-weight: 600; }
+        .nav-menu-item.active svg { color: #16a34a; }
+
+        /* --- หน้า Document (รายการเอกสารของสินค้า จาก Linked Master) --- */
+        .doc-page { flex-grow: 1; overflow: auto; background-color: #f9fafb; padding: 16px; }
+        .doc-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+        .doc-toolbar .doc-spacer { flex-grow: 1; }
+        .doc-input, .doc-select {
+            border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px;
+            font-size: 0.8rem; background: white; color: #111827;
+        }
+        .doc-input { width: 260px; max-width: 100%; }
+        .doc-input:focus, .doc-select:focus { outline: none; border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+        .doc-view-switch { display: inline-flex; border: 1px solid #d1d5db; border-radius: 9999px; overflow: hidden; background: white; }
+        .doc-view-switch button { padding: 6px 12px; font-size: 0.78rem; border: none; background: none; cursor: pointer; color: #4b5563; white-space: nowrap; }
+        .doc-view-switch button + button { border-left: 1px solid #e5e7eb; }
+        .doc-view-switch button:hover { background-color: #f3f4f6; }
+        .doc-view-switch button.active { background-color: #16a34a; color: white; }
+        .doc-source { font-size: 0.75rem; padding: 4px 10px; border-radius: 9999px; border: 1px solid; }
+        .doc-source.mock { background: #fffbeb; color: #92400e; border-color: #fcd34d; }
+        .doc-source.live { background: #f0fdf4; color: #166534; border-color: #86efac; }
+        .doc-source.local { background: #eff6ff; color: #1e40af; border-color: #93c5fd; }
+        .doc-focus { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; background: #fef3c7; color: #92400e; border-radius: 9999px; padding: 4px 6px 4px 12px; margin-bottom: 10px; }
+        .doc-focus button { border: none; background: rgba(0,0,0,0.06); border-radius: 9999px; width: 20px; height: 20px; cursor: pointer; color: inherit; }
+
+        .doc-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+        .doc-kpi { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 14px; }
+        .doc-kpi .n { font-size: 1.4rem; font-weight: 700; color: #111827; font-variant-numeric: tabular-nums; line-height: 1.2; }
+        .doc-kpi .l { font-size: 0.75rem; color: #6b7280; }
+        .doc-kpi.warn .n { color: #b45309; }
+        .doc-kpi.bad .n { color: #b91c1c; }
+
+        .doc-empty { text-align: center; color: #6b7280; font-size: 0.875rem; padding: 48px 16px; background: white; border: 1px dashed #d1d5db; border-radius: 10px; }
+
+        /* ไอเดีย 1: การ์ดสินค้า */
+        .doc-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+        .doc-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+        .doc-card-head { display: flex; gap: 8px; align-items: flex-start; }
+        .doc-bu { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; background: #f3f4f6; color: #374151; flex-shrink: 0; margin-top: 1px; }
+        .doc-card-title { font-size: 0.875rem; font-weight: 600; color: #111827; line-height: 1.35; }
+        .doc-card-sub { font-size: 0.72rem; color: #6b7280; margin-top: 2px; word-break: break-word; }
+        .doc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+        .doc-chip {
+            display: inline-flex; align-items: center; gap: 6px; max-width: 100%;
+            font-size: 0.72rem; padding: 3px 8px 3px 3px; border-radius: 6px;
+            border: 1px solid #e5e7eb; background: white; color: #1f2937; text-decoration: none;
+        }
+        a.doc-chip:hover { border-color: #16a34a; background: #f0fdf4; }
+        .doc-chip.no-url { cursor: default; color: #6b7280; }
+        .doc-chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 210px; }
+        .doc-type { font-weight: 700; font-size: 0.65rem; padding: 1px 6px; border-radius: 4px; color: white; flex-shrink: 0; }
+        .doc-status { font-size: 0.65rem; font-weight: 600; padding: 1px 7px; border-radius: 9999px; white-space: nowrap; }
+        .doc-status.expired { background: #fee2e2; color: #b91c1c; }
+        .doc-status.soon { background: #fef3c7; color: #92400e; }
+        .doc-status.ok { background: #dcfce7; color: #166534; }
+        .doc-status.none { background: #f3f4f6; color: #6b7280; }
+
+        /* ไอเดีย 2 และ 3: ตาราง — ต้อง override สไตล์ตารางหลักของหน้า Main (เส้นดำหนา, table-layout:fixed, nowrap ฯลฯ) */
+        .doc-table-wrap { background: white; border: 1px solid #e5e7eb; border-radius: 10px; overflow: auto; max-height: calc(100vh - 290px); }
+        table.doc-table { table-layout: auto; width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.78rem; }
+        .doc-table thead tr th, .doc-table tbody tr td {
+            border: none; border-bottom: 1px solid #f3f4f6; padding: 6px 10px;
+            text-align: left; white-space: normal; overflow: visible; vertical-align: middle;
+        }
+        .doc-table thead tr th {
+            position: sticky; top: 0; z-index: 2; background: #f9fafb; color: #374151;
+            font-weight: 600; border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+        }
+        .doc-table tbody tr { cursor: default; }
+        .doc-table a { color: #1d4ed8; text-decoration: none; word-break: break-all; }
+        .doc-table a:hover { text-decoration: underline; }
+        .doc-table .mono { font-family: ui-monospace, Consolas, monospace; font-size: 0.72rem; color: #4b5563; }
+        .doc-matrix thead tr th.mx-col { text-align: center; }
+        .doc-matrix tbody tr td.mx-cell { text-align: center; }
+        .doc-matrix .pcol { position: sticky; left: 0; background: white; z-index: 1; min-width: 260px; }
+        .doc-matrix thead tr th.pcol { z-index: 3; background: #f9fafb; }
+        .doc-matrix .cov { display: block; font-weight: 400; font-size: 0.68rem; color: #6b7280; }
+        .doc-mx {
+            display: inline-flex; align-items: center; justify-content: center; min-width: 30px;
+            padding: 2px 6px; border-radius: 6px; font-size: 0.72rem; font-weight: 700;
+            border: 1px solid transparent; cursor: pointer;
+        }
+        .doc-mx.ok { background: #dcfce7; color: #166534; }
+        .doc-mx.none { background: #e0f2fe; color: #075985; }
+        .doc-mx.soon { background: #fef3c7; color: #92400e; border-color: #fcd34d; }
+        .doc-mx.expired { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+        button.doc-mx:hover { filter: brightness(0.95); outline: 2px solid #16a34a; outline-offset: 1px; }
+        span.doc-mx { cursor: default; } /* ตัวอย่างสีในคำอธิบาย (legend) — ไม่ใช่ปุ่ม */
+        .doc-mx-empty { color: #d1d5db; }
+        .doc-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.72rem; color: #6b7280; margin-bottom: 8px; align-items: center; }
+
+        /* --- หน้า Health Check (ใช้ .doc-page/.doc-toolbar/.doc-table ร่วมกับหน้า Document) --- */
+        .hc-top { display: grid; grid-template-columns: 220px 1fr; gap: 12px; margin-bottom: 12px; }
+        @media (max-width: 900px) { .hc-top { grid-template-columns: 1fr; } }
+        .hc-score { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+        .hc-score .n { font-size: 2.6rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+        .hc-score .l { font-size: 0.75rem; color: #6b7280; text-align: center; }
+        .hc-good { color: #15803d; } .hc-mid { color: #b45309; } .hc-bad { color: #b91c1c; }
+        .hc-cats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+        .hc-cat { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+        .hc-cat:hover { border-color: #16a34a; }
+        .hc-cat.active { border-color: #16a34a; box-shadow: 0 0 0 2px rgba(22,163,74,0.25); }
+        .hc-cat.pending { cursor: default; background: #f9fafb; border-style: dashed; }
+        .hc-cat .t { font-size: 0.75rem; color: #374151; font-weight: 600; }
+        .hc-cat .n { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+        .hc-cat .s { font-size: 0.68rem; color: #6b7280; }
+        .hc-bar { height: 4px; border-radius: 9999px; background: #f3f4f6; margin-top: 6px; overflow: hidden; }
+        .hc-bar > i { display: block; height: 100%; border-radius: 9999px; }
+        .hc-rules { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .hc-rule { display: inline-flex; align-items: center; gap: 6px; font-size: 0.72rem; padding: 3px 10px; border-radius: 9999px; border: 1px solid #e5e7eb; background: white; cursor: pointer; color: #374151; }
+        .hc-rule:hover { border-color: #16a34a; }
+        .hc-rule.active { background: #f0fdf4; border-color: #16a34a; color: #15803d; font-weight: 600; }
+        .hc-rule b { font-variant-numeric: tabular-nums; }
+        .hc-sev { display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 700; padding: 1px 8px; border-radius: 9999px; white-space: nowrap; }
+        .hc-sev.high { background: #fee2e2; color: #b91c1c; }
+        .hc-sev.medium { background: #ffedd5; color: #c2410c; }
+        .hc-sev.low { background: #fef9c3; color: #854d0e; }
+        .hc-dot { width: 8px; height: 8px; border-radius: 9999px; display: inline-block; flex-shrink: 0; }
+        .hc-dot.high { background: #dc2626; } .hc-dot.medium { background: #ea580c; } .hc-dot.low { background: #ca8a04; }
+        .hc-section-title { font-size: 0.85rem; font-weight: 700; color: #111827; margin: 16px 0 8px; display: flex; align-items: center; gap: 8px; }
+        .hc-section-title .sub { font-weight: 400; color: #6b7280; font-size: 0.75rem; }
+        .hc-issue-row { cursor: pointer; }
+        .hc-issue-row:hover td { background: #f0fdf4; }
+        .hc-note { font-size: 0.75rem; color: #6b7280; margin-top: 6px; }
+        .hc-pending-box { background: white; border: 1px dashed #d1d5db; border-radius: 10px; padding: 10px 14px; font-size: 0.78rem; color: #4b5563; margin-top: 12px; }
+        .hc-needs { display: flex; flex-wrap: wrap; gap: 4px; }
+        .hc-need { display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; font-weight: 600; padding: 1px 6px 1px 2px; border-radius: 6px; border: 1px solid; text-decoration: none; white-space: nowrap; }
+        .hc-need.ok { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+        a.hc-need.ok:hover { border-color: #16a34a; }
+        .hc-need.exp { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+        .hc-need.miss { background: #fef2f2; color: #b91c1c; border: 1px dashed #f87171; }
+        .hc-need.miss .doc-type, .hc-need.exp .doc-type { opacity: 0.55; }
+        .hc-pending-box ul { margin: 4px 0 0 18px; list-style: disc; }
+
+        /* --- หน้า Setting --- */
+        .st-wrap { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+        .st-banner { font-size: 0.78rem; background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; border-radius: 10px; padding: 8px 12px; }
+        .st-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; }
+        .st-card h2 { font-size: 0.95rem; font-weight: 700; color: #111827; margin-bottom: 2px; }
+        .st-card .desc { font-size: 0.75rem; color: #6b7280; margin-bottom: 10px; }
+        .st-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+        .st-label { font-size: 0.75rem; font-weight: 600; color: #374151; display: block; margin-bottom: 4px; }
+        .st-parts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+        .st-part { display: inline-flex; align-items: center; gap: 4px; border: 1px solid #d1d5db; border-radius: 8px; padding: 3px 4px 3px 6px; background: #f9fafb; font-size: 0.75rem; }
+        .st-part select, .st-part input[type=text] { border: none; background: transparent; font-size: 0.78rem; padding: 2px; }
+        .st-part input[type=text] { width: 80px; border-bottom: 1px dashed #9ca3af; }
+        .st-part button { border: none; background: none; color: #9ca3af; cursor: pointer; padding: 0 4px; font-size: 0.85rem; }
+        .st-part button:hover { color: #dc2626; }
+        .st-sep { font-family: ui-monospace, Consolas, monospace; font-weight: 700; color: #6b7280; }
+        .st-pattern { font-family: ui-monospace, Consolas, monospace; font-size: 0.78rem; background: #f3f4f6; border-radius: 6px; padding: 6px 10px; margin-top: 8px; word-break: break-all; }
+        .st-test-result { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; font-size: 0.75rem; }
+        .st-chk { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; }
+        .st-chk.ok { background: #dcfce7; color: #166534; }
+        .st-chk.bad { background: #fee2e2; color: #b91c1c; }
+        .st-livebar { display: flex; align-items: center; gap: 10px; margin-top: 10px; font-size: 0.78rem; color: #374151; flex-wrap: wrap; }
+        .st-livebar .hc-bar { flex: 1; min-width: 120px; height: 8px; margin: 0; }
+        .st-table { width: 100%; font-size: 0.78rem; border-collapse: collapse; }
+        .st-table th { text-align: left; font-weight: 600; color: #374151; background: #f9fafb; padding: 5px 8px; border-bottom: 1px solid #e5e7eb; white-space: nowrap; }
+        .st-table td { padding: 4px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+        .st-table td.num { text-align: right; font-variant-numeric: tabular-nums; color: #4b5563; }
+        .st-table tr.st-new td { background: #fffbeb; }
+        .st-table tr.st-missing td { color: #9ca3af; }
+        .st-tag { font-size: 0.62rem; font-weight: 700; padding: 1px 6px; border-radius: 9999px; margin-left: 4px; }
+        .st-tag.new { background: #fef3c7; color: #92400e; }
+        .st-tag.missing { background: #f3f4f6; color: #6b7280; }
+        .st-scroll { max-height: 280px; overflow: auto; border: 1px solid #f3f4f6; border-radius: 8px; }
+        .st-actions { position: sticky; bottom: 0; background: rgba(249,250,251,0.95); padding: 10px 0; display: flex; gap: 8px; justify-content: flex-end; align-items: center; flex-wrap: wrap; border-top: 1px solid #e5e7eb; }
+        .st-dirty { font-size: 0.75rem; color: #b45309; margin-right: auto; }
+        .st-textarea { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 0.78rem; font-family: ui-monospace, Consolas, monospace; min-height: 64px; }
+        .st-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: #374151; }
+        .st-num { width: 80px; }
+
         /* Scrollbar */
         ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; border-top: 1px solid #ccc;}
@@ -461,15 +683,39 @@
             <!-- แถวที่ 1: ค้นหาและตัวกรองหลัก -->
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-4 flex-wrap">
-                    <h1 class="text-xl font-bold text-green-700 hidden md:block">Green Products</h1>
-                    
-                    <div class="relative">
+                    <!-- เมนูหลัก: ปุ่ม Burger + ชื่อหน้าปัจจุบัน (ชื่อเปลี่ยนตามหน้าที่เลือก ดู NAV_PAGES ใน <script>) -->
+                    <div class="relative flex items-center gap-2" id="nav-menu">
+                        <button type="button" id="nav-menu-btn" class="nav-menu-btn" title="เมนู" aria-haspopup="true" aria-expanded="false" aria-controls="nav-menu-panel">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                        </button>
+                        <div id="nav-menu-panel" class="nav-menu-panel page-hidden" role="menu">
+                            <button type="button" class="nav-menu-item active" data-page="main" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                                Main
+                            </button>
+                            <button type="button" class="nav-menu-item" data-page="document" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/></svg>
+                                Document
+                            </button>
+                            <button type="button" class="nav-menu-item" data-page="health" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>
+                                Health Check
+                            </button>
+                            <button type="button" class="nav-menu-item" data-page="setting" role="menuitem">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                                Setting
+                            </button>
+                        </div>
+                        <h1 id="page-title" class="text-xl font-bold text-green-700 hidden md:block">Green Products</h1>
+                    </div>
+
+                    <div class="relative main-only">
                         <input type="text" id="search" placeholder="ค้นหาชื่อสินค้า..." class="border border-gray-300 rounded px-3 py-1.5 text-sm w-48 lg:w-64 focus:outline-none focus:border-green-500 shadow-sm">
                     </div>
 
                     <!-- ตัวกรอง BU และ Product Group แบบเลือกได้หลายค่า (Multi-select) -->
                     <!-- โครงสร้าง: ปุ่มแสดงสรุปตัวเลือกปัจจุบัน + Panel รายการ Checkbox ที่กดเปิด/ปิดได้ -->
-                    <div class="ms-filter relative" id="ms-filter-bu">
+                    <div class="ms-filter relative main-only" id="ms-filter-bu">
                         <button type="button" id="ms-filter-bu-btn" class="border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none shadow-sm flex items-center gap-1">
                             <span id="ms-filter-bu-label">ทุก BU</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -477,7 +723,7 @@
                         <div id="ms-filter-bu-panel" class="ms-filter-panel hidden"></div>
                     </div>
 
-                    <div class="ms-filter relative" id="ms-filter-group">
+                    <div class="ms-filter relative main-only" id="ms-filter-group">
                         <button type="button" id="ms-filter-group-btn" class="border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none shadow-sm flex items-center gap-1">
                             <span id="ms-filter-group-label">ทุก Product Group</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -485,32 +731,32 @@
                         <div id="ms-filter-group-panel" class="ms-filter-panel hidden"></div>
                     </div>
 
-                    <button id="btn-clear" class="btn-pill btn-pill-gray">
+                    <button id="btn-clear" class="btn-pill btn-pill-gray main-only">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                         ล้างตัวกรอง
                     </button>
 
                     <!-- ปุ่มรีเซ็ตขนาดคอลัมน์/แถวที่ผู้ใช้ลากปรับเอง กลับเป็นค่า Default -->
-                    <button id="btn-reset-resize" class="btn-pill btn-pill-blue" title="รีเซ็ตความกว้างคอลัมน์และความสูงแถวที่เคยลากปรับไว้ กลับเป็นค่าเริ่มต้น">
+                    <button id="btn-reset-resize" class="btn-pill btn-pill-blue main-only"title="รีเซ็ตความกว้างคอลัมน์และความสูงแถวที่เคยลากปรับไว้ กลับเป็นค่าเริ่มต้น">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
                         รีเซ็ตขนาด Col./Row
                     </button>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span class="text-sm text-gray-600">พบ <span id="count" class="font-bold text-black text-lg">0</span> รายการ</span>
-                    <span class="text-sm text-gray-600">เลือกไว้ <span id="selected-count" class="font-bold text-orange-600 text-lg">0</span> แถว</span>
-                    <button id="btn-clear-highlight" class="btn-pill btn-pill-orange">
+                    <span class="text-sm text-gray-600 main-only">พบ <span id="count" class="font-bold text-black text-lg">0</span> รายการ</span>
+                    <span class="text-sm text-gray-600 main-only">เลือกไว้ <span id="selected-count" class="font-bold text-orange-600 text-lg">0</span> แถว</span>
+                    <button id="btn-clear-highlight" class="btn-pill btn-pill-orange main-only">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
                         ล้าง Highlight
                     </button>
                     <!-- เพิ่มปุ่ม Export Excel -->
-                    <button id="btn-export" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors shadow-sm flex items-center gap-1">
+                    <button id="btn-export" class="main-only bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm transition-colors shadow-sm flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                         Export
                     </button>
                     <!-- ดึงไฟล์ Master.xlsx จาก Google Drive มาโหลดใหม่ (เผื่อไฟล์มีการอัปเดตระหว่างที่เปิดหน้านี้ค้างไว้) -->
-                    <button id="btn-refresh-master" class="btn-pill btn-pill-blue" title="โหลดไฟล์ Master.xlsx ล่าสุดจาก Google Drive ใหม่อีกครั้ง">
+                    <button id="btn-refresh-master" class="btn-pill btn-pill-blue main-only"title="โหลดไฟล์ Master.xlsx ล่าสุดจาก Google Drive ใหม่อีกครั้ง">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
                         รีเฟรชข้อมูล
                     </button>
@@ -523,7 +769,7 @@
             </div>
             
             <!-- แถวที่ 2: ตัวเลือกซ่อน/แสดงคอลัมน์ใบรับรอง (เพื่อลดความกว้างตาราง) -->
-            <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
+            <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200 main-only">
                 <span class="text-xs font-bold text-gray-700">แสดงใบรับรอง:</span>
                 <div id="cert-toggles" class="flex flex-wrap gap-3">
                     <!-- Checkbox จะถูกสร้างจาก JS -->
@@ -542,7 +788,69 @@
             (ดูฟังก์ชัน buildHeader/setColWidth ใน <script>) เพื่อให้คอลัมน์ตรงกันเป๊ะเวลาเลื่อนแนวนอน
             ซึ่ง Sync กันผ่าน Event scroll (เลื่อน body ซ้าย-ขวา แล้ว header-scroll เลื่อนตามอัตโนมัติ)
         -->
-        <div class="table-outer" id="table-outer">
+        <!-- หน้าเปล่าสำหรับเมนู Document / Health Check / Setting (ยังไม่มีเนื้อหา — แสดงแทนตารางเมื่อไม่ได้อยู่หน้า Main) -->
+        <div id="placeholder-page" class="page-hidden" style="flex-grow: 1; background-color: white;"></div>
+
+        <!-- หน้า Document: รายการเอกสารของสินค้าจากไฟล์ Linked Master (Mock 3 ไอเดียการแสดงผล — สลับได้ที่ปุ่มด้านบน) -->
+        <div id="document-page" class="page-hidden doc-page">
+            <div class="doc-toolbar">
+                <span id="doc-source" class="doc-source mock">ข้อมูลตัวอย่าง (Mock)</span>
+                <input type="text" id="doc-search" class="doc-input" placeholder="ค้นหาสินค้า / SKU / ชื่อเอกสาร...">
+                <select id="doc-filter-bu" class="doc-select" aria-label="กรอง BU"></select>
+                <select id="doc-filter-type" class="doc-select" aria-label="กรองประเภทเอกสาร"></select>
+                <div class="doc-spacer"></div>
+                <div class="doc-view-switch" role="tablist" aria-label="รูปแบบการแสดงผล">
+                    <button type="button" role="tab" data-doc-view="cards" class="active">การ์ดสินค้า</button>
+                    <button type="button" role="tab" data-doc-view="matrix">Matrix ความครบถ้วน</button>
+                    <button type="button" role="tab" data-doc-view="list">รายการ + วันหมดอายุ</button>
+                </div>
+                <button type="button" id="doc-load-local" class="btn-pill btn-pill-gray" title="เปิดไฟล์ Linked Master / Product Mapping จากเครื่องเพื่อดูตัวอย่างกับข้อมูลจริง (อ่านในเบราว์เซอร์เท่านั้น ไม่ได้อัปโหลดไปไหน)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    เปิดไฟล์จากเครื่อง
+                </button>
+                <input type="file" id="doc-file-input" accept=".xlsx,.xls" class="hidden">
+                <button type="button" id="doc-refresh" class="btn-pill btn-pill-blue" title="โหลด Linked Master ล่าสุดจาก Google Drive ใหม่">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                    รีเฟรช
+                </button>
+            </div>
+            <div id="doc-kpis" class="doc-kpis"></div>
+            <div id="doc-focus"></div>
+            <div id="doc-view"></div>
+        </div>
+
+        <!-- หน้า Health Check: ตรวจคุณภาพข้อมูลเอกสาร (จาก Link Master ชุดเดียวกับหน้า Document) ตามกฎที่ตั้งในหน้า Setting -->
+        <div id="health-page" class="page-hidden doc-page">
+            <div class="doc-toolbar">
+                <span id="hc-source" class="doc-source mock">กำลังโหลด...</span>
+                <input type="text" id="hc-search" class="doc-input" placeholder="ค้นหาสินค้า / เอกสาร / รายละเอียด...">
+                <select id="hc-filter-sev" class="doc-select" aria-label="กรองความรุนแรง">
+                    <option value="">ทุกความรุนแรง</option>
+                    <option value="high">สูง</option>
+                    <option value="medium">กลาง</option>
+                    <option value="low">ต่ำ</option>
+                </select>
+                <select id="hc-filter-cat" class="doc-select" aria-label="กรองหมวด"></select>
+                <select id="hc-filter-bu" class="doc-select" aria-label="กรอง BU"></select>
+                <div class="doc-spacer"></div>
+                <button type="button" id="hc-export" class="btn-pill btn-pill-gray" title="ส่งออกรายการปัญหา (ตามตัวกรองปัจจุบัน) + สรุปตาม BU เป็นไฟล์ Excel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    Export รายการปัญหา
+                </button>
+                <button type="button" id="hc-refresh" class="btn-pill btn-pill-blue" title="โหลด Link Master ล่าสุดจาก Google Drive แล้วตรวจใหม่">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                    ตรวจใหม่
+                </button>
+            </div>
+            <div id="hc-body"></div>
+        </div>
+
+        <!-- หน้า Setting: กติกาการตรวจข้อมูล (ชุดเดียวทั้งระบบ) + โครงสร้างตารางผู้ใช้งาน -->
+        <div id="setting-page" class="page-hidden doc-page">
+            <div id="st-body" class="st-wrap"></div>
+        </div>
+
+        <div class="table-outer main-only" id="table-outer">
             <div class="header-scroll" id="header-scroll">
                 <table id="header-table">
                     <colgroup id="header-colgroup"></colgroup>
@@ -581,6 +889,10 @@
         // ถ้าเคย Login ค้าง session ไว้) ไม่งั้นจะชน Temporal Dead Zone ของ const พังตั้งแต่โหลดหน้าแรก
         const GOOGLE_API_KEY = 'AIzaSyA40JDSQZfoaMOmHLfw_SxHdt0aXQX9T7k';
         const DRIVE_FILE_ID = '1kRJaUJiaA3NmBwj48IcKWhs4Fqs2I_hg';
+        // File ID ของไฟล์ Linked Master บน Google Drive ("Link Master.xlsx" — แชร์ Anyone with the link: Viewer)
+        // อัปเดตไฟล์ได้จากหน้า Convert โหมด Linked Master — ถ้าเปลี่ยนไฟล์ ต้องแก้ค่าเดียวกันที่ Convert/index.html ด้วย
+        // ถ้าตั้งเป็น '' หน้า Document จะแสดงข้อมูลตัวอย่าง (Mock) แทน
+        const LINKED_DRIVE_FILE_ID = '1uPABIAxwXlKCWoCCqLmUUvLCe897_rj8';
 
         const GREEN_ATTRS = [
             { id: 'Low Corbon Emission', label: 'Low\nCarbon\nEmission' }, // สะกดตามไฟล์ต้นฉบับ
@@ -1634,6 +1946,7 @@
         // เปิด/ปิด Panel ตัวกรอง (ปิด Panel อื่นก่อนเสมอ กันเปิดซ้อนกันหลายอัน)
         function toggleMsFilterPanel(panelEl) {
             const isHidden = panelEl.classList.contains('hidden');
+            setNavMenuOpen(false); // ปิดเมนู Burger ด้วย กันเปิดซ้อนกัน
             document.querySelectorAll('.ms-filter-panel').forEach(p => p.classList.add('hidden'));
             if (isHidden) panelEl.classList.remove('hidden');
         }
@@ -1647,6 +1960,1619 @@
             if (!e.target.closest('.ms-filter')) {
                 document.querySelectorAll('.ms-filter-panel').forEach(p => p.classList.add('hidden'));
             }
+        });
+
+        // --- เมนูหลัก (ปุ่ม Burger): สลับหน้า Main / Document / Health Check / Setting ---
+        // หน้า Main = Dashboard ข้อมูลจาก Google Drive เดิม ส่วนหน้าอื่นยังเป็นหน้าเปล่า (placeholder-page)
+        // การสลับหน้าแค่ซ่อน/แสดง element ที่มี class "main-only" ไม่ได้ลบข้อมูล/ตัวกรอง/Highlight ที่ทำค้างไว้
+        const NAV_PAGES = {
+            main: 'Green Products',
+            document: 'Green Document',
+            health: 'Health Check',
+            setting: 'Setting'
+        };
+        const elNavMenuBtn = document.getElementById('nav-menu-btn');
+        const elNavMenuPanel = document.getElementById('nav-menu-panel');
+        const elPageTitle = document.getElementById('page-title');
+        const elPlaceholderPage = document.getElementById('placeholder-page');
+
+        function setNavMenuOpen(open) {
+            elNavMenuPanel.classList.toggle('page-hidden', !open);
+            elNavMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        }
+
+        function showPage(page) {
+            if (!NAV_PAGES[page]) return;
+            const isMain = page === 'main';
+            elPageTitle.textContent = NAV_PAGES[page];
+            document.querySelectorAll('.main-only').forEach(el => el.classList.toggle('page-hidden', !isMain));
+            // ทุกเมนูมีหน้าของตัวเองแล้ว — placeholder-page เก็บไว้สำหรับเมนูใหม่ในอนาคตที่ยังไม่มีหน้า
+            const pageEls = { document: elDocPage, health: elHealthPage, setting: elSettingPage };
+            Object.entries(pageEls).forEach(([key, el]) => el.classList.toggle('page-hidden', page !== key));
+            elPlaceholderPage.classList.toggle('page-hidden', isMain || !!pageEls[page]);
+            if (page === 'document') ensureDocumentData(false);
+            if (page === 'health') ensureHealthData(false);
+            if (page === 'setting') openSettingPage();
+            elNavMenuPanel.querySelectorAll('.nav-menu-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+            setNavMenuOpen(false);
+            if (isMain) {
+                // ตารางเพิ่งกลับมาแสดง ต้องวัด scrollbar/ตำแหน่ง Sticky ใหม่ (ตอนซ่อนอยู่วัดได้เป็น 0)
+                setStickyColumns();
+                syncHeaderScrollGutter();
+            }
+        }
+
+        elNavMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.ms-filter-panel').forEach(p => p.classList.add('hidden'));
+            setNavMenuOpen(elNavMenuPanel.classList.contains('page-hidden'));
+        });
+        elNavMenuPanel.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const item = e.target.closest('.nav-menu-item');
+            if (item) showPage(item.dataset.page);
+        });
+        document.addEventListener('click', () => setNavMenuOpen(false));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') setNavMenuOpen(false);
+        });
+
+        // ============================================================================
+        // SETTING — กติกาการตรวจข้อมูล (ชุดเดียวทั้งระบบ) ใช้ร่วมกันโดยหน้า Document / Health Check / Setting
+        // ตอนนี้ (Mock) เก็บค่าที่บันทึกไว้ใน localStorage ของเบราว์เซอร์นี้เท่านั้น
+        // แผนต่อไป: เก็บเป็นไฟล์ settings.json บน Google Drive (อ่านด้วย API Key แบบเดียวกับ Master / เขียนด้วย Sign-in แบบหน้า Convert)
+        // โครงสร้างค่า = DEFAULT_SETTINGS ด้านล่าง (ปุ่ม "ส่งออก settings.json" ในหน้า Setting ได้ไฟล์หน้าตานี้)
+        // ============================================================================
+        const SETTINGS_STORAGE_KEY = 'greencat_settings_v1';
+        const HC_SEVERITY_LABEL = { high: 'สูง', medium: 'กลาง', low: 'ต่ำ' };
+        const HC_SEVERITY_RANK = { high: 0, medium: 1, low: 2 };
+        const HC_SEVERITY_WEIGHT = { high: 1, medium: 0.6, low: 0.25 }; // ใช้หักคะแนน: ปัญหาระดับต่ำหักน้อยกว่า
+
+        // หมวดการตรวจ — pending = ยังทำไม่ได้ (รอข้อมูล/รอตกลงกติกา) แสดงเป็นการ์ดเส้นประในหน้า Health Check
+        const HC_CATEGORIES = [
+            { id: 'completeness', label: 'ความครบถ้วน' },
+            { id: 'expiry', label: 'วันหมดอายุ' },
+            { id: 'format', label: 'รูปแบบข้อมูล' },
+            { id: 'links', label: 'ลิงก์' },
+            { id: 'freshness', label: 'ความสดของข้อมูล' },
+            { id: 'consistency', label: 'ความสอดคล้องระหว่างไฟล์', pending: 'รอตกลงรหัสจับคู่สินค้า Main ↔ Document (เช่น Green Cat. Code)' },
+            { id: 'evidence', label: 'หลักฐานรองรับ', pending: 'ต้องจับคู่สินค้าได้ก่อน แล้วจึงเทียบ Credit/คุณสมบัติในหน้า Main กับเอกสาร' }
+        ];
+
+        // กฎการตรวจทั้งหมด — sev = ระดับความรุนแรงเริ่มต้น (เปลี่ยน/ปิดได้ในหน้า Setting)
+        const HC_RULES = {
+            doc_missing:     { cat: 'completeness', sev: 'high', label: 'ขาดเอกสารบังคับ', fix: 'จัดทำ/อัปโหลดเอกสาร แล้วเพิ่มแถวในไฟล์ Directory (ประเภทที่บังคับตั้งในหน้า Setting)' },
+            req_type:        { cat: 'completeness', sev: 'medium', label: 'ไม่ระบุประเภทเอกสาร', fix: 'กรอกคอลัมน์ ประเภทเอกสาร* ในไฟล์ Directory' },
+            req_bu:          { cat: 'completeness', sev: 'medium', label: 'ไม่ระบุ BU', fix: 'กรอกคอลัมน์ BUs*' },
+            req_name_th:     { cat: 'completeness', sev: 'low',    label: 'ไม่มีชื่อสินค้า [TH] (คอลัมน์บังคับ *)', fix: 'กรอกคอลัมน์ [TH] Product Name/ Display Name*' },
+            exp_expired:     { cat: 'expiry', sev: 'high',   label: 'เอกสารหมดอายุแล้ว', fix: 'ต่ออายุเอกสาร แล้วอัปโหลดไฟล์ใหม่ + แก้ชื่อไฟล์/ลิงก์' },
+            exp_soon:        { cat: 'expiry', sev: 'medium', label: 'เอกสารใกล้หมดอายุ', fix: 'เริ่มกระบวนการต่ออายุเอกสาร' },
+            exp_missing:     { cat: 'expiry', sev: 'medium', label: 'ไม่ระบุวันหมดอายุ (ประเภทที่ต้องมี)', fix: 'เติม _ExpYYYYMMDD ท้ายชื่อไฟล์' },
+            fmt_pattern:     { cat: 'format', sev: 'low',    label: 'ชื่อไฟล์ไม่ตรงรูปแบบ', fix: 'เปลี่ยนชื่อไฟล์ให้ตรงรูปแบบที่ตั้งในหน้า Setting' },
+            fmt_prefix_type: { cat: 'format', sev: 'medium', label: 'ประเภทในชื่อไฟล์ ≠ คอลัมน์ประเภทเอกสาร', fix: 'ตรวจว่าใส่ไฟล์ถูกประเภทหรือไม่ แล้วแก้ชื่อไฟล์หรือคอลัมน์ประเภท' },
+            fmt_bu_mismatch: { cat: 'format', sev: 'low',    label: 'BU ในชื่อไฟล์ ≠ คอลัมน์ BU', fix: 'ตรวจว่าเป็นเอกสารของ BU ไหน แล้วแก้ให้ตรงกัน' },
+            fmt_link_is_url: { cat: 'format', sev: 'low',    label: 'ช่อง Link ใส่ URL แทนชื่อไฟล์', fix: 'ใส่ชื่อไฟล์ในช่อง Link แล้วผูก Hyperlink แทน' },
+            fmt_multi:       { cat: 'format', sev: 'medium', label: 'หลายไฟล์ในช่องเดียว', fix: 'แยกเป็น 1 แถวต่อ 1 ไฟล์' },
+            fmt_spaces:      { cat: 'format', sev: 'low',    label: 'มีวรรคเกินหัว/ท้ายข้อความ', fix: 'ลบช่องว่างหน้า/หลังข้อความ' },
+            fmt_unknown_type:{ cat: 'format', sev: 'medium', label: 'ประเภทเอกสารไม่อยู่ในรายการที่อนุญาต', fix: 'แก้เป็นค่าที่อนุญาต หรือเพิ่มค่าในหน้า Setting' },
+            fmt_unknown_bu:  { cat: 'format', sev: 'medium', label: 'BU ไม่อยู่ในรายการที่อนุญาต', fix: 'แก้เป็นค่าที่อนุญาต หรือเพิ่มค่าในหน้า Setting' },
+            link_missing:    { cat: 'links', sev: 'medium', label: 'ไม่มีลิงก์ URL', fix: 'ใส่ Hyperlink ที่ช่อง Link' },
+            link_email:      { cat: 'links', sev: 'medium', label: 'ลิงก์ผูกกับบุคคล (มี email=)', fix: 'สร้างลิงก์แชร์ใหม่แบบไม่ระบุบุคคล' },
+            link_unofficial: { cat: 'links', sev: 'low',    label: 'ลิงก์ไม่ได้อยู่ใน Site ทางการ', fix: 'ย้ายไฟล์ไป Site ทางการ แล้วอัปเดตลิงก์' },
+            link_dup:        { cat: 'links', sev: 'low',    label: 'สินค้าเดียวกันใส่ลิงก์ซ้ำ', fix: 'ลบแถวที่ซ้ำ' },
+            fresh_stale:     { cat: 'freshness', sev: 'medium', label: 'ไฟล์ไม่ได้อัปเดตนานเกินกำหนด', fix: 'อัปเดตไฟล์ต้นทางแล้วแปลงผ่านหน้า Convert ใหม่' }
+        };
+
+        // ส่วนประกอบของชื่อไฟล์ที่เลือกได้ในตัวประกอบรูปแบบ (หน้า Setting)
+        const FILENAME_PART_DEFS = {
+            type:    { label: 'ประเภท', example: 'EPD' },
+            bu:      { label: 'BU', example: 'CGS' },
+            product: { label: 'ชื่อสินค้า', example: 'ชื่อสินค้า' },
+            exp:     { label: 'Exp+วันที่', example: 'Exp20291231' },
+            text:    { label: 'ข้อความคงที่', example: '' }
+        };
+
+        const DEFAULT_SETTINGS = {
+            version: 1,
+            fileName: {
+                parts: [{ key: 'type' }, { key: 'bu' }, { key: 'product' }, { key: 'exp', optional: true }],
+                separator: '_',
+                extensions: ['pdf'],
+                regex: '' // โหมดขั้นสูง: ถ้าใส่ จะใช้ Regex นี้แทนตัวประกอบด้านบน (ใช้ชื่อกลุ่ม type/bu/product/exp/ext ได้)
+            },
+            allowed: {
+                types: ['CFP', 'EPD', 'GrCh', 'Asb', 'CFR', 'SRI', 'Ther', 'VOC', 'Acous'],
+                bus: ['CW', 'CGS', 'LS', 'SFG', 'ROOF', 'QCON', 'SCI'],
+                // คำนำหน้าชื่อไฟล์ → ประเภทเอกสาร (เช่นไฟล์ GreenChoice_... = ประเภท GrCh)
+                prefixMap: { CFP: 'CFP', EPD: 'EPD', GreenChoice: 'GrCh', Asb: 'Asb', CFR: 'CFR', SRI: 'SRI', Ther: 'Ther', VOC: 'VOC', Acous: 'Acous' }
+            },
+            expiry: { soonDays: 180, requiredFor: ['EPD', 'CFP'] },
+            links: { officialSites: ['CBM_CPAC_Products_Documentation'], forbidEmailParam: true },
+            freshness: { maxDays: 30 },
+            // เอกสารบังคับต่อ BU — ค่าเริ่มต้น = ประเภทที่สินค้าเกินครึ่งหนึ่งของ BU นั้นมีอยู่แล้ว (Link Master 17 พ.ย. 2026)
+            completeness: {
+                requiredDocs: {
+                    CGS: ['CFP', 'EPD'], LS: ['CFP'], SFG: ['Asb', 'EPD', 'GrCh'], CW: ['EPD', 'CFP'],
+                    ROOF: ['CFP', 'GrCh'], QCON: ['CFP', 'GrCh', 'CFR'], SCI: ['VOC']
+                },
+                expiredCountsAsMissing: true // มีเอกสารแต่หมดอายุทั้งหมด = นับว่ายังขาด
+            },
+            rules: Object.fromEntries(Object.entries(HC_RULES).map(([id, r]) => [id, { on: true, sev: r.sev }]))
+        };
+
+        function cloneSettings(s) { return JSON.parse(JSON.stringify(s)); }
+
+        // รวมค่าที่บันทึกไว้กับค่าเริ่มต้น (กันกรณีเพิ่มกฎใหม่ในโค้ดแล้วค่าที่บันทึกไว้ไม่มี)
+        function normalizeSettings(saved) {
+            const d = cloneSettings(DEFAULT_SETTINGS);
+            if (!saved || typeof saved !== 'object') return d;
+            const pick = (obj, def) => (obj && typeof obj === 'object' && !Array.isArray(obj)) ? { ...def, ...obj } : def;
+            const s = {
+                version: 1,
+                fileName: pick(saved.fileName, d.fileName),
+                allowed: pick(saved.allowed, d.allowed),
+                expiry: pick(saved.expiry, d.expiry),
+                links: pick(saved.links, d.links),
+                freshness: pick(saved.freshness, d.freshness),
+                completeness: pick(saved.completeness, d.completeness),
+                rules: d.rules
+            };
+            Object.keys(d.rules).forEach(id => {
+                const r = saved.rules && saved.rules[id];
+                if (r) s.rules[id] = { on: r.on !== false, sev: HC_SEVERITY_LABEL[r.sev] ? r.sev : d.rules[id].sev };
+            });
+            if (!Array.isArray(s.fileName.parts) || !s.fileName.parts.length) s.fileName.parts = d.fileName.parts;
+            return s;
+        }
+
+        function loadSavedSettings() {
+            try { return normalizeSettings(JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) || 'null')); }
+            catch (e) { return cloneSettings(DEFAULT_SETTINGS); }
+        }
+
+        let appSettings = loadSavedSettings();
+
+        function escRegex(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+        // แปลงรูปแบบชื่อไฟล์เป็น Regex — ส่วนที่ "ไม่บังคับ" จะครอบรวมตัวคั่นด้านหน้าไว้ด้วย
+        function buildFileNameRegex(fn) {
+            if (fn.regex && fn.regex.trim()) {
+                try { return { re: new RegExp(fn.regex.trim(), 'i') }; }
+                catch (e) { return { re: null, error: `Regex ไม่ถูกต้อง: ${e.message}` }; }
+            }
+            const sep = escRegex(fn.separator || '');
+            const used = new Set();
+            let src = '^';
+            fn.parts.forEach((p, i) => {
+                let g;
+                if (p.key === 'text') g = escRegex(p.text || '');
+                else if (used.has(p.key)) return; // ห้ามมีส่วนเดียวกันซ้ำ (ชื่อกลุ่มใน Regex ชนกัน)
+                else if (p.key === 'exp') g = 'Exp(?<exp>\\d{8})';
+                else g = `(?<${p.key}>.+?)`;
+                if (p.key !== 'text') used.add(p.key);
+                const piece = (i > 0 ? sep : '') + g;
+                src += p.optional ? `(?:${piece})?` : piece;
+            });
+            src += '\\.(?<ext>[A-Za-z0-9]+)$';
+            return { re: new RegExp(src, 'i') };
+        }
+
+        // ข้อความแสดงรูปแบบ เช่น {ประเภท}_{BU}_{ชื่อสินค้า}[_Exp{YYYYMMDD}].pdf
+        function describeFileNamePattern(fn) {
+            if (fn.regex && fn.regex.trim()) return `Regex: ${fn.regex.trim()}`;
+            const sep = fn.separator || '';
+            const body = fn.parts.map((p, i) => {
+                const label = p.key === 'text' ? (p.text || '') : p.key === 'exp' ? 'Exp{YYYYMMDD}' : `{${FILENAME_PART_DEFS[p.key].label}}`;
+                const piece = (i > 0 ? sep : '') + label;
+                return p.optional ? `[${piece}]` : piece;
+            }).join('');
+            return `${body}.${(fn.extensions || []).join('|') || '*'}`;
+        }
+
+        function exampleFileName(s) {
+            const fn = s.fileName;
+            if (fn.regex && fn.regex.trim()) return '';
+            return fn.parts.map(p => p.key === 'text' ? (p.text || '') : p.key === 'type'
+                ? (Object.keys(s.allowed.prefixMap)[0] || 'EPD') : p.key === 'bu' ? (s.allowed.bus[0] || 'CGS') : FILENAME_PART_DEFS[p.key].example
+            ).join(fn.separator || '') + '.' + ((fn.extensions || [])[0] || 'pdf');
+        }
+
+        const ciIncludes = (list, v) => list.some(x => String(x).toLowerCase() === String(v).toLowerCase());
+        function prefixToType(s, prefix) {
+            const k = Object.keys(s.allowed.prefixMap).find(p => p.toLowerCase() === String(prefix).toLowerCase());
+            return k ? s.allowed.prefixMap[k] : null;
+        }
+
+        // ตรวจชื่อไฟล์ 1 ชื่อ — คืนผลแยกทีละส่วน (ใช้ทั้งช่องทดสอบในหน้า Setting และหน้า Health Check)
+        function checkFileName(name, s, compiled) {
+            const { re, error } = compiled || buildFileNameRegex(s.fileName);
+            const res = { ok: false, matched: false, parts: {}, checks: [] };
+            if (!re) { res.checks.push({ label: 'รูปแบบ', ok: false, msg: error }); return res; }
+            const m = re.exec(String(name || '').trim());
+            if (!m) {
+                res.checks.push({ label: 'โครงสร้าง', ok: false, msg: `ไม่ตรงรูปแบบ ${describeFileNamePattern(s.fileName)}` });
+                return res;
+            }
+            res.matched = true;
+            const g = m.groups || {};
+            res.parts = g;
+            if (g.type !== undefined) {
+                const t = prefixToType(s, g.type);
+                res.checks.push(t
+                    ? { label: 'ประเภท', ok: true, msg: g.type === t ? g.type : `${g.type} → ${t}` }
+                    : { label: 'ประเภท', ok: false, msg: `"${g.type}" ไม่อยู่ในรายการคำนำหน้า` });
+            }
+            if (g.bu !== undefined) {
+                res.checks.push(ciIncludes(s.allowed.bus, g.bu)
+                    ? { label: 'BU', ok: true, msg: g.bu }
+                    : { label: 'BU', ok: false, msg: `"${g.bu}" ไม่อยู่ในรายการ BU` });
+            }
+            if (g.product !== undefined) res.checks.push({ label: 'ชื่อสินค้า', ok: !!g.product.trim(), msg: g.product.trim() || 'ว่าง' });
+            if (g.exp !== undefined) {
+                const d = parseDocExpiry('Exp' + g.exp);
+                res.checks.push(d
+                    ? { label: 'หมดอายุ', ok: true, msg: fmtThaiDate(d) }
+                    : { label: 'หมดอายุ', ok: false, msg: `วันที่ ${g.exp} ไม่ถูกต้อง` });
+            }
+            if (g.ext !== undefined) {
+                const exts = s.fileName.extensions || [];
+                res.checks.push(!exts.length || ciIncludes(exts, g.ext)
+                    ? { label: 'นามสกุล', ok: true, msg: '.' + g.ext }
+                    : { label: 'นามสกุล', ok: false, msg: `.${g.ext} ไม่อยู่ในรายการ (${exts.join(', ')})` });
+            }
+            res.ok = res.checks.every(c => c.ok);
+            return res;
+        }
+
+        // ============================================================================
+        // หน้า DOCUMENT — รายการเอกสารของสินค้า จากไฟล์ "Linked Master.xlsx" (สร้างที่หน้า Convert โหมด Linked Master)
+        // แหล่งข้อมูล: 1) Google Drive (ถ้าตั้ง LINKED_DRIVE_FILE_ID แล้ว)  2) ไฟล์จากเครื่อง (ปุ่ม "เปิดไฟล์จากเครื่อง")
+        //             3) ข้อมูลตัวอย่าง (Mock) ถ้ายังไม่มีข้อ 1 — ข้อมูล Mock เป็นชื่อสมมติทั้งหมด ไม่มีลิงก์จริง
+        // มี 3 ไอเดียการแสดงผลให้เลือกดู: การ์ดสินค้า / Matrix ความครบถ้วน / รายการเอกสาร + วันหมดอายุ
+        // ============================================================================
+        const DOC_TYPE_COLORS = {
+            CFP: '#16a34a', EPD: '#2563eb', GrCh: '#0d9488', Asb: '#6b7280', CFR: '#7c3aed',
+            SRI: '#ea580c', Ther: '#dc2626', VOC: '#db2777', Acous: '#4f46e5'
+        };
+        // จำนวนวันที่ถือว่า "ใกล้หมดอายุ" ตั้งได้ที่หน้า Setting (ค่าเริ่มต้น 180 วัน)
+        function docSoonDays() { return appSettings.expiry.soonDays; }
+        const DOC_STATUS_LABEL = { expired: 'หมดอายุ', soon: 'ใกล้หมดอายุ', ok: 'ยังไม่หมดอายุ', none: 'ไม่ระบุวันหมดอายุ' };
+        const DOC_STATUS_RANK = { expired: 0, soon: 1, ok: 2, none: 3 }; // ใช้เรียง/เลือกสถานะที่แย่ที่สุดในกลุ่ม
+
+        const docState = { loaded: false, loading: false, docs: [], source: { kind: 'mock', label: '' }, view: 'cards', focus: null };
+
+        const elDocPage = document.getElementById('document-page');
+        const elDocSource = document.getElementById('doc-source');
+        const elDocSearch = document.getElementById('doc-search');
+        const elDocFilterBu = document.getElementById('doc-filter-bu');
+        const elDocFilterType = document.getElementById('doc-filter-type');
+        const elDocKpis = document.getElementById('doc-kpis');
+        const elDocFocus = document.getElementById('doc-focus');
+        const elDocView = document.getElementById('doc-view');
+        const elDocFileInput = document.getElementById('doc-file-input');
+
+        function startOfToday() { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+        function docTypeColor(code) { return DOC_TYPE_COLORS[code] || '#9ca3af'; }
+        function fmtThaiDate(d) { return d ? d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'; }
+
+        // ชื่อไฟล์เอกสารส่วนใหญ่มีวันหมดอายุฝังอยู่ เช่น "EPD_..._Exp20290806.pdf" → 6 ส.ค. 2029
+        function parseDocExpiry(name) {
+            const m = /Exp(\d{4})(\d{2})(\d{2})/i.exec(name || '');
+            if (!m) return null;
+            const d = new Date(+m[1], +m[2] - 1, +m[3]);
+            return d.getMonth() === +m[2] - 1 ? d : null;
+        }
+
+        // สถานะวันหมดอายุ — จำนวนวัน "ใกล้หมดอายุ" มาจากหน้า Setting (คำนวณใหม่ได้เมื่อเปลี่ยนค่า ดู refreshDocStatuses)
+        function docStatusOf(d) {
+            if (/หมดอายุ/.test(d.remark || '')) return 'expired';
+            if (!d.expiry) return 'none';
+            const days = (d.expiry - startOfToday()) / 86400000;
+            return days < 0 ? 'expired' : (days <= docSoonDays() ? 'soon' : 'ok');
+        }
+        function refreshDocStatuses() { docState.docs.forEach(d => { d.status = docStatusOf(d); }); }
+
+        function makeDoc(f) {
+            const docName = String(f.docName || '').trim();
+            const expiry = parseDocExpiry(docName);
+            const status = docStatusOf({ remark: f.remark, expiry });
+            const url = /^https?:\/\//i.test(f.url || '') ? f.url : '';
+            const typeCode = f.typeCode || f.typeFull || 'อื่นๆ';
+            return {
+                typeCode, typeFull: f.typeFull || typeCode,
+                bu: f.bu || '-', group: f.group, sku: f.sku || '', greenCode: f.greenCode || '',
+                nameTH: f.nameTH || '', nameEN: f.nameEN || '', remark: f.remark || '',
+                docName, url, expiry, status,
+                pkey: `${f.bu || '-'}||${f.group}`,
+                // ค่าดิบก่อน trim + เลขแถวใน Excel — ใช้ตรวจวรรคเกิน/ชี้ตำแหน่งที่ต้องแก้ในหน้า Health Check
+                row: f.row || null,
+                rawTypeCode: f.typeCode || '',
+                raw: f.raw || { docName: f.docName || '', group: f.group || '', nameTH: f.nameTH || '' }
+            };
+        }
+
+        // อ่านไฟล์ Linked Master (หรือ Product Mapping.xlsx ซึ่ง Format เดียวกัน) — หาคอลัมน์จากหัวคอลัมน์ ไม่ยึดตำแหน่ง
+        function parseLinkedMasterBuffer(buffer) {
+            const wb = XLSX.read(buffer, { type: 'array' });
+            const sheet = wb.Sheets['Link เอกสาร'] || wb.Sheets[wb.SheetNames[0]];
+            if (!sheet || !sheet['!ref']) throw new Error('ไฟล์ว่าง ไม่พบข้อมูล');
+            const range = XLSX.utils.decode_range(sheet['!ref']);
+            const val = (r, c) => {
+                const cell = sheet[XLSX.utils.encode_cell({ r, c })];
+                if (!cell || cell.t === 'e' || cell.v === undefined || cell.v === null) return null;
+                return cell.v;
+            };
+            const headers = [];
+            for (let c = range.s.c; c <= range.e.c; c++) {
+                const v = val(range.s.r, c);
+                headers.push(v === null ? '' : String(v).replace(/\r\n/g, '\n').trim());
+            }
+            const col = pred => { const i = headers.findIndex(pred); return i < 0 ? -1 : range.s.c + i; };
+            const C = {
+                typeCode: col(h => h === 'ประเภทเอกสาร'), typeFull: col(h => h === 'ประเภทเอกสาร*'),
+                bu: col(h => h.startsWith('BUs')), group: col(h => h.startsWith('Group Name')),
+                sku: col(h => h.startsWith('SKU')), greenCode: col(h => h.startsWith('Green Cat')),
+                nameTH: col(h => h.startsWith('[TH]')), nameEN: col(h => h.startsWith('[EN]')),
+                link: col(h => h.startsWith('Link')), docName: col(h => h === 'ชื่อเอกสาร'),
+                url: col(h => h === 'URL'), remark: col(h => h === 'Column11')
+            };
+            if (C.group < 0 || (C.link < 0 && C.docName < 0)) {
+                throw new Error('ไม่พบคอลัมน์ "Group Name (Products)" หรือ "Link" — ไฟล์นี้ยังไม่ใช่รูปแบบ Linked Master (ให้แปลงผ่านหน้า Convert โหมด Linked Master ก่อน)');
+            }
+            const str = (r, c) => { if (c < 0) return ''; const v = val(r, c); return v === null ? '' : String(v).trim(); };
+            const rawStr = (r, c) => { if (c < 0) return ''; const v = val(r, c); return v === null ? '' : String(v); };
+            const docs = [];
+            for (let r = range.s.r + 1; r <= range.e.r; r++) {
+                const group = str(r, C.group);
+                const docName = str(r, C.link) || str(r, C.docName); // ใช้ Link เป็นหลัก (คอลัมน์ ชื่อเอกสาร ในไฟล์เดิมบางแถวเลื่อนไม่ตรง)
+                if (!group || !docName) continue;
+                let url = str(r, C.url);
+                if (!url && C.link >= 0) {
+                    const cell = sheet[XLSX.utils.encode_cell({ r, c: C.link })];
+                    if (cell && cell.l && cell.l.Target) url = String(cell.l.Target).replace(/&amp;/g, '&');
+                }
+                if (!url && /^https?:\/\//i.test(docName)) url = docName;
+                docs.push(makeDoc({
+                    typeCode: str(r, C.typeCode), typeFull: str(r, C.typeFull), bu: str(r, C.bu), group,
+                    sku: str(r, C.sku), greenCode: str(r, C.greenCode), nameTH: str(r, C.nameTH), nameEN: str(r, C.nameEN),
+                    remark: str(r, C.remark), docName, url,
+                    row: r + 1,
+                    raw: { docName: rawStr(r, C.link) || rawStr(r, C.docName), group: rawStr(r, C.group), nameTH: rawStr(r, C.nameTH) }
+                }));
+            }
+            return docs;
+        }
+
+        // ข้อมูลตัวอย่าง (ชื่อสินค้าสมมติ ไม่มีลิงก์จริง) — วันหมดอายุคำนวณจากวันนี้ ให้เห็นครบทุกสถานะ
+        function buildMockDocs() {
+            const exp = days => {
+                const d = startOfToday(); d.setDate(d.getDate() + days);
+                return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+            };
+            const rows = [
+                ['EPD', 'EPD', 'CGS', 'ปูนซีเมนต์ตัวอย่าง รุ่น A', 'MOCK-0001', `EPD_Sample_Cement_A_Exp${exp(1200)}.pdf`],
+                ['CFP', 'CFP', 'CGS', 'ปูนซีเมนต์ตัวอย่าง รุ่น A', 'MOCK-0001', `CFP_Sample_Cement_A_Exp${exp(90)}.pdf`],
+                ['GrCh', 'SCG GreenChoice', 'CGS', 'ปูนซีเมนต์ตัวอย่าง รุ่น A', 'MOCK-0001', 'GreenChoice_Sample_Cement_A.pdf'],
+                ['EPD', 'EPD', 'CGS', 'ปูนฉาบตัวอย่าง รุ่น B', 'MOCK-0002', `EPD_Sample_Mortar_B_Exp${exp(-20)}.pdf`],
+                ['CFP', 'CFP', 'CW', 'แผ่นฝ้าตัวอย่าง รุ่น C', 'MOCK-0101', `CFP_Sample_Ceiling_C_Exp${exp(400)}.pdf`],
+                ['Asb', 'Asbestos', 'CW', 'แผ่นฝ้าตัวอย่าง รุ่น C', 'MOCK-0101', 'Asbestos_Test_Sample_Ceiling_C.pdf'],
+                ['SRI', 'SRI และ/หรือ SR', 'ROOF', 'กระเบื้องหลังคาตัวอย่าง รุ่น D', 'MOCK-0201', 'SRI_Report_Sample_Roof_D.pdf'],
+                ['CFP', 'CFP', 'ROOF', 'กระเบื้องหลังคาตัวอย่าง รุ่น D', 'MOCK-0201', `CFP_Sample_Roof_D_Exp${exp(150)}.pdf`],
+                ['CFR', 'CFR', 'LS', 'พื้นสำเร็จตัวอย่าง รุ่น E', 'MOCK-0301', `CFR_Sample_Floor_E_Exp${exp(700)}.pdf`],
+                ['GrCh', 'SCG GreenChoice', 'LS', 'พื้นสำเร็จตัวอย่าง รุ่น E', 'MOCK-0301', 'GreenChoice_Sample_Floor_E.pdf'],
+                ['CFP', 'CFP', 'SFG', 'ไม้ฝาตัวอย่าง รุ่น F', 'MOCK-0401', `CFP_Sample_Siding_F_Exp${exp(30)}.pdf`],
+                ['Ther', 'Thermal Performance (K-Value และ/หรือ R-Value)', 'SFG', 'ฉนวนตัวอย่าง รุ่น G', 'MOCK-0402', 'Thermal_Report_Sample_Insulation_G.pdf'],
+                ['VOC', 'VOC Content และ/หรือ VOC Emission', 'SFG', 'ฉนวนตัวอย่าง รุ่น G', 'MOCK-0402', 'VOC_Report_Sample_Insulation_G.pdf'],
+                ['CFP', 'CFP', 'SFG', 'ฉนวนตัวอย่าง รุ่น G', 'MOCK-0402', `CFP_Sample_Insulation_G_Exp${exp(-200)}.pdf`],
+                ['EPD', 'EPD', 'QCON', 'อิฐมวลเบาตัวอย่าง รุ่น H', 'MOCK-0501', `EPD_Sample_Block_H_Exp${exp(1500)}.pdf`]
+            ];
+            return rows.map(([typeCode, typeFull, bu, group, sku, docName]) => makeDoc({ typeCode, typeFull, bu, group, sku, docName, url: '' }));
+        }
+
+        // โหลดข้อมูลเอกสารชุดเดียว ใช้ร่วมกันทั้งหน้า Document / Health Check / Setting (ไม่โหลดซ้ำถ้ากำลังโหลดอยู่)
+        function loadDocs(force) {
+            if (docState.loading) return docState.promise;
+            if (docState.loaded && !force) return Promise.resolve();
+            docState.loading = true;
+            docState.promise = (async () => {
+                try {
+                    if (!LINKED_DRIVE_FILE_ID) {
+                        docState.docs = buildMockDocs();
+                        docState.source = { kind: 'mock', label: 'ข้อมูลตัวอย่าง (Mock) — ยังไม่ได้เชื่อมไฟล์ Linked Master บน Google Drive' };
+                    } else {
+                        const url = `https://www.googleapis.com/drive/v3/files/${LINKED_DRIVE_FILE_ID}?alt=media&key=${GOOGLE_API_KEY}&_=${Date.now()}`;
+                        const res = await fetch(url, { cache: 'no-store' });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        docState.docs = parseLinkedMasterBuffer(await res.arrayBuffer());
+                        docState.source = { kind: 'live', label: 'Link Master.xlsx จาก Google Drive' };
+                    }
+                } catch (err) {
+                    console.error('โหลด Linked Master จาก Google Drive ไม่สำเร็จ:', err);
+                    docState.docs = buildMockDocs();
+                    docState.source = { kind: 'mock', label: `ข้อมูลตัวอย่าง (Mock) — โหลด Linked Master ไม่สำเร็จ (${err.message})` };
+                } finally {
+                    docState.loading = false;
+                    docState.loaded = true;
+                }
+                docState.focus = null;
+                buildDocFilterOptions();
+                onDocsChanged();
+            })();
+            return docState.promise;
+        }
+
+        async function ensureDocumentData(force) {
+            if (force || !docState.loaded) {
+                elDocKpis.innerHTML = '';
+                elDocFocus.innerHTML = '';
+                elDocView.innerHTML = '<div class="doc-empty">กำลังโหลดข้อมูลเอกสาร...</div>';
+            }
+            await loadDocs(force);
+            renderDocumentPage();
+        }
+
+        function buildDocFilterOptions() {
+            const keep = (sel, values, allLabel, labelOf) => {
+                const prev = sel.value;
+                sel.innerHTML = `<option value="">${allLabel}</option>` + values.map(v => `<option value="${escAttr(v)}">${escAttr(labelOf ? labelOf(v) : v)}</option>`).join('');
+                sel.value = values.includes(prev) ? prev : '';
+            };
+            const bus = [...new Set(docState.docs.map(d => d.bu))].sort((a, b) => a.localeCompare(b));
+            keep(elDocFilterBu, bus, 'ทุก BU');
+            keep(elDocFilterType, docTypesOrdered(docState.docs), 'ทุกประเภทเอกสาร', code => {
+                const d = docState.docs.find(x => x.typeCode === code);
+                return d && d.typeFull !== code ? `${code} — ${d.typeFull}` : code;
+            });
+        }
+
+        // ประเภทเอกสารเรียงตามจำนวนมากไปน้อย (ใช้เป็นลำดับคอลัมน์ Matrix และตัวกรอง)
+        function docTypesOrdered(docs) {
+            const counts = {};
+            docs.forEach(d => { counts[d.typeCode] = (counts[d.typeCode] || 0) + 1; });
+            return Object.keys(counts).sort((a, b) => counts[b] - counts[a] || a.localeCompare(b));
+        }
+
+        function filteredDocs() {
+            const q = elDocSearch.value.trim().toLowerCase();
+            const bu = elDocFilterBu.value, type = elDocFilterType.value, f = docState.focus;
+            return docState.docs.filter(d =>
+                (!bu || d.bu === bu) &&
+                (!type || d.typeCode === type) &&
+                (!f || (d.pkey === f.pkey && d.typeCode === f.type)) &&
+                (!q || [d.group, d.nameTH, d.nameEN, d.sku, d.docName, d.typeFull, d.greenCode].some(s => s && s.toLowerCase().includes(q)))
+            );
+        }
+
+        function groupDocsByProduct(docs) {
+            const map = new Map();
+            docs.forEach(d => {
+                if (!map.has(d.pkey)) map.set(d.pkey, { pkey: d.pkey, bu: d.bu, group: d.group, names: new Set(), skus: new Set(), docs: [] });
+                const p = map.get(d.pkey);
+                [d.nameTH, d.nameEN].forEach(n => { if (n && n.trim() !== d.group.trim()) p.names.add(n.trim()); });
+                d.sku.split(/[;,\n]/).map(s => s.trim()).filter(Boolean).forEach(s => p.skus.add(s));
+                p.docs.push(d);
+            });
+            return [...map.values()].sort((a, b) => a.bu.localeCompare(b.bu) || a.group.localeCompare(b.group, ['th', 'en']));
+        }
+
+        function worstStatus(docs) {
+            return docs.reduce((w, d) => DOC_STATUS_RANK[d.status] < DOC_STATUS_RANK[w] ? d.status : w, 'none');
+        }
+
+        function docStatusPill(status) { return `<span class="doc-status ${status}">${DOC_STATUS_LABEL[status]}</span>`; }
+        function docTypeBadge(code) { return `<span class="doc-type" style="background:${docTypeColor(code)}">${escAttr(code)}</span>`; }
+
+        function renderDocumentPage() {
+            const s = docState.source;
+            elDocSource.className = `doc-source ${s.kind}`;
+            elDocSource.textContent = s.label;
+            document.querySelectorAll('[data-doc-view]').forEach(b => {
+                const on = b.dataset.docView === docState.view;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+
+            const docs = filteredDocs();
+            const products = groupDocsByProduct(docs);
+            const soon = docs.filter(d => d.status === 'soon').length;
+            const expired = docs.filter(d => d.status === 'expired').length;
+            const noUrl = docs.filter(d => !d.url).length;
+            const kpis = [
+                { n: docs.length, l: 'เอกสารทั้งหมด' },
+                { n: products.length, l: 'สินค้าที่มีเอกสาร' },
+                { n: new Set(docs.map(d => d.typeCode)).size, l: 'ประเภทเอกสาร' },
+                { n: soon, l: `ใกล้หมดอายุ (≤ ${docSoonDays()} วัน)`, cls: soon ? 'warn' : '' },
+                { n: expired, l: 'หมดอายุแล้ว', cls: expired ? 'bad' : '' }
+            ];
+            if (s.kind !== 'mock') kpis.push({ n: noUrl, l: 'ไม่มีลิงก์ URL', cls: noUrl ? 'warn' : '' });
+            elDocKpis.innerHTML = kpis.map(k => `<div class="doc-kpi ${k.cls || ''}"><div class="n">${k.n.toLocaleString()}</div><div class="l">${k.l}</div></div>`).join('');
+
+            const f = docState.focus;
+            elDocFocus.innerHTML = f
+                ? `<span class="doc-focus">กำลังดู: ${escAttr(f.label)} × ${escAttr(f.type)} <button type="button" data-doc-clear-focus title="ล้าง">✕</button></span>`
+                : '';
+
+            if (docs.length === 0) {
+                elDocView.innerHTML = '<div class="doc-empty">ไม่พบเอกสารตามเงื่อนไขที่เลือก</div>';
+                return;
+            }
+            if (docState.view === 'matrix') elDocView.innerHTML = renderDocMatrix(docs, products);
+            else if (docState.view === 'list') elDocView.innerHTML = renderDocList(docs);
+            else elDocView.innerHTML = renderDocCards(products);
+        }
+
+        // ไอเดีย 1: การ์ดต่อสินค้า — เห็นเอกสารทั้งหมดของสินค้าในที่เดียว กดชิปเพื่อเปิดเอกสาร
+        function renderDocCards(products) {
+            return '<div class="doc-cards">' + products.map(p => {
+                const subParts = [];
+                if (p.names.size) subParts.push([...p.names].map(escAttr).join(' · '));
+                if (p.skus.size) subParts.push(`SKU: ${[...p.skus].map(escAttr).join(', ')}`);
+                const chips = p.docs
+                    .slice().sort((a, b) => a.typeCode.localeCompare(b.typeCode))
+                    .map(d => {
+                        const tip = escAttr(`${d.typeFull}\n${d.docName}${d.expiry ? `\nหมดอายุ ${fmtThaiDate(d.expiry)}` : ''}${d.url ? '' : '\n(ไม่มีลิงก์)'}`);
+                        const pill = (d.status === 'expired' || d.status === 'soon') ? docStatusPill(d.status) : '';
+                        const inner = `${docTypeBadge(d.typeCode)}<span class="nm">${escAttr(d.docName)}</span>${pill}`;
+                        return d.url
+                            ? `<a class="doc-chip" href="${escAttr(d.url)}" target="_blank" rel="noopener noreferrer" title="${tip}">${inner}</a>`
+                            : `<span class="doc-chip no-url" title="${tip}">${inner}</span>`;
+                    }).join('');
+                return `<div class="doc-card">
+                            <div class="doc-card-head">
+                                <span class="doc-bu">${escAttr(p.bu)}</span>
+                                <div>
+                                    <div class="doc-card-title">${escAttr(p.group)}</div>
+                                    ${subParts.length ? `<div class="doc-card-sub">${subParts.join('<br>')}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="doc-chips">${chips}</div>
+                        </div>`;
+            }).join('') + '</div>';
+        }
+
+        // ไอเดีย 2: Matrix สินค้า × ประเภทเอกสาร — เห็นช่องว่าง (สินค้าไหนยังขาดเอกสารอะไร) และสถานะหมดอายุในภาพเดียว
+        function renderDocMatrix(docs, products) {
+            const types = docTypesOrdered(docs);
+            const fullName = {};
+            docs.forEach(d => { fullName[d.typeCode] = d.typeFull; });
+            const coverage = Object.fromEntries(types.map(t => [t, new Set(docs.filter(d => d.typeCode === t).map(d => d.pkey)).size]));
+
+            const head = `<tr><th class="pcol">สินค้า (${products.length})</th><th>BU</th>` + types.map(t =>
+                `<th class="mx-col" title="${escAttr(fullName[t])}">${docTypeBadge(t)}<span class="cov">${coverage[t]}/${products.length}</span></th>`
+            ).join('') + '</tr>';
+
+            const body = products.map(p => {
+                const cells = types.map(t => {
+                    const list = p.docs.filter(d => d.typeCode === t);
+                    if (!list.length) return '<td class="mx-cell"><span class="doc-mx-empty">·</span></td>';
+                    const st = worstStatus(list);
+                    const tip = escAttr(list.map(d => `• ${d.docName}${d.expiry ? ` (หมดอายุ ${fmtThaiDate(d.expiry)})` : ''}`).join('\n') + '\n\nคลิกเพื่อดูรายการเอกสาร');
+                    return `<td class="mx-cell"><button type="button" class="doc-mx ${st}" data-doc-focus-pkey="${escAttr(p.pkey)}" data-doc-focus-type="${escAttr(t)}" data-doc-focus-label="${escAttr(p.group)}" title="${tip}">${list.length > 1 ? list.length : '✓'}</button></td>`;
+                }).join('');
+                return `<tr><td class="pcol">${escAttr(p.group)}</td><td><span class="doc-bu">${escAttr(p.bu)}</span></td>${cells}</tr>`;
+            }).join('');
+
+            const legend = `<div class="doc-legend">สีช่อง:
+                <span class="doc-mx ok">✓</span> ยังไม่หมดอายุ
+                <span class="doc-mx none">✓</span> ไม่ระบุวันหมดอายุ
+                <span class="doc-mx soon">✓</span> ใกล้หมดอายุ
+                <span class="doc-mx expired">✓</span> หมดอายุ
+                <span class="doc-mx-empty">·</span> ยังไม่มีเอกสาร · ตัวเลข = จำนวนเอกสาร · ใต้หัวคอลัมน์ = สินค้าที่มี / ทั้งหมด</div>`;
+            return `${legend}<div class="doc-table-wrap"><table class="doc-table doc-matrix"><thead>${head}</thead><tbody>${body}</tbody></table></div>`;
+        }
+
+        // ไอเดีย 3: รายการเอกสารแบบตาราง เรียงตามความเร่งด่วน (หมดอายุ → ใกล้หมด → ปกติ) — เป็นฐานของหน้า Health Check ได้ด้วย
+        function renderDocList(docs) {
+            const sorted = docs.slice().sort((a, b) =>
+                DOC_STATUS_RANK[a.status] - DOC_STATUS_RANK[b.status] ||
+                (a.expiry && b.expiry ? a.expiry - b.expiry : 0) ||
+                a.group.localeCompare(b.group, ['th', 'en'])
+            );
+            const rows = sorted.map(d => `<tr>
+                    <td title="${escAttr(d.typeFull)}">${docTypeBadge(d.typeCode)}</td>
+                    <td><span class="doc-bu">${escAttr(d.bu)}</span></td>
+                    <td>${escAttr(d.group)}</td>
+                    <td class="mono">${escAttr(d.sku)}</td>
+                    <td>${d.url ? `<a href="${escAttr(d.url)}" target="_blank" rel="noopener noreferrer">${escAttr(d.docName)}</a>` : escAttr(d.docName)}</td>
+                    <td style="white-space:nowrap">${fmtThaiDate(d.expiry)}</td>
+                    <td>${docStatusPill(d.status)}</td>
+                    <td>${escAttr(/^https?:\/\//i.test(d.remark) ? 'มีลิงก์เพิ่มเติม' : d.remark)}</td>
+                </tr>`).join('');
+            return `<div class="doc-table-wrap"><table class="doc-table"><thead><tr>
+                        <th>ประเภท</th><th>BU</th><th>สินค้า</th><th>SKU</th><th>เอกสาร</th><th>วันหมดอายุ</th><th>สถานะ</th><th>หมายเหตุ</th>
+                    </tr></thead><tbody>${rows}</tbody></table></div>`;
+        }
+
+        document.querySelectorAll('[data-doc-view]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                docState.view = btn.dataset.docView;
+                docState.focus = null;
+                renderDocumentPage();
+            });
+        });
+        elDocSearch.addEventListener('input', debounce(renderDocumentPage, 150));
+        elDocFilterBu.addEventListener('change', renderDocumentPage);
+        elDocFilterType.addEventListener('change', renderDocumentPage);
+        elDocFocus.addEventListener('click', (e) => {
+            if (e.target.closest('[data-doc-clear-focus]')) { docState.focus = null; renderDocumentPage(); }
+        });
+        // คลิกช่องใน Matrix → ไปหน้ารายการ (ไอเดีย 3) โดยกรองเฉพาะสินค้า × ประเภทเอกสารนั้น
+        elDocView.addEventListener('click', (e) => {
+            const cell = e.target.closest('[data-doc-focus-pkey]');
+            if (!cell) return;
+            docState.focus = { pkey: cell.dataset.docFocusPkey, type: cell.dataset.docFocusType, label: cell.dataset.docFocusLabel };
+            docState.view = 'list';
+            renderDocumentPage();
+        });
+        document.getElementById('doc-refresh').addEventListener('click', () => ensureDocumentData(true));
+        document.getElementById('doc-load-local').addEventListener('click', () => elDocFileInput.click());
+        elDocFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    docState.docs = parseLinkedMasterBuffer(ev.target.result);
+                    docState.source = { kind: 'local', label: `ไฟล์จากเครื่อง: ${file.name} (อ่านในเบราว์เซอร์เท่านั้น)` };
+                    docState.loaded = true;
+                    docState.focus = null;
+                    buildDocFilterOptions();
+                    onDocsChanged();
+                    renderDocumentPage();
+                } catch (err) {
+                    alert(`อ่านไฟล์ไม่สำเร็จ: ${err.message}`);
+                } finally {
+                    elDocFileInput.value = '';
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // ============================================================================
+        // หน้า HEALTH CHECK — ตรวจคุณภาพข้อมูลเอกสาร (Link Master ชุดเดียวกับหน้า Document) ตามกฎในหน้า Setting
+        // เฟส 1 (ทำแล้ว): ความครบถ้วนของช่องบังคับ, วันหมดอายุ, รูปแบบข้อมูล, ลิงก์, ความสดของไฟล์บน Drive
+        // ยังไม่ทำ: แถวที่ถูกตัดทิ้งตอน Convert, ความสอดคล้อง Main ↔ Document, หลักฐานรองรับ Credit
+        // ============================================================================
+        const elHealthPage = document.getElementById('health-page');
+        const elHcSource = document.getElementById('hc-source');
+        const elHcSearch = document.getElementById('hc-search');
+        const elHcSev = document.getElementById('hc-filter-sev');
+        const elHcCat = document.getElementById('hc-filter-cat');
+        const elHcBu = document.getElementById('hc-filter-bu');
+        const elHcBody = document.getElementById('hc-body');
+        const HC_PAGE_SIZE = 300;
+
+        const hcState = { computed: false, issues: [], completeness: [], catScores: {}, overall: null, buRows: [], meta: null, rule: '', showAll: false, showAllProducts: false, missType: '', checkedAt: null };
+        const HC_PRODUCT_PAGE_SIZE = 100;
+
+        elHcCat.innerHTML = '<option value="">ทุกหมวด</option>' + HC_CATEGORIES.filter(c => !c.pending)
+            .map(c => `<option value="${c.id}">${escAttr(c.label)}</option>`).join('');
+
+        function hcCatLabel(id) { const c = HC_CATEGORIES.find(x => x.id === id); return c ? c.label : id; }
+        function hcScoreClass(n) { return n === null ? '' : n >= 85 ? 'hc-good' : n >= 70 ? 'hc-mid' : 'hc-bad'; }
+        function hcScoreColor(n) { return n >= 85 ? '#16a34a' : n >= 70 ? '#d97706' : '#dc2626'; }
+        function hcSevPill(sev) { return `<span class="hc-sev ${sev}"><span class="hc-dot ${sev}"></span>${HC_SEVERITY_LABEL[sev]}</span>`; }
+        function shortUrl(u) { return u.length > 70 ? u.slice(0, 67) + '...' : u; }
+
+        // บอกว่าลิงก์อยู่ที่ไหน (Site ไหน / OneDrive ส่วนตัว / Google Drive) — ใช้เป็นรายละเอียดของกฎ link_unofficial
+        function linkLocation(u) {
+            let m = /\/sites\/([^/?#]+)/i.exec(u) || /\/:[a-z]:\/s\/([^/?#]+)/i.exec(u);
+            if (m) return `Site: ${decodeURIComponent(m[1])}`;
+            if (/\/personal\//i.test(u)) return 'OneDrive ส่วนตัว';
+            if (/drive\.google\.com/i.test(u)) return 'Google Drive';
+            try { return new URL(u).hostname; } catch (e) { return shortUrl(u); }
+        }
+
+        // อ่านวันที่แก้ไขล่าสุดของไฟล์บน Drive (ใช้ API Key เดิม ไม่ต้อง Sign-in)
+        async function fetchDriveMeta() {
+            const files = [
+                { id: DRIVE_FILE_ID, label: 'Master.xlsx (หน้า Main)' },
+                { id: LINKED_DRIVE_FILE_ID, label: 'Link Master.xlsx (หน้า Document)' }
+            ].filter(f => f.id);
+            return Promise.all(files.map(async f => {
+                try {
+                    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${f.id}?fields=name,modifiedTime&key=${GOOGLE_API_KEY}&_=${Date.now()}`, { cache: 'no-store' });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const j = await res.json();
+                    return { ...f, name: j.name, modified: new Date(j.modifiedTime) };
+                } catch (err) {
+                    return { ...f, error: err.message };
+                }
+            }));
+        }
+
+        // รันกฎทั้งหมดกับเอกสารทุกแถว → รายการปัญหา
+        function runHealthChecks(docs, s, meta) {
+            const issues = [];
+            const R = s.rules;
+            const compiled = buildFileNameRegex(s.fileName);
+            const today = startOfToday();
+            const sep = s.fileName.separator || '';
+            const seen = new Set();
+            const add = (rule, d, detail) => {
+                if (!R[rule] || !R[rule].on) return;
+                const def = HC_RULES[rule];
+                issues.push({
+                    rule, cat: def.cat, sev: R[rule].sev, label: def.label, fix: def.fix, detail, doc: d || null,
+                    scope: d ? 'doc' : 'file', pkey: d ? d.pkey : '',
+                    bu: d ? d.bu : '-', product: d ? d.group : '', typeCode: d ? d.typeCode : '', docName: d ? d.docName : '', row: d ? d.row : null
+                });
+            };
+            // ปัญหาระดับสินค้า (ไม่มีแถวเอกสารให้ชี้ เพราะเอกสารยังไม่มี)
+            const addProduct = (rule, p, typeCode, detail) => {
+                if (!R[rule] || !R[rule].on) return;
+                const def = HC_RULES[rule];
+                issues.push({
+                    rule, cat: def.cat, sev: R[rule].sev, label: `${def.label}: ${typeCode}`, fix: def.fix, detail, doc: null,
+                    scope: 'product', pkey: p.pkey, bu: p.bu, product: p.group, typeCode, docName: '', row: null
+                });
+            };
+
+            docs.forEach(d => {
+                // ความครบถ้วน (เฉพาะแถวที่ผ่านการกรองตอน Convert แล้ว — แถวที่ไม่มี Link/Group Name ไม่อยู่ในไฟล์นี้)
+                if (!d.rawTypeCode) add('req_type', d, 'ช่องประเภทเอกสารว่าง');
+                if (!d.bu || d.bu === '-') add('req_bu', d, 'ช่อง BU ว่าง');
+                if (!d.nameTH) add('req_name_th', d, 'ช่องชื่อสินค้า [TH] ว่าง');
+
+                // วันหมดอายุ
+                if (d.status === 'expired') {
+                    add('exp_expired', d, d.expiry
+                        ? `หมดอายุ ${fmtThaiDate(d.expiry)} (${Math.round((today - d.expiry) / 86400000)} วันที่แล้ว)`
+                        : `หมายเหตุในไฟล์ระบุว่า "${d.remark}"`);
+                } else if (d.status === 'soon') {
+                    add('exp_soon', d, `หมดอายุ ${fmtThaiDate(d.expiry)} (อีก ${Math.ceil((d.expiry - today) / 86400000)} วัน)`);
+                } else if (d.status === 'none' && ciIncludes(s.expiry.requiredFor, d.typeCode)) {
+                    add('exp_missing', d, `ประเภท ${d.typeCode} ต้องมีวันหมดอายุในชื่อไฟล์`);
+                }
+
+                // รูปแบบข้อมูล
+                const name = d.docName;
+                const rawName = (d.raw && d.raw.docName) || name;
+                if (/^https?:\/\//i.test(name)) {
+                    add('fmt_link_is_url', d, shortUrl(name));
+                } else if (/\n/.test(rawName.trim()) || (name.match(/\.(pdf|docx?|xlsx?|pptx?|jpe?g|png)\b/gi) || []).length > 1) {
+                    add('fmt_multi', d, name.replace(/\s*\n\s*/g, ' | '));
+                } else {
+                    const r = checkFileName(name, s, compiled);
+                    if (!r.ok) add('fmt_pattern', d, r.checks.filter(c => !c.ok).map(c => c.msg).join(' · '));
+                    let prefix = r.parts.type;
+                    if (prefix === undefined && sep && name.includes(sep)) prefix = name.split(sep)[0];
+                    const pt = prefix !== undefined ? prefixToType(s, prefix) : null;
+                    if (pt && d.rawTypeCode && pt.toLowerCase() !== d.rawTypeCode.toLowerCase()) {
+                        add('fmt_prefix_type', d, `ชื่อไฟล์ขึ้นต้น "${prefix}" (= ${pt}) แต่คอลัมน์ประเภทเป็น ${d.rawTypeCode}`);
+                    }
+                    const fb = r.parts.bu;
+                    if (fb !== undefined && ciIncludes(s.allowed.bus, fb) && d.bu && fb.toLowerCase() !== d.bu.toLowerCase()) {
+                        add('fmt_bu_mismatch', d, `ชื่อไฟล์ระบุ ${fb} แต่คอลัมน์ BU เป็น ${d.bu}`);
+                    }
+                }
+                const raw = d.raw || {};
+                const spaced = [['docName', 'Link'], ['group', 'Group Name'], ['nameTH', '[TH]']]
+                    .filter(([k]) => raw[k] && raw[k] !== raw[k].trim()).map(([, l]) => l);
+                if (spaced.length) add('fmt_spaces', d, `ที่คอลัมน์ ${spaced.join(', ')}`);
+                if (d.rawTypeCode && !ciIncludes(s.allowed.types, d.rawTypeCode)) add('fmt_unknown_type', d, `"${d.rawTypeCode}"`);
+                if (d.bu && d.bu !== '-' && !ciIncludes(s.allowed.bus, d.bu)) add('fmt_unknown_bu', d, `"${d.bu}"`);
+
+                // ลิงก์ (ตรวจได้แค่รูปแบบ — เว็บนี้เปิดดูไม่ได้ว่าไฟล์บน SharePoint ยังอยู่จริงไหม เพราะต้อง Login SCG)
+                if (!d.url) {
+                    if (docState.source.kind !== 'mock') add('link_missing', d, 'ไม่มี Hyperlink ที่ช่อง Link');
+                } else {
+                    if (s.links.forbidEmailParam && /[?&]email=/i.test(d.url)) add('link_email', d, 'ลิงก์มีพารามิเตอร์ email= ติดมา');
+                    const sites = (s.links.officialSites || []).filter(Boolean);
+                    if (sites.length && !sites.some(x => d.url.toLowerCase().includes(x.toLowerCase()))) add('link_unofficial', d, linkLocation(d.url));
+                    const k = `${d.pkey}|${d.url}`;
+                    if (seen.has(k)) add('link_dup', d, 'ลิงก์เดียวกันซ้ำในสินค้านี้'); else seen.add(k);
+                }
+            });
+
+            // เอกสารบังคับต่อ BU — 1 ปัญหาต่อ 1 สินค้า × 1 ประเภทที่ขาด
+            productCompleteness(docs, s).forEach(pc => {
+                pc.missing.forEach(t => addProduct('doc_missing', pc.p, t, pc.expired.includes(t)
+                    ? `มีเอกสาร ${t} แต่หมดอายุแล้วทั้งหมด` : `ยังไม่มีเอกสาร ${t} (บังคับสำหรับ BU ${pc.p.bu})`));
+            });
+
+            // ความสดของข้อมูล (ระดับไฟล์ ไม่ผูกกับเอกสาร)
+            (meta || []).forEach(f => {
+                if (f.error || !f.modified) return;
+                const days = Math.floor((Date.now() - f.modified) / 86400000);
+                if (days > s.freshness.maxDays) add('fresh_stale', null, `${f.label}: แก้ไขล่าสุด ${fmtThaiDate(f.modified)} (${days} วันที่แล้ว — เกิน ${s.freshness.maxDays} วัน)`);
+            });
+            return issues;
+        }
+
+        // ความครบของเอกสารรายสินค้า เทียบกับ "เอกสารบังคับต่อ BU" ในหน้า Setting
+        // คืนเฉพาะสินค้าที่ BU มีเอกสารบังคับ: { p, required, have, expired, missing }
+        function productCompleteness(docs, s) {
+            const comp = s.completeness || {};
+            const reqMap = comp.requiredDocs || {};
+            return groupDocsByProduct(docs).map(p => {
+                const buKey = Object.keys(reqMap).find(k => k.toLowerCase() === String(p.bu).toLowerCase());
+                const required = buKey ? reqMap[buKey] : [];
+                const have = [], expired = [], missing = [];
+                required.forEach(t => {
+                    const list = p.docs.filter(d => d.typeCode.toLowerCase() === t.toLowerCase());
+                    const allExpired = list.length > 0 && list.every(d => d.status === 'expired');
+                    if (!list.length) missing.push(t);
+                    else if (allExpired && comp.expiredCountsAsMissing) { expired.push(t); missing.push(t); }
+                    else have.push(t);
+                });
+                return { p, required, have, expired, missing };
+            }).filter(pc => pc.required.length);
+        }
+
+        // คะแนนต่อหมวด = 100 × (1 − ผลรวมโทษ / จำนวนเอกสาร) — แต่ละเอกสารโดนหักตามปัญหาที่รุนแรงที่สุดในหมวดนั้น
+        // หมวดความครบถ้วน = เฉลี่ยของ (ช่องบังคับในแถวเอกสาร) กับ (สัดส่วนเอกสารบังคับที่สินค้ามีครบ)
+        function hcCategoryScores(docs, issues, meta) {
+            const scores = {};
+            HC_CATEGORIES.filter(c => !c.pending && c.id !== 'freshness').forEach(c => {
+                if (!docs.length) { scores[c.id] = null; return; }
+                const worst = new Map();
+                issues.forEach(i => {
+                    if (i.cat !== c.id || !i.doc) return;
+                    worst.set(i.doc, Math.max(worst.get(i.doc) || 0, HC_SEVERITY_WEIGHT[i.sev]));
+                });
+                let penalty = 0; worst.forEach(w => { penalty += w; });
+                scores[c.id] = Math.round(100 * (1 - penalty / docs.length));
+            });
+            if (scores.completeness !== null && appSettings.rules.doc_missing.on) {
+                const pcs = productCompleteness(docs, appSettings);
+                const slots = pcs.reduce((a, pc) => a + pc.required.length, 0);
+                const ok = pcs.reduce((a, pc) => a + pc.required.length - pc.missing.length, 0);
+                if (slots) scores.completeness = Math.round((scores.completeness + 100 * ok / slots) / 2);
+            }
+            if (meta) {
+                const files = meta.filter(f => !f.error);
+                const stale = issues.filter(i => i.rule === 'fresh_stale').length;
+                scores.freshness = files.length ? Math.round(100 * (1 - stale / files.length)) : null;
+            }
+            return scores;
+        }
+        function hcOverall(scores) {
+            const v = Object.values(scores).filter(n => n !== null && n !== undefined);
+            return v.length ? Math.round(v.reduce((a, b) => a + b, 0) / v.length) : null;
+        }
+
+        function computeHealth() {
+            const docs = docState.docs;
+            hcState.completeness = appSettings.rules.doc_missing.on ? productCompleteness(docs, appSettings) : [];
+            hcState.issues = runHealthChecks(docs, appSettings, hcState.meta);
+            hcState.catScores = hcCategoryScores(docs, hcState.issues, hcState.meta);
+            hcState.overall = hcOverall(hcState.catScores);
+            // ตารางคะแนนแยก BU (ไม่รวมความสดของไฟล์ ซึ่งเป็นระดับไฟล์)
+            const bus = [...new Set(docs.map(d => d.bu))].sort((a, b) => a.localeCompare(b));
+            hcState.buRows = bus.map(bu => {
+                const bDocs = docs.filter(d => d.bu === bu);
+                const bIssues = hcState.issues.filter(i => i.scope !== 'file' && i.bu === bu);
+                const sc = hcCategoryScores(bDocs, bIssues, null);
+                const pcs = hcState.completeness.filter(pc => pc.p.bu === bu);
+                return {
+                    bu, docs: bDocs.length, score: hcOverall(sc), scores: sc,
+                    products: groupDocsByProduct(bDocs).length,
+                    reqProducts: pcs.length, completeProducts: pcs.filter(pc => !pc.missing.length).length,
+                    required: pcs.length ? pcs[0].required : [],
+                    high: bIssues.filter(i => i.sev === 'high').length,
+                    medium: bIssues.filter(i => i.sev === 'medium').length,
+                    low: bIssues.filter(i => i.sev === 'low').length
+                };
+            }).sort((a, b) => a.score - b.score);
+            const prevBu = elHcBu.value;
+            elHcBu.innerHTML = '<option value="">ทุก BU</option>' + bus.map(b => `<option value="${escAttr(b)}">${escAttr(b)}</option>`).join('');
+            elHcBu.value = bus.includes(prevBu) ? prevBu : '';
+            hcState.computed = true;
+            hcState.checkedAt = new Date();
+        }
+
+        async function ensureHealthData(force) {
+            if (hcState.computed && !force) { renderHealthPage(); return; }
+            elHcSource.className = 'doc-source mock';
+            elHcSource.textContent = 'กำลังโหลด...';
+            elHcBody.innerHTML = '<div class="doc-empty">กำลังโหลดข้อมูลและตรวจสอบ...</div>';
+            const metaPromise = (force || !hcState.meta) ? fetchDriveMeta() : Promise.resolve(hcState.meta);
+            await loadDocs(force);
+            hcState.meta = await metaPromise;
+            computeHealth();
+            renderHealthPage();
+        }
+
+        function hcFilteredIssues(ignoreRule) {
+            const q = elHcSearch.value.trim().toLowerCase();
+            const sev = elHcSev.value, cat = elHcCat.value, bu = elHcBu.value;
+            return hcState.issues.filter(i =>
+                (!sev || i.sev === sev) && (!cat || i.cat === cat) &&
+                (!bu || i.bu === bu || i.scope === 'file') &&
+                (ignoreRule || !hcState.rule || i.rule === hcState.rule) &&
+                (!q || [i.product, i.docName, i.detail, i.label, i.typeCode].some(x => x && String(x).toLowerCase().includes(q)))
+            );
+        }
+
+        function hcSortIssues(list) {
+            const catOrder = Object.fromEntries(HC_CATEGORIES.map((c, i) => [c.id, i]));
+            return list.slice().sort((a, b) =>
+                HC_SEVERITY_RANK[a.sev] - HC_SEVERITY_RANK[b.sev] || catOrder[a.cat] - catOrder[b.cat] ||
+                a.label.localeCompare(b.label) || a.bu.localeCompare(b.bu) || a.product.localeCompare(b.product, ['th', 'en'])
+            );
+        }
+
+        function renderHealthPage() {
+            if (!hcState.computed) return;
+            const s = docState.source;
+            elHcSource.className = `doc-source ${s.kind}`;
+            const t = hcState.checkedAt ? hcState.checkedAt.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '';
+            elHcSource.textContent = `${s.label} · ตรวจเมื่อ ${t} · ${docState.docs.length.toLocaleString()} เอกสาร`;
+
+            const cat = elHcCat.value;
+            const overall = hcState.overall;
+            const catCards = HC_CATEGORIES.map(c => {
+                if (c.pending) {
+                    return `<div class="hc-cat pending" title="${escAttr(c.pending)}"><div class="t">${escAttr(c.label)}</div><div class="n" style="color:#9ca3af">—</div><div class="s">ยังไม่เปิดใช้: ${escAttr(c.pending)}</div></div>`;
+                }
+                const n = hcState.catScores[c.id];
+                const count = hcState.issues.filter(i => i.cat === c.id).length;
+                const sub = c.id === 'freshness'
+                    ? (hcState.meta || []).map(f => f.error ? `${f.label.split(' ')[0]}: อ่านวันที่ไม่ได้` : `${f.label.split(' ')[0]}: ${fmtThaiDate(f.modified)}`).join('<br>')
+                    : `${count.toLocaleString()} ปัญหา`;
+                return `<button type="button" class="hc-cat ${cat === c.id ? 'active' : ''}" data-hc-cat="${c.id}">
+                            <div class="t">${escAttr(c.label)}</div>
+                            <div class="n ${hcScoreClass(n)}">${n === null || n === undefined ? '—' : n}</div>
+                            <div class="s">${sub}</div>
+                            ${n === null || n === undefined ? '' : `<div class="hc-bar"><i style="width:${Math.max(0, n)}%;background:${hcScoreColor(n)}"></i></div>`}
+                        </button>`;
+            }).join('');
+
+            const sevCount = sev => hcState.issues.filter(i => i.sev === sev).length;
+            const top = `<div class="hc-top">
+                    <div class="hc-score">
+                        <div class="l">Health Score</div>
+                        <div class="n ${hcScoreClass(overall)}">${overall === null ? '—' : overall}<span style="font-size:1rem;color:#9ca3af;font-weight:600">/100</span></div>
+                        <div class="l" style="margin-top:6px">${hcSevPill('high')} ${sevCount('high')} &nbsp; ${hcSevPill('medium')} ${sevCount('medium')} &nbsp; ${hcSevPill('low')} ${sevCount('low')}</div>
+                    </div>
+                    <div class="hc-cats">${catCards}</div>
+                </div>`;
+
+            // ชิปสรุปตามกฎ (นับตามตัวกรองอื่นๆ ยกเว้นตัวกรองกฎเอง) — คลิกเพื่อกรองเฉพาะกฎนั้น
+            const byRule = {};
+            hcFilteredIssues(true).forEach(i => { byRule[i.rule] = (byRule[i.rule] || 0) + 1; });
+            const ruleChips = Object.keys(byRule)
+                .sort((a, b) => HC_SEVERITY_RANK[appSettings.rules[a].sev] - HC_SEVERITY_RANK[appSettings.rules[b].sev] || byRule[b] - byRule[a])
+                .map(r => `<button type="button" class="hc-rule ${hcState.rule === r ? 'active' : ''}" data-hc-rule="${r}"><span class="hc-dot ${appSettings.rules[r].sev}"></span>${escAttr(HC_RULES[r].label)} <b>${byRule[r]}</b></button>`)
+                .join('');
+
+            const list = hcSortIssues(hcFilteredIssues(false));
+            const shown = hcState.showAll ? list : list.slice(0, HC_PAGE_SIZE);
+            const rows = shown.map((i, idx) => `<tr class="${i.scope !== 'file' ? 'hc-issue-row' : ''}" ${i.scope !== 'file' ? `data-hc-issue="${idx}" title="${i.doc ? 'คลิกเพื่อเปิดเอกสารนี้ในหน้า Document' : 'คลิกเพื่อดูเอกสารที่สินค้านี้มีอยู่ในหน้า Document'}"` : ''}>
+                    <td>${hcSevPill(i.sev)}</td>
+                    <td style="white-space:nowrap">${escAttr(hcCatLabel(i.cat))}</td>
+                    <td>${i.scope !== 'file' ? `<span class="doc-bu">${escAttr(i.bu)}</span>` : '-'}</td>
+                    <td>${escAttr(i.product)}${i.typeCode ? ` ${docTypeBadge(i.typeCode)}` : ''}</td>
+                    <td><b>${escAttr(i.label)}</b><div class="mono">${escAttr(i.docName)}</div></td>
+                    <td>${escAttr(i.detail)}</td>
+                    <td style="color:#4b5563">${escAttr(i.fix)}</td>
+                    <td class="mono" style="text-align:right">${i.row || ''}</td>
+                </tr>`).join('');
+            hcState.shownIssues = shown;
+            const more = list.length > shown.length
+                ? `<div class="hc-note">แสดง ${shown.length.toLocaleString()} จาก ${list.length.toLocaleString()} รายการ — <button type="button" class="underline text-blue-700" data-hc-show-all>แสดงทั้งหมด</button> หรือใช้ตัวกรอง / Export</div>`
+                : '';
+            const table = list.length
+                ? `<div class="doc-table-wrap" style="max-height:60vh"><table class="doc-table"><thead><tr>
+                        <th>ความรุนแรง</th><th>หมวด</th><th>BU</th><th>สินค้า</th><th>ปัญหา / เอกสาร</th><th>รายละเอียด</th><th>วิธีแก้</th><th title="เลขแถวในไฟล์ Link Master">แถว</th>
+                    </tr></thead><tbody>${rows}</tbody></table></div>${more}`
+                : '<div class="doc-empty">ไม่พบปัญหาตามตัวกรองที่เลือก 🎉</div>';
+
+            const buTable = `<div class="doc-table-wrap"><table class="doc-table"><thead><tr>
+                    <th>BU</th><th>เอกสาร</th><th title="สินค้าที่มีเอกสารบังคับครบ / สินค้าทั้งหมดของ BU">สินค้าครบ</th><th>เอกสารบังคับ</th><th>คะแนน</th>${HC_CATEGORIES.filter(c => !c.pending && c.id !== 'freshness').map(c => `<th>${escAttr(c.label)}</th>`).join('')}
+                    <th>${hcSevPill('high')}</th><th>${hcSevPill('medium')}</th><th>${hcSevPill('low')}</th>
+                </tr></thead><tbody>${hcState.buRows.map(r => `<tr class="hc-issue-row" data-hc-bu="${escAttr(r.bu)}" title="คลิกเพื่อกรองเฉพาะ BU นี้">
+                    <td><span class="doc-bu">${escAttr(r.bu)}</span></td><td>${r.docs}</td>
+                    <td style="white-space:nowrap">${r.reqProducts ? `<b class="${hcScoreClass(Math.round(100 * r.completeProducts / r.reqProducts))}">${r.completeProducts}/${r.reqProducts}</b> <span style="color:#6b7280">(${Math.round(100 * r.completeProducts / r.reqProducts)}%)</span>` : '<span style="color:#9ca3af">ไม่ได้ตั้ง</span>'}</td>
+                    <td>${r.required.map(docTypeBadge).join(' ')}</td>
+                    <td><b class="${hcScoreClass(r.score)}">${r.score}</b></td>
+                    ${HC_CATEGORIES.filter(c => !c.pending && c.id !== 'freshness').map(c => `<td class="${hcScoreClass(r.scores[c.id])}">${r.scores[c.id]}</td>`).join('')}
+                    <td>${r.high || ''}</td><td>${r.medium || ''}</td><td>${r.low || ''}</td>
+                </tr>`).join('')}</tbody></table></div>`;
+
+            const pending = `<div class="hc-pending-box"><b>การตรวจที่จะเพิ่มในเฟสถัดไป</b><ul>
+                    <li>แถวที่กรอกไม่ครบจนถูกตัดทิ้งตอนแปลงไฟล์ (ไม่มี Link / Group Name) — ให้หน้า Convert บันทึก Sheet "แถวที่ถูกตัดทิ้ง" เพิ่มใน Link Master</li>
+                    <li>ความสอดคล้อง Main ↔ Document และหลักฐานรองรับ Credit — รอตกลงรหัสจับคู่สินค้า (Green Cat. Code ยังว่างทุกแถว)</li>
+                    <li>ตรวจว่าลิงก์ SharePoint ยังเปิดได้จริง — ต้องใช้ Microsoft Graph / Power Automate (เว็บนี้ตรวจได้แค่รูปแบบลิงก์)</li>
+                </ul></div>`;
+
+            elHcBody.innerHTML = `${top}
+                ${renderProductCompleteness()}
+                <div class="hc-section-title">รายการปัญหา <span class="sub">${list.length.toLocaleString()} รายการ · คลิกแถวเพื่อเปิดในหน้า Document · กติกาทั้งหมดปรับได้ที่หน้า Setting</span></div>
+                <div class="hc-rules">${ruleChips}</div>
+                ${table}
+                <div class="hc-section-title">คะแนนแยก BU <span class="sub">เรียงจากคะแนนต่ำสุด · ไม่รวมความสดของไฟล์</span></div>
+                ${buTable}
+                ${pending}`;
+        }
+
+        // ส่วน "สินค้าที่เอกสารยังไม่ครบ" — ชิปเขียว = มีแล้ว · ส้ม = มีแต่หมดอายุ (นับว่าขาด) · แดงเส้นประ = ยังไม่มี
+        function renderProductCompleteness() {
+            if (!appSettings.rules.doc_missing.on) {
+                return '<div class="hc-pending-box">ปิดกฎ "ขาดเอกสารบังคับ" ไว้ในหน้า Setting — เปิดเพื่อดูว่าสินค้าไหนเอกสารยังไม่ครบ</div>';
+            }
+            const cat = elHcCat.value;
+            if (cat && cat !== 'completeness') return '';
+            const all = hcState.completeness;
+            if (!all.length) return '<div class="hc-pending-box">ยังไม่ได้ตั้ง "เอกสารบังคับต่อ BU" ในหน้า Setting</div>';
+            const bu = elHcBu.value, q = elHcSearch.value.trim().toLowerCase(), mt = hcState.missType;
+            const scope = all.filter(pc => (!bu || pc.p.bu === bu) &&
+                (!q || [pc.p.group, ...pc.p.names, ...pc.p.skus].some(x => x && x.toLowerCase().includes(q))));
+            const incomplete = scope.filter(pc => pc.missing.length && (!mt || ciIncludes(pc.missing, mt)))
+                .sort((a, b) => (b.missing.length / b.required.length) - (a.missing.length / a.required.length) ||
+                    a.p.bu.localeCompare(b.p.bu) || a.p.group.localeCompare(b.p.group, ['th', 'en']));
+            const complete = scope.filter(pc => !pc.missing.length).length;
+            const pct = scope.length ? Math.round(100 * complete / scope.length) : 0;
+            const missCount = t => scope.filter(pc => ciIncludes(pc.missing, t)).length;
+            const missTypes = [...new Set(all.flatMap(pc => pc.missing))].sort((a, b) => missCount(b) - missCount(a));
+            const typeChips = missTypes.map(t =>
+                `<button type="button" class="hc-rule ${mt === t ? 'active' : ''}" data-hc-miss-type="${escAttr(t)}">ขาด ${docTypeBadge(t)} <b>${missCount(t)}</b></button>`).join('');
+
+            const shown = hcState.showAllProducts ? incomplete : incomplete.slice(0, HC_PRODUCT_PAGE_SIZE);
+            const rows = shown.map(pc => {
+                const chips = pc.required.map(t => {
+                    if (pc.expired.includes(t)) return `<span class="hc-need exp" title="มีเอกสาร ${escAttr(t)} แต่หมดอายุแล้วทั้งหมด">${docTypeBadge(t)} หมดอายุ</span>`;
+                    if (pc.missing.includes(t)) return `<span class="hc-need miss" title="ยังไม่มีเอกสาร ${escAttr(t)}">${docTypeBadge(t)} ขาด</span>`;
+                    const doc = pc.p.docs.find(d => d.typeCode.toLowerCase() === t.toLowerCase() && d.status !== 'expired' && d.url);
+                    return doc
+                        ? `<a class="hc-need ok" href="${escAttr(doc.url)}" target="_blank" rel="noopener noreferrer" title="${escAttr(doc.docName)}">${docTypeBadge(t)} ✓</a>`
+                        : `<span class="hc-need ok">${docTypeBadge(t)} ✓</span>`;
+                }).join('');
+                const extra = [...new Set(pc.p.docs.map(d => d.typeCode))].filter(t => !ciIncludes(pc.required, t));
+                const have = pc.required.length - pc.missing.length;
+                return `<tr class="hc-issue-row" data-hc-product="${escAttr(pc.p.pkey)}" title="คลิกเพื่อดูเอกสารที่สินค้านี้มีอยู่ในหน้า Document">
+                        <td><span class="doc-bu">${escAttr(pc.p.bu)}</span></td>
+                        <td>${escAttr(pc.p.group)}</td>
+                        <td><div class="hc-needs">${chips}</div></td>
+                        <td>${extra.map(docTypeBadge).join(' ')}</td>
+                        <td style="text-align:right;white-space:nowrap"><b class="${hcScoreClass(Math.round(100 * have / pc.required.length))}">${have}/${pc.required.length}</b></td>
+                    </tr>`;
+            }).join('');
+            const more = incomplete.length > shown.length
+                ? `<div class="hc-note">แสดง ${shown.length} จาก ${incomplete.length} สินค้า — <button type="button" class="underline text-blue-700" data-hc-show-all-products>แสดงทั้งหมด</button></div>` : '';
+            const table = incomplete.length
+                ? `<div class="doc-table-wrap" style="max-height:50vh"><table class="doc-table"><thead><tr>
+                        <th>BU</th><th>สินค้า</th><th>เอกสารบังคับ</th><th>เอกสารอื่นที่มี</th><th style="text-align:right">มี/ต้องมี</th>
+                    </tr></thead><tbody>${rows}</tbody></table></div>${more}`
+                : '<div class="doc-empty">ทุกสินค้าตามตัวกรองมีเอกสารบังคับครบ 🎉</div>';
+            return `<div class="hc-section-title">สินค้าที่เอกสารยังไม่ครบ
+                    <span class="sub">ครบ <b class="${hcScoreClass(pct)}">${complete}/${scope.length}</b> สินค้า (${pct}%) · ยังไม่ครบ ${scope.length - complete} สินค้า · เทียบกับ "เอกสารบังคับต่อ BU" ในหน้า Setting${appSettings.completeness.expiredCountsAsMissing ? ' · เอกสารหมดอายุนับเป็นขาด' : ''}</span></div>
+                <div class="hc-rules">${typeChips}</div>
+                ${table}
+                <div class="hc-note">นับเฉพาะสินค้าที่มีอยู่ใน Link Master แล้ว — สินค้าที่อยู่ในหน้า Main แต่ไม่มีเอกสารเลย จะตรวจได้หลังตกลงรหัสจับคู่สินค้า</div>`;
+        }
+
+        // เปิดสินค้าในหน้า Document (การ์ดสินค้า ค้นหาด้วยชื่อสินค้า + BU)
+        function openProductInDocument(pkey) {
+            const p = groupDocsByProduct(docState.docs).find(x => x.pkey === pkey);
+            if (!p) return;
+            docState.focus = null;
+            docState.view = 'cards';
+            elDocSearch.value = p.group;
+            elDocFilterType.value = '';
+            elDocFilterBu.value = [...elDocFilterBu.options].some(o => o.value === p.bu) ? p.bu : '';
+            showPage('document');
+        }
+
+        // เปิดเอกสารของปัญหานั้นในหน้า Document (มุมมองรายการ กรองเฉพาะสินค้า × ประเภทเอกสาร)
+        function openIssueInDocument(issue) {
+            if (issue.scope === 'product') { openProductInDocument(issue.pkey); return; }
+            const d = issue.doc;
+            if (!d) return;
+            docState.focus = { pkey: d.pkey, type: d.typeCode, label: d.group };
+            docState.view = 'list';
+            elDocSearch.value = '';
+            elDocFilterBu.value = '';
+            elDocFilterType.value = '';
+            showPage('document');
+        }
+
+        function exportHealthIssues() {
+            if (!hcState.computed) return;
+            const list = hcSortIssues(hcFilteredIssues(false));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(list.map(i => ({
+                'ความรุนแรง': HC_SEVERITY_LABEL[i.sev], 'หมวด': hcCatLabel(i.cat), 'ปัญหา': i.label,
+                'BU': i.bu, 'สินค้า (Group Name)': i.product, 'ประเภทเอกสาร': i.typeCode, 'เอกสาร': i.docName,
+                'รายละเอียด': i.detail, 'วิธีแก้': i.fix, 'แถวใน Link Master': i.row || '', 'URL': (i.doc && i.doc.url) || ''
+            }))), 'รายการปัญหา');
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hcState.buRows.map(r => ({
+                'BU': r.bu, 'เอกสาร': r.docs, 'คะแนนรวม': r.score,
+                ...Object.fromEntries(HC_CATEGORIES.filter(c => !c.pending && c.id !== 'freshness').map(c => [c.label, r.scores[c.id]])),
+                'สูง': r.high, 'กลาง': r.medium, 'ต่ำ': r.low
+            }))), 'สรุปตาม BU');
+            const buF = elHcBu.value;
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(hcState.completeness
+                .filter(pc => !buF || pc.p.bu === buF)
+                .slice().sort((a, b) => b.missing.length - a.missing.length || a.p.bu.localeCompare(b.p.bu))
+                .map(pc => ({
+                    'BU': pc.p.bu, 'สินค้า (Group Name)': pc.p.group, 'สถานะ': pc.missing.length ? 'ยังไม่ครบ' : 'ครบ',
+                    'เอกสารบังคับ': pc.required.join(', '), 'มีแล้ว': pc.have.join(', '),
+                    'ขาด': pc.missing.filter(t => !pc.expired.includes(t)).join(', '), 'หมดอายุ (นับเป็นขาด)': pc.expired.join(', '),
+                    'มี/ต้องมี': `${pc.required.length - pc.missing.length}/${pc.required.length}`
+                }))), 'ความครบรายสินค้า');
+            const byRule = {};
+            list.forEach(i => { byRule[i.rule] = (byRule[i.rule] || 0) + 1; });
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(Object.keys(byRule).map(r => ({
+                'หมวด': hcCatLabel(HC_RULES[r].cat), 'ปัญหา': HC_RULES[r].label, 'ความรุนแรง': HC_SEVERITY_LABEL[appSettings.rules[r].sev],
+                'จำนวน': byRule[r], 'วิธีแก้': HC_RULES[r].fix
+            }))), 'สรุปตามกฎ');
+            const d = new Date();
+            const stamp = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+            XLSX.writeFile(wb, `Health_Check_${stamp}.xlsx`);
+        }
+
+        elHcBody.addEventListener('click', (e) => {
+            const catBtn = e.target.closest('[data-hc-cat]');
+            if (catBtn) { elHcCat.value = elHcCat.value === catBtn.dataset.hcCat ? '' : catBtn.dataset.hcCat; hcState.rule = ''; hcState.showAll = false; renderHealthPage(); return; }
+            const ruleBtn = e.target.closest('[data-hc-rule]');
+            if (ruleBtn) { hcState.rule = hcState.rule === ruleBtn.dataset.hcRule ? '' : ruleBtn.dataset.hcRule; hcState.showAll = false; renderHealthPage(); return; }
+            if (e.target.closest('[data-hc-show-all]')) { hcState.showAll = true; renderHealthPage(); return; }
+            if (e.target.closest('[data-hc-show-all-products]')) { hcState.showAllProducts = true; renderHealthPage(); return; }
+            const missBtn = e.target.closest('[data-hc-miss-type]');
+            if (missBtn) { hcState.missType = hcState.missType === missBtn.dataset.hcMissType ? '' : missBtn.dataset.hcMissType; hcState.showAllProducts = false; renderHealthPage(); return; }
+            const prodRow = e.target.closest('[data-hc-product]');
+            if (prodRow) { if (!e.target.closest('a')) openProductInDocument(prodRow.dataset.hcProduct); return; }
+            const buRow = e.target.closest('[data-hc-bu]');
+            if (buRow) { elHcBu.value = buRow.dataset.hcBu; hcState.showAll = false; renderHealthPage(); elHcBody.scrollTop = 0; return; }
+            const row = e.target.closest('[data-hc-issue]');
+            if (row && !e.target.closest('a')) openIssueInDocument(hcState.shownIssues[+row.dataset.hcIssue]);
+        });
+        [elHcSev, elHcCat, elHcBu].forEach(el => el.addEventListener('change', () => { hcState.showAll = false; if (el === elHcCat) hcState.rule = ''; renderHealthPage(); }));
+        elHcSearch.addEventListener('input', debounce(() => { hcState.showAll = false; renderHealthPage(); }, 150));
+        document.getElementById('hc-refresh').addEventListener('click', () => ensureHealthData(true));
+        document.getElementById('hc-export').addEventListener('click', exportHealthIssues);
+
+        // ข้อมูลเอกสารเปลี่ยน (โหลดใหม่ / เปิดไฟล์จากเครื่อง) → ตรวจใหม่ + วาดหน้าที่เปิดอยู่ใหม่
+        function onDocsChanged() {
+            if (hcState.computed) {
+                computeHealth();
+                if (!elHealthPage.classList.contains('page-hidden')) renderHealthPage();
+            }
+            if (!elSettingPage.classList.contains('page-hidden')) renderSettingPage();
+        }
+
+        // ============================================================================
+        // หน้า SETTING — แก้กติกาเป็น "ฉบับร่าง" (stDraft) ก่อน กดบันทึกแล้วจึงมีผลกับหน้า Document / Health Check
+        // สิทธิ์: Role เดียว — ทุกคนที่ Login เข้าเว็บได้ แก้ Setting ได้
+        // ============================================================================
+        const elSettingPage = document.getElementById('setting-page');
+        const elStBody = document.getElementById('st-body');
+        let stDraft = cloneSettings(appSettings);
+        let stDirty = false;
+        let stTestName = '';
+        let stNotice = '';
+
+        function openSettingPage() {
+            if (!stDirty) stDraft = cloneSettings(appSettings);
+            renderSettingPage();
+            if (!docState.loaded) loadDocs(false); // ข้อมูลจริงใช้แสดง "ค่าที่พบ" — โหลดเสร็จแล้ว onDocsChanged จะวาดหน้านี้ใหม่
+        }
+
+        // สแกนข้อมูลจริง → ค่าที่พบ + จำนวน (ใช้แสดงในส่วน "ค่าที่อนุญาต")
+        function detectValues(docs, s) {
+            const types = new Map(), prefixes = new Map(), bus = new Map();
+            const sep = s.fileName.separator || '';
+            docs.forEach(d => {
+                if (d.rawTypeCode) {
+                    const t = types.get(d.rawTypeCode) || { count: 0, full: d.typeFull };
+                    t.count++; types.set(d.rawTypeCode, t);
+                }
+                if (d.bu && d.bu !== '-') bus.set(d.bu, (bus.get(d.bu) || 0) + 1);
+                const n = d.docName;
+                if (sep && n.includes(sep) && !/^https?:\/\//i.test(n)) {
+                    const p = n.split(sep)[0].trim();
+                    if (p && p.length <= 30) prefixes.set(p, (prefixes.get(p) || 0) + 1);
+                }
+            });
+            return { types, prefixes, bus };
+        }
+
+        // ต่อ BU: จำนวนสินค้า และจำนวนสินค้าที่มีเอกสารแต่ละประเภท (ไม่นับเอกสารที่หมดอายุแล้ว)
+        function stCoverage() {
+            const out = {};
+            groupDocsByProduct(docState.docs).forEach(p => {
+                const c = (out[p.bu] = out[p.bu] || { n: 0, t: {} });
+                c.n++;
+                new Set(p.docs.filter(d => d.status !== 'expired').map(d => d.typeCode)).forEach(t => { c.t[t] = (c.t[t] || 0) + 1; });
+            });
+            return out;
+        }
+
+        // ผลของรูปแบบชื่อไฟล์ (ฉบับร่าง) กับข้อมูลจริง — ไม่นับช่องที่เป็น URL หรือหลายไฟล์ในช่องเดียว (มีกฎแยก)
+        function stLiveStats() {
+            const compiled = buildFileNameRegex(stDraft.fileName);
+            let total = 0, pass = 0;
+            const fails = [];
+            docState.docs.forEach(d => {
+                const n = d.docName;
+                if (/^https?:\/\//i.test(n) || /\n/.test(n) || (n.match(/\.(pdf|docx?|xlsx?|pptx?|jpe?g|png)\b/gi) || []).length > 1) return;
+                total++;
+                const r = checkFileName(n, stDraft, compiled);
+                if (r.ok) pass++;
+                else if (fails.length < 6) fails.push({ name: n, why: r.checks.filter(c => !c.ok).map(c => c.msg).join(' · ') });
+            });
+            return { total, pass, fails };
+        }
+
+        function stTestHtml() {
+            const name = stTestName || exampleFileName(stDraft);
+            if (!name) return '<span class="hc-note">พิมพ์ชื่อไฟล์เพื่อทดสอบ</span>';
+            const r = checkFileName(name, stDraft);
+            return r.checks.map(c => `<span class="st-chk ${c.ok ? 'ok' : 'bad'}">${c.ok ? '✓' : '✗'} ${escAttr(c.label)}: ${escAttr(c.msg)}</span>`).join('')
+                + `<span class="st-chk ${r.ok ? 'ok' : 'bad'}" style="font-weight:700">${r.ok ? 'ผ่าน' : 'ไม่ผ่าน'}</span>`;
+        }
+
+        function stLiveHtml() {
+            if (!docState.loaded) return '<span class="hc-note">กำลังโหลดข้อมูลจริงเพื่อทดสอบ...</span>';
+            const st = stLiveStats();
+            const pct = st.total ? Math.round(100 * st.pass / st.total) : 0;
+            const src = docState.source.kind === 'mock' ? ' (ข้อมูลตัวอย่าง)' : '';
+            return `<div class="st-livebar">
+                    <span>กับข้อมูลจริง${src}: ผ่าน <b>${st.pass.toLocaleString()}</b> / ${st.total.toLocaleString()} ชื่อไฟล์ (${pct}%)</span>
+                    <div class="hc-bar"><i style="width:${pct}%;background:${hcScoreColor(pct)}"></i></div>
+                    <button type="button" class="btn-pill btn-pill-gray" data-st-goto="fmt_pattern">ดูรายการที่ไม่ผ่านในหน้า Health Check</button>
+                </div>
+                ${st.fails.length ? `<div class="hc-note">ตัวอย่างที่ไม่ผ่าน:</div><ul class="hc-note" style="margin-left:18px;list-style:disc">${st.fails.map(f =>
+                    `<li><span class="mono">${escAttr(f.name)}</span> — ${escAttr(f.why)}</li>`).join('')}</ul>` : ''}
+                ${stDirty ? '<div class="hc-note">* ผลในหน้า Health Check ใช้ค่าที่ "บันทึก" แล้วเท่านั้น</div>' : ''}`;
+        }
+
+        // อัปเดตเฉพาะส่วนที่เปลี่ยนตามการพิมพ์ (ไม่วาดทั้งหน้าใหม่ เพื่อไม่ให้ช่องที่กำลังพิมพ์หลุดโฟกัส)
+        function refreshSettingDynamic() {
+            const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+            set('st-pattern', `รูปแบบ: ${escAttr(describeFileNamePattern(stDraft.fileName))}`);
+            set('st-test-result', stTestHtml());
+            set('st-live', stLiveHtml());
+            set('st-dirty', stDirtyHtml());
+            const testInput = document.getElementById('st-test');
+            if (testInput && !stTestName) testInput.placeholder = exampleFileName(stDraft) || 'พิมพ์ชื่อไฟล์...';
+        }
+        function stDirtyHtml() {
+            if (stNotice) return `<span style="color:#15803d">${escAttr(stNotice)}</span>`;
+            return stDirty ? '● มีการแก้ไขที่ยังไม่ได้บันทึก' : '';
+        }
+
+        function stAllowTable(kind, rows, opts) {
+            // rows: [{ value, count, full, allowed, isNew, missing }]
+            const body = rows.map(r => `<tr class="${r.isNew ? 'st-new' : ''} ${r.missing ? 'st-missing' : ''}">
+                    <td style="width:28px"><input type="checkbox" data-st-allow="${kind}" value="${escAttr(r.value)}" ${r.allowed ? 'checked' : ''}></td>
+                    <td><b>${escAttr(r.value)}</b>${r.isNew ? '<span class="st-tag new">พบใหม่</span>' : ''}${r.missing ? '<span class="st-tag missing">ไม่พบในข้อมูล</span>' : ''}
+                        ${opts.showFull && r.full && r.full !== r.value ? `<div class="hc-note" style="margin:0">${escAttr(r.full)}</div>` : ''}</td>
+                    <td class="num">${r.count.toLocaleString()}</td>
+                </tr>`).join('');
+            const newCount = rows.filter(r => r.isNew).length;
+            return `<div class="st-scroll"><table class="st-table"><thead><tr><th></th><th>ค่า</th><th style="text-align:right">พบ (แถว)</th></tr></thead><tbody>${body}</tbody></table></div>
+                ${newCount ? `<button type="button" class="btn-pill btn-pill-orange" style="margin-top:6px" data-st-accept-all="${kind}">อนุญาตค่าที่พบใหม่ทั้งหมด (${newCount})</button>` : ''}`;
+        }
+
+        function stAllowRows(found, allowedList, fullOf) {
+            const rows = [...found.entries()].map(([value, info]) => {
+                const count = typeof info === 'number' ? info : info.count;
+                const allowed = ciIncludes(allowedList, value);
+                return { value, count, full: fullOf ? fullOf(info) : '', allowed, isNew: !allowed };
+            });
+            allowedList.forEach(v => {
+                if (![...found.keys()].some(k => k.toLowerCase() === v.toLowerCase())) rows.push({ value: v, count: 0, allowed: true, missing: true });
+            });
+            return rows.sort((a, b) => b.isNew - a.isNew || b.count - a.count || a.value.localeCompare(b.value));
+        }
+
+        function renderSettingPage() {
+            const s = stDraft;
+            const fn = s.fileName;
+            const used = new Set(fn.parts.map(p => p.key).filter(k => k !== 'text'));
+            const partsHtml = fn.parts.map((p, i) => {
+                const opts = Object.entries(FILENAME_PART_DEFS).map(([k, def]) =>
+                    `<option value="${k}" ${k === p.key ? 'selected' : ''} ${k !== p.key && k !== 'text' && used.has(k) ? 'disabled' : ''}>${def.label}</option>`).join('');
+                return `${i > 0 ? `<span class="st-sep">${escAttr(fn.separator || '·')}</span>` : ''}
+                    <span class="st-part">
+                        <select data-st-part-key="${i}" aria-label="ส่วนที่ ${i + 1}">${opts}</select>
+                        ${p.key === 'text' ? `<input type="text" data-st-part-text="${i}" value="${escAttr(p.text || '')}" placeholder="ข้อความ">` : ''}
+                        <label class="st-inline" title="ส่วนนี้ไม่ต้องมีก็ได้"><input type="checkbox" data-st-part-opt="${i}" ${p.optional ? 'checked' : ''}>ไม่บังคับ</label>
+                        <button type="button" data-st-part-del="${i}" title="ลบส่วนนี้" ${fn.parts.length <= 1 ? 'disabled' : ''}>✕</button>
+                    </span>`;
+            }).join('');
+
+            const found = detectValues(docState.docs, s);
+            const typeRows = stAllowRows(found.types, s.allowed.types, info => info.full);
+            const buRows = stAllowRows(found.bus, s.allowed.bus);
+            const prefixKeys = new Set([...found.prefixes.keys(), ...Object.keys(s.allowed.prefixMap)]);
+            const prefixRows = [...prefixKeys].map(p => {
+                const count = found.prefixes.get(p) || 0;
+                const mapped = prefixToType(s, p);
+                return { p, count, mapped, isNew: !mapped, missing: count === 0 };
+            }).sort((a, b) => b.isNew - a.isNew || b.count - a.count || a.p.localeCompare(b.p));
+            const typeOptions = sel => `<option value="">— ไม่อนุญาต —</option>` + s.allowed.types.map(t => `<option value="${escAttr(t)}" ${t === sel ? 'selected' : ''}>${escAttr(t)}</option>`).join('');
+            const prefixTable = `<div class="st-scroll"><table class="st-table"><thead><tr><th>คำนำหน้า</th><th style="text-align:right">พบ</th><th>= ประเภท</th></tr></thead><tbody>${prefixRows.map(r =>
+                `<tr class="${r.isNew ? 'st-new' : ''} ${r.missing ? 'st-missing' : ''}">
+                    <td><b>${escAttr(r.p)}</b>${r.isNew ? '<span class="st-tag new">พบใหม่</span>' : ''}${r.missing ? '<span class="st-tag missing">ไม่พบ</span>' : ''}</td>
+                    <td class="num">${r.count}</td>
+                    <td><select class="doc-select" style="padding:2px 6px" data-st-prefix="${escAttr(r.p)}">${typeOptions(r.mapped)}</select></td>
+                </tr>`).join('')}</tbody></table></div>`;
+
+            const srcNote = !docState.loaded ? 'กำลังโหลดข้อมูล...' : `${docState.source.label} · ${docState.docs.length.toLocaleString()} เอกสาร`;
+
+            const catOrder = HC_CATEGORIES.map(c => c.id);
+            const ruleRows = Object.entries(HC_RULES).sort((a, b) => catOrder.indexOf(a[1].cat) - catOrder.indexOf(b[1].cat)).map(([id, def]) => {
+                const r = s.rules[id];
+                return `<tr>
+                    <td style="white-space:nowrap;color:#6b7280">${escAttr(hcCatLabel(def.cat))}</td>
+                    <td>${escAttr(def.label)}</td>
+                    <td><label class="st-inline"><input type="checkbox" data-st-rule-on="${id}" ${r.on ? 'checked' : ''}>เปิด</label></td>
+                    <td><select class="doc-select" style="padding:2px 6px" data-st-rule-sev="${id}" ${r.on ? '' : 'disabled'}>
+                        ${['high', 'medium', 'low'].map(v => `<option value="${v}" ${r.sev === v ? 'selected' : ''}>${HC_SEVERITY_LABEL[v]}</option>`).join('')}</select></td>
+                    <td style="color:#6b7280">${escAttr(def.fix)}</td>
+                </tr>`;
+            }).join('');
+
+            const userRows = USERS_LIST.map(u => `<tr>
+                    <td><b>${escAttr(u.username)}</b></td>
+                    <td style="color:#9ca3af">— (ยังไม่มีใน users.js)</td>
+                    <td style="color:#9ca3af">ยังเก็บเป็นรหัสผ่านตรงๆ ใน users.js</td>
+                    <td>${escAttr(u.role || '-')}</td>
+                </tr>`).join('');
+
+            // เอกสารบังคับต่อ BU — ตาราง BU × ประเภท พร้อมสัดส่วนสินค้าที่มีอยู่แล้วในแต่ละช่อง (ช่วยตัดสินใจ)
+            const cov = stCoverage();
+            const reqBus = [...new Set([...s.allowed.bus, ...Object.keys(cov)])];
+            const reqMap = s.completeness.requiredDocs || {};
+            const reqHead = `<tr><th>BU</th><th style="text-align:right">สินค้า</th>${s.allowed.types.map(t => `<th style="text-align:center">${docTypeBadge(t)}</th>`).join('')}</tr>`;
+            const reqBody = reqBus.map(bu => {
+                const c = cov[bu] || { n: 0, t: {} };
+                const req = reqMap[bu] || [];
+                return `<tr><td><span class="doc-bu">${escAttr(bu)}</span></td><td class="num">${c.n}</td>${s.allowed.types.map(t => {
+                    const have = c.t[t] || 0;
+                    const on = ciIncludes(req, t);
+                    return `<td style="text-align:center;${on ? 'background:#f0fdf4' : ''}"><label style="cursor:pointer;display:block">
+                        <input type="checkbox" data-st-reqdoc="${escAttr(bu)}|${escAttr(t)}" ${on ? 'checked' : ''}>
+                        <div style="font-size:0.65rem;color:${have ? '#4b5563' : '#d1d5db'}">${have}/${c.n}</div></label></td>`;
+                }).join('')}</tr>`;
+            }).join('');
+            const reqCard = `<div class="st-card">
+                    <h2>เอกสารบังคับต่อ BU</h2>
+                    <div class="desc">ติ๊กประเภทเอกสารที่สินค้าทุกตัวใน BU นั้น "ต้องมี" — ใช้ตรวจส่วน "สินค้าที่เอกสารยังไม่ครบ" ในหน้า Health Check · ตัวเลขใต้ช่อง = สินค้าที่มีเอกสารประเภทนั้นแล้ว / สินค้าทั้งหมดของ BU</div>
+                    <div class="st-scroll" style="max-height:none"><table class="st-table"><thead>${reqHead}</thead><tbody>${reqBody}</tbody></table></div>
+                    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:8px">
+                        <button type="button" class="btn-pill btn-pill-gray" data-st-req-auto title="ติ๊กให้อัตโนมัติ: ประเภทที่สินค้าเกินครึ่งหนึ่งของ BU มีอยู่แล้ว">ตั้งจากข้อมูลจริง (ประเภทที่สินค้า &gt; 50% มีแล้ว)</button>
+                        <label class="st-inline"><input type="checkbox" data-st-bool="completeness.expiredCountsAsMissing" ${s.completeness.expiredCountsAsMissing ? 'checked' : ''}>นับเอกสารที่หมดอายุแล้วว่า "ยังขาด"</label>
+                    </div>
+                </div>`;
+
+            elStBody.innerHTML = `
+                <div class="st-banner"><b>Mock:</b> ค่าที่บันทึกตอนนี้เก็บใน<b>เบราว์เซอร์นี้เท่านั้น</b> — ขั้นต่อไปจะย้ายไปเก็บเป็นไฟล์ settings.json บน Google Drive ให้ทุกคนใช้กติกาชุดเดียวกัน (ปุ่ม "ส่งออก settings.json" ด้านล่างได้ไฟล์หน้าตาเดียวกันนั้น)</div>
+
+                <div class="st-card">
+                    <h2>รูปแบบชื่อไฟล์เอกสาร</h2>
+                    <div class="desc">ประกอบรูปแบบจากบล็อก ใช้ตรวจกฎ "ชื่อไฟล์ไม่ตรงรูปแบบ" ในหน้า Health Check และอ่านวันหมดอายุ</div>
+                    <div class="st-parts">${partsHtml}
+                        <button type="button" class="btn-pill btn-pill-gray" data-st-part-add>+ เพิ่มส่วน</button>
+                    </div>
+                    <div class="st-grid2" style="margin-top:10px">
+                        <div><label class="st-label" for="st-sep">ตัวคั่น</label><input type="text" id="st-sep" class="doc-input st-num" data-st-field="fileName.separator" value="${escAttr(fn.separator)}"></div>
+                        <div><label class="st-label" for="st-ext">นามสกุลที่อนุญาต (คั่นด้วย ,)</label><input type="text" id="st-ext" class="doc-input" data-st-field="fileName.extensions" data-st-type="list" value="${escAttr(fn.extensions.join(', '))}"></div>
+                    </div>
+                    <div class="st-pattern" id="st-pattern"></div>
+                    <details style="margin-top:8px">
+                        <summary class="st-label" style="cursor:pointer;display:list-item">โหมดขั้นสูง (Regex) — ถ้าใส่ จะใช้แทนบล็อกด้านบน</summary>
+                        <textarea class="st-textarea" data-st-field="fileName.regex" placeholder="เช่น ^(?<type>[A-Za-z]+)_(?<bu>[A-Z]+)_(?<product>.+?)(?:_Exp(?<exp>\\d{8}))?\\.(?<ext>pdf)$">${escAttr(fn.regex)}</textarea>
+                        <div class="hc-note">ใช้ชื่อกลุ่ม type / bu / product / exp / ext เพื่อให้ระบบตรวจแต่ละส่วนต่อได้</div>
+                    </details>
+                    <div style="margin-top:12px"><label class="st-label" for="st-test">ทดสอบชื่อไฟล์</label>
+                        <input type="text" id="st-test" class="doc-input" style="width:100%" value="${escAttr(stTestName)}" placeholder="${escAttr(exampleFileName(s) || 'พิมพ์ชื่อไฟล์...')}"></div>
+                    <div class="st-test-result" id="st-test-result"></div>
+                    <div id="st-live"></div>
+                </div>
+
+                <div class="st-card">
+                    <h2>ค่าที่อนุญาต — ดึงจากข้อมูลจริงอัตโนมัติ</h2>
+                    <div class="desc">ระบบสแกนไฟล์ Link Master แล้วรวบรวมค่าที่พบจริงให้ ติ๊กเพื่ออนุญาต · <span class="st-tag new">พบใหม่</span> = เจอในข้อมูลแต่ยังไม่อยู่ในรายการ (จะถูกแจ้งเป็นปัญหา) · <span class="st-tag missing">ไม่พบในข้อมูล</span> = อยู่ในรายการแต่ยังไม่มีใครใช้<br>แหล่งข้อมูล: ${escAttr(srcNote)}</div>
+                    <div class="st-grid2">
+                        <div><span class="st-label">ประเภทเอกสาร (คอลัมน์ ประเภทเอกสาร)</span>${stAllowTable('types', typeRows, { showFull: true })}</div>
+                        <div><span class="st-label">คำนำหน้าชื่อไฟล์ → หมายถึงประเภทอะไร</span>${prefixTable}
+                            <div class="hc-note">เช่นไฟล์ GreenChoice_... ให้นับเป็นประเภท GrCh · ถ้าเลือก "ไม่อนุญาต" ชื่อไฟล์ที่ขึ้นต้นแบบนี้จะไม่ผ่านรูปแบบ</div></div>
+                        <div><span class="st-label">BU</span>${stAllowTable('bus', buRows, {})}</div>
+                    </div>
+                </div>
+
+                ${reqCard}
+
+                <div class="st-grid2">
+                    <div class="st-card">
+                        <h2>วันหมดอายุ</h2>
+                        <div class="desc">ใช้ทั้งหน้า Document (สถานะ/สี) และหน้า Health Check</div>
+                        <label class="st-inline">ถือว่า "ใกล้หมดอายุ" เมื่อเหลือไม่เกิน <input type="number" min="1" class="doc-input st-num" data-st-field="expiry.soonDays" data-st-type="num" value="${s.expiry.soonDays}"> วัน</label>
+                        <div class="st-label" style="margin-top:10px">ประเภทที่ "ต้อง" มีวันหมดอายุในชื่อไฟล์</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:10px">${s.allowed.types.map(t =>
+                            `<label class="st-inline"><input type="checkbox" data-st-req="${escAttr(t)}" ${ciIncludes(s.expiry.requiredFor, t) ? 'checked' : ''}>${docTypeBadge(t)}</label>`).join('')}</div>
+                    </div>
+                    <div class="st-card">
+                        <h2>ลิงก์</h2>
+                        <div class="desc">ลิงก์ที่ไม่มีชื่อ Site เหล่านี้อยู่ในลิงก์ จะถูกแจ้งว่า "ไม่ได้อยู่ใน Site ทางการ"</div>
+                        <label class="st-label">Site ทางการ (บรรทัดละ 1 Site)</label>
+                        <textarea class="st-textarea" data-st-field="links.officialSites" data-st-type="lines">${escAttr(s.links.officialSites.join('\n'))}</textarea>
+                        <label class="st-inline" style="margin-top:6px"><input type="checkbox" data-st-bool="links.forbidEmailParam" ${s.links.forbidEmailParam ? 'checked' : ''}>แจ้งเตือนลิงก์ที่มี email= (ลิงก์ผูกกับบุคคล)</label>
+                    </div>
+                    <div class="st-card">
+                        <h2>ความสดของข้อมูล</h2>
+                        <div class="desc">อ่านวันที่แก้ไขล่าสุดของ Master.xlsx และ Link Master.xlsx จาก Google Drive</div>
+                        <label class="st-inline">เตือนเมื่อไม่ได้อัปเดตเกิน <input type="number" min="1" class="doc-input st-num" data-st-field="freshness.maxDays" data-st-type="num" value="${s.freshness.maxDays}"> วัน</label>
+                    </div>
+                </div>
+
+                <div class="st-card">
+                    <h2>กฎและระดับความรุนแรง</h2>
+                    <div class="desc">เปิด/ปิดกฎ และกำหนดระดับ — สูง = เสี่ยงต่อการอ้างสิทธิ์ผิด · กลาง = ต้องแก้เร็ว · ต่ำ = ความสะอาดของข้อมูล (ระดับมีผลต่อการหักคะแนน: สูง 1 · กลาง 0.6 · ต่ำ 0.25)</div>
+                    <div class="st-scroll" style="max-height:none"><table class="st-table"><thead><tr><th>หมวด</th><th>กฎ</th><th>เปิดใช้</th><th>ความรุนแรง</th><th>วิธีแก้ที่แนะนำ</th></tr></thead><tbody>${ruleRows}</tbody></table></div>
+                </div>
+
+                <div class="st-card">
+                    <h2>ผู้ใช้งานและสิทธิ์ <span class="st-tag missing" style="font-size:0.68rem">โครงสร้าง — ยังไม่เปิดใช้</span></h2>
+                    <div class="desc">สิทธิ์มี Role เดียว: ทุกคนที่ Login ได้ แก้ Setting ได้ · ตารางผู้ใช้จะเก็บ 4 คอลัมน์ตามโครงสร้างด้านล่าง</div>
+                    <div class="st-grid2">
+                        <div><span class="st-label">โครงสร้างตาราง Users</span>
+                            <table class="st-table"><thead><tr><th>คอลัมน์</th><th>ชนิด</th><th>ตัวอย่าง / กติกา</th></tr></thead><tbody>
+                                <tr><td><b>Username</b></td><td>ข้อความ</td><td>ห้ามซ้ำ ไม่สนตัวพิมพ์เล็ก-ใหญ่ เช่น <span class="mono">somchai</span></td></tr>
+                                <tr><td><b>Email</b></td><td>ข้อความ</td><td>อีเมลองค์กร ใช้ติดต่อ/รีเซ็ตรหัสผ่าน</td></tr>
+                                <tr><td><b>Password (Hash)</b></td><td>ข้อความ</td><td>เก็บเฉพาะค่า Hash + Salt ห้ามเก็บรหัสผ่านจริง เช่น <span class="mono">pbkdf2-sha256$100000$&lt;salt&gt;$&lt;hash&gt;</span></td></tr>
+                                <tr><td><b>Role</b></td><td>ข้อความ</td><td>ตอนนี้มีค่าเดียว: <span class="mono">editor</span> (เผื่อแยกสิทธิ์ภายหลัง)</td></tr>
+                            </tbody></table>
+                        </div>
+                        <div><span class="st-label">ผู้ใช้ปัจจุบัน (จาก users.js) เมื่อจัดตามโครงสร้างใหม่</span>
+                            <table class="st-table"><thead><tr><th>Username</th><th>Email</th><th>Password (Hash)</th><th>Role</th></tr></thead><tbody>${userRows}</tbody></table>
+                            <div class="hc-note">หมายเหตุ: users.js เป็นไฟล์ที่ใครก็เปิดอ่านได้ — การเก็บ Hash ช่วยไม่ให้เห็นรหัสผ่านตรงๆ แต่ยังไม่ใช่ระบบความปลอดภัยจริง ถ้าต้องการจริงจังควรใช้ระบบ Login ฝั่ง Server (เช่น Microsoft Entra ID)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="st-actions">
+                    <span class="st-dirty" id="st-dirty"></span>
+                    <button type="button" class="btn-pill btn-pill-gray" data-st-action="export">ส่งออก settings.json</button>
+                    <button type="button" class="btn-pill btn-pill-gray" data-st-action="defaults">คืนค่าเริ่มต้น</button>
+                    <button type="button" class="btn-pill btn-pill-gray" data-st-action="cancel" ${stDirty ? '' : 'disabled'}>ยกเลิกการแก้ไข</button>
+                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded text-sm shadow-sm" data-st-action="save">บันทึก</button>
+                </div>`;
+            refreshSettingDynamic();
+        }
+
+        function stMarkDirty() { stDirty = true; stNotice = ''; }
+
+        function stSetField(path, type, raw) {
+            const [a, b] = path.split('.');
+            let v = raw;
+            if (type === 'list') v = raw.split(',').map(x => x.trim().replace(/^\./, '')).filter(Boolean);
+            else if (type === 'lines') v = raw.split('\n').map(x => x.trim()).filter(Boolean);
+            else if (type === 'num') { v = parseInt(raw, 10); if (!(v > 0)) return; }
+            stDraft[a][b] = v;
+        }
+
+        function toggleInList(list, value, on) {
+            const i = list.findIndex(x => x.toLowerCase() === value.toLowerCase());
+            if (on && i < 0) list.push(value);
+            if (!on && i >= 0) list.splice(i, 1);
+        }
+
+        function saveSettings() {
+            appSettings = normalizeSettings(cloneSettings(stDraft));
+            try { localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appSettings)); }
+            catch (e) { /* storage ปิดอยู่ — ค่ายังมีผลจนกว่าจะปิดหน้า */ }
+            stDraft = cloneSettings(appSettings);
+            stDirty = false;
+            stNotice = '✓ บันทึกแล้ว (ในเบราว์เซอร์นี้) — หน้า Document และ Health Check ใช้ค่าใหม่แล้ว';
+            refreshDocStatuses();
+            if (hcState.computed) computeHealth();
+            renderSettingPage();
+        }
+
+        elStBody.addEventListener('input', (e) => {
+            const t = e.target;
+            if (t.id === 'st-test') { stTestName = t.value; document.getElementById('st-test-result').innerHTML = stTestHtml(); return; }
+            if (t.dataset.stField) { stSetField(t.dataset.stField, t.dataset.stType, t.value); stMarkDirty(); }
+            else if (t.dataset.stPartText !== undefined) { stDraft.fileName.parts[+t.dataset.stPartText].text = t.value; stMarkDirty(); }
+            else return;
+            if (t.dataset.stField === 'fileName.separator') {
+                document.querySelectorAll('#st-body .st-sep').forEach(el => { el.textContent = t.value || '·'; });
+            }
+            stLiveDebounced();
+            refreshSettingDynamicLight();
+        });
+        const stLiveDebounced = debounce(() => {
+            const el = document.getElementById('st-live');
+            if (el) el.innerHTML = stLiveHtml();
+        }, 200);
+        function refreshSettingDynamicLight() {
+            const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+            set('st-pattern', `รูปแบบ: ${escAttr(describeFileNamePattern(stDraft.fileName))}`);
+            set('st-test-result', stTestHtml());
+            set('st-dirty', stDirtyHtml());
+            const cancel = elStBody.querySelector('[data-st-action="cancel"]');
+            if (cancel) cancel.disabled = !stDirty;
+        }
+
+        // การเปลี่ยนที่กระทบโครงสร้างหน้า (select / checkbox) → วาดทั้งหน้าใหม่
+        elStBody.addEventListener('change', (e) => {
+            const t = e.target, ds = t.dataset;
+            const parts = stDraft.fileName.parts;
+            if (ds.stPartKey !== undefined) { parts[+ds.stPartKey] = { key: t.value, optional: parts[+ds.stPartKey].optional, text: '' }; }
+            else if (ds.stPartOpt !== undefined) { parts[+ds.stPartOpt].optional = t.checked; }
+            else if (ds.stAllow) {
+                toggleInList(stDraft.allowed[ds.stAllow], t.value, t.checked);
+                if (ds.stAllow === 'types' && !t.checked) {
+                    // ประเภทที่ถูกถอดออก: ล้าง mapping คำนำหน้าและ "ต้องมีวันหมดอายุ" ที่ชี้ไปหาด้วย
+                    Object.keys(stDraft.allowed.prefixMap).forEach(p => { if (stDraft.allowed.prefixMap[p].toLowerCase() === t.value.toLowerCase()) delete stDraft.allowed.prefixMap[p]; });
+                    toggleInList(stDraft.expiry.requiredFor, t.value, false);
+                    Object.values(stDraft.completeness.requiredDocs).forEach(list => toggleInList(list, t.value, false));
+                }
+            }
+            else if (ds.stPrefix !== undefined) {
+                const key = Object.keys(stDraft.allowed.prefixMap).find(p => p.toLowerCase() === ds.stPrefix.toLowerCase()) || ds.stPrefix;
+                if (t.value) stDraft.allowed.prefixMap[key] = t.value; else delete stDraft.allowed.prefixMap[key];
+            }
+            else if (ds.stReq) { toggleInList(stDraft.expiry.requiredFor, ds.stReq, t.checked); }
+            else if (ds.stReqdoc) {
+                const [bu, type] = ds.stReqdoc.split('|');
+                const map = stDraft.completeness.requiredDocs;
+                const key = Object.keys(map).find(k => k.toLowerCase() === bu.toLowerCase()) || bu;
+                map[key] = map[key] || [];
+                toggleInList(map[key], type, t.checked);
+            }
+            else if (ds.stBool) { const [a, b] = ds.stBool.split('.'); stDraft[a][b] = t.checked; }
+            else if (ds.stRuleOn) { stDraft.rules[ds.stRuleOn].on = t.checked; }
+            else if (ds.stRuleSev) { stDraft.rules[ds.stRuleSev].sev = t.value; }
+            else return; // ช่องข้อความจัดการใน 'input' แล้ว
+            stMarkDirty();
+            const y = elSettingPage.scrollTop;
+            renderSettingPage();
+            elSettingPage.scrollTop = y;
+        });
+
+        elStBody.addEventListener('click', (e) => {
+            const t = e.target.closest('button');
+            if (!t) return;
+            const ds = t.dataset;
+            const y = elSettingPage.scrollTop;
+            if (ds.stPartAdd !== undefined) {
+                const used = new Set(stDraft.fileName.parts.map(p => p.key));
+                const next = ['type', 'bu', 'product', 'exp'].find(k => !used.has(k)) || 'text';
+                stDraft.fileName.parts.push({ key: next, optional: next === 'exp', text: '' });
+            } else if (ds.stPartDel !== undefined) {
+                if (stDraft.fileName.parts.length <= 1) return;
+                stDraft.fileName.parts.splice(+ds.stPartDel, 1);
+            } else if (ds.stAcceptAll) {
+                const found = detectValues(docState.docs, stDraft)[ds.stAcceptAll];
+                found.forEach((_, v) => toggleInList(stDraft.allowed[ds.stAcceptAll], v, true));
+            } else if (ds.stReqAuto !== undefined) {
+                const cov = stCoverage();
+                const map = {};
+                Object.entries(cov).forEach(([bu, c]) => {
+                    map[bu] = stDraft.allowed.types.filter(t => (c.t[t] || 0) / c.n > 0.5);
+                });
+                stDraft.completeness.requiredDocs = map;
+            } else if (ds.stGoto) {
+                hcState.rule = ds.stGoto;
+                elHcCat.value = ''; elHcSev.value = ''; elHcBu.value = ''; elHcSearch.value = '';
+                showPage('health');
+                return;
+            } else if (ds.stAction === 'save') { saveSettings(); elSettingPage.scrollTop = y; return; }
+            else if (ds.stAction === 'cancel') { stDraft = cloneSettings(appSettings); stDirty = false; stNotice = ''; }
+            else if (ds.stAction === 'defaults') {
+                if (!confirm('คืนค่าทุกอย่างเป็นค่าเริ่มต้น? (ยังไม่บันทึกจนกว่าจะกด "บันทึก")')) return;
+                stDraft = cloneSettings(DEFAULT_SETTINGS); stMarkDirty();
+            } else if (ds.stAction === 'export') {
+                const blob = new Blob([JSON.stringify(normalizeSettings(stDraft), null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'settings.json';
+                a.click();
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+                return;
+            } else return;
+            if (!ds.stAction) stMarkDirty();
+            renderSettingPage();
+            elSettingPage.scrollTop = y;
         });
 
         // Event Listeners สำหรับ Filter
