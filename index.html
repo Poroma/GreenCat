@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SCG Green Product - Data Dashboard</title>
+    <link rel="icon" type="image/png" href="GreenChoice.png">
+    <link rel="apple-touch-icon" href="GreenChoice.png">
     <!-- โหลด Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -621,6 +623,66 @@
         }
         .login-gate-submit:hover { background-color: #15803d; }
         .login-gate-submit:active { transform: scale(0.98); }
+        .login-gate-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: #f3f4f6; border-radius: 10px; padding: 4px; margin-bottom: 14px; }
+        .login-gate-tabs button { border: none; background: none; border-radius: 8px; padding: 6px 4px; font-size: 0.85rem; font-weight: 600; color: #6b7280; cursor: pointer; line-height: 1.2; }
+        .login-gate-tabs button span { display: block; font-size: 0.68rem; font-weight: 400; }
+        .login-gate-tabs button.active { background: white; color: #15803d; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* --- ฟอร์มขอข้อมูล (เฉพาะผู้ใช้ External) --- */
+        .lead-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(17,24,39,0.55); display: flex; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 24px 16px; }
+        .lead-box { position: relative; width: 100%; max-width: 680px; background: white; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); padding: 28px 28px 20px; }
+        .lead-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border: none; border-radius: 9999px; background: #f3f4f6; color: #4b5563; cursor: pointer; font-size: 1rem; }
+        .lead-close:hover { background: #e5e7eb; }
+        .lead-header { text-align: center; margin-bottom: 18px; }
+        .lead-header img { width: 44px; height: 44px; object-fit: contain; margin: 0 auto 6px; display: block; }
+        .lead-title { font-size: 1.25rem; font-weight: 700; color: #15803d; line-height: 1.35; }
+        .lead-sub { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
+        .lead-chat { display: flex; justify-content: center; margin: 0 0 12px; }
+        .lead-chat a { display: inline-flex; align-items: center; gap: 8px; background: #06c755; color: white; border-radius: 9999px; padding: 8px 18px; font-size: 0.85rem; font-weight: 600; text-decoration: none; }
+        .lead-or { display: flex; align-items: center; gap: 12px; color: #9ca3af; font-size: 0.8rem; margin: 4px 0 16px; }
+        .lead-or::before, .lead-or::after { content: ""; flex: 1; height: 1px; background: #e5e7eb; }
+        .lead-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .lead-grid .full { grid-column: 1 / -1; }
+        @media (max-width: 600px) { .lead-grid { grid-template-columns: 1fr; } .lead-box { padding: 24px 16px 16px; } }
+        .lead-section { font-size: 0.85rem; font-weight: 600; color: #111827; margin: 18px 0 10px; }
+        /* ช่องกรอกแบบป้ายลอย (Floating label): ป้ายอยู่ในช่อง แล้วเลื่อนขึ้นเมื่อพิมพ์/โฟกัส */
+        .lead-field { position: relative; }
+        .lead-field input, .lead-field select, .lead-field textarea {
+            width: 100%; border: 1px solid #d1d5db; border-radius: 8px; background: white; color: #111827;
+            font-size: 0.9rem; padding: 20px 12px 6px; outline: none; transition: border-color .15s, box-shadow .15s;
+        }
+        .lead-field select { padding: 20px 10px 6px; appearance: auto; }
+        .lead-field textarea { min-height: 84px; resize: vertical; }
+        .lead-field label.fl { position: absolute; left: 13px; top: 14px; font-size: 0.88rem; color: #6b7280; pointer-events: none; transition: all .15s ease; background: transparent; }
+        .lead-field input:focus + label.fl, .lead-field input:not(:placeholder-shown) + label.fl,
+        .lead-field textarea:focus + label.fl, .lead-field textarea:not(:placeholder-shown) + label.fl,
+        .lead-field select + label.fl { top: 5px; font-size: 0.68rem; color: #15803d; }
+        .lead-field input:focus, .lead-field select:focus, .lead-field textarea:focus { border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+        .lead-err { display: none; color: #dc2626; font-size: 0.72rem; margin-top: 3px; }
+        .lead-field.invalid input, .lead-field.invalid select, .lead-field.invalid textarea { border-color: #dc2626; }
+        .lead-field.invalid .lead-err, .lead-checks.invalid .lead-err, .lead-consent.invalid .lead-err { display: block; }
+        .lead-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+        @media (max-width: 600px) { .lead-checks { grid-template-columns: 1fr; } }
+        .lead-checks label, .lead-consent label { display: flex; align-items: flex-start; gap: 8px; font-size: 0.85rem; color: #374151; cursor: pointer; }
+        .lead-checks input, .lead-consent input { margin-top: 3px; accent-color: #16a34a; flex-shrink: 0; }
+        .lead-consent { margin-top: 16px; }
+        .lead-privacy { font-size: 0.75rem; color: #6b7280; text-align: center; margin: 14px 0 12px; }
+        .lead-privacy a { color: #15803d; text-decoration: underline; }
+        .lead-submit { display: block; width: 100%; max-width: 320px; margin: 0 auto; background: #16a34a; color: white; border: none; border-radius: 9999px; padding: 12px 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+        .lead-submit:hover { background: #15803d; }
+        .lead-submit:disabled { background: #9ca3af; cursor: wait; }
+        .lead-footer { font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 14px; border-top: 1px solid #f3f4f6; padding-top: 12px; }
+        .lead-done { text-align: center; padding: 30px 10px 10px; }
+        .lead-done .ic { width: 56px; height: 56px; border-radius: 9999px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.6rem; }
+        .lead-mock { font-size: 0.75rem; background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; text-align: center; }
+        .lead-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+        /* ปุ่มคัดลอก (Health Check) — กดแล้วไม่พาไปหน้า Document */
+        .copy-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-left: 4px; border: 1px solid transparent; border-radius: 5px; background: none; color: #9ca3af; cursor: pointer; vertical-align: middle; flex-shrink: 0; }
+        .copy-btn:hover { color: #15803d; border-color: #bbf7d0; background: #f0fdf4; }
+        .copy-btn.copied { color: #15803d; }
+        .copy-cell { display: flex; align-items: flex-start; gap: 2px; }
+        .copy-cell > span { flex: 1; min-width: 0; user-select: text; }
     </style>
 </head>
 <body>
@@ -638,13 +700,25 @@
     -->
     <div id="login-gate" class="login-gate">
         <div class="login-gate-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-green-600 mb-3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <h2 class="text-lg font-bold text-gray-800 mb-1 text-center">SCG Green Products Data</h2>
-            <p class="text-sm text-gray-500 mb-4 text-center">กรุณาเข้าสู่ระบบเพื่อใช้งาน (สำหรับพนักงาน SCG เท่านั้น)</p>
-            <input type="text" id="login-gate-username" class="login-gate-input mb-2" placeholder="ชื่อผู้ใช้" autocomplete="off">
-            <input type="password" id="login-gate-input" class="login-gate-input" placeholder="รหัสผ่าน" autocomplete="off">
-            <p id="login-gate-error" class="login-gate-error hidden">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</p>
-            <button id="login-gate-submit" class="login-gate-submit">เข้าสู่ระบบ</button>
+            <div class="flex items-center justify-center gap-2 mb-4">
+                <img src="GreenChoice.png" alt="" width="36" height="36" style="width:36px;height:36px;object-fit:contain">
+                <h2 class="text-lg font-bold text-gray-800">SCG Green Products</h2>
+            </div>
+            <!-- เลือกประเภทผู้ใช้: Internal = Login ด้วยบัญชี เห็นทุกเมนู / External = ไม่ต้องมีบัญชี เห็นเฉพาะตารางหน้า Main -->
+            <div class="login-gate-tabs" role="tablist" aria-label="ประเภทผู้ใช้">
+                <button type="button" role="tab" data-gate-tab="internal" aria-selected="false">Internal<span>พนักงาน SCG</span></button>
+                <button type="button" role="tab" class="active" data-gate-tab="external" aria-selected="true">External<span>บุคคลภายนอก</span></button>
+            </div>
+            <div id="login-gate-internal" class="hidden">
+                <p class="text-sm text-gray-500 mb-4 text-center">พนักงาน SCG กรุณาเข้าสู่ระบบเพื่อใช้งาน</p>
+                <input type="text" id="login-gate-username" class="login-gate-input mb-2" placeholder="ชื่อผู้ใช้" autocomplete="off">
+                <input type="password" id="login-gate-input" class="login-gate-input" placeholder="รหัสผ่าน" autocomplete="off">
+                <p id="login-gate-error" class="login-gate-error hidden">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง</p>
+                <button id="login-gate-submit" class="login-gate-submit">เข้าสู่ระบบ</button>
+            </div>
+            <div id="login-gate-external">
+                <button type="button" id="login-gate-guest" class="login-gate-submit">เข้าใช้งานโดยไม่ใช้บัญชี</button>
+            </div>
         </div>
     </div>
 
@@ -745,6 +819,7 @@
 
                 <div class="flex items-center gap-3">
                     <span class="text-sm text-gray-600 main-only">พบ <span id="count" class="font-bold text-black text-lg">0</span> รายการ</span>
+                    <span id="data-stamp" class="text-xs text-gray-500 main-only"></span>
                     <span class="text-sm text-gray-600 main-only">เลือกไว้ <span id="selected-count" class="font-bold text-orange-600 text-lg">0</span> แถว</span>
                     <button id="btn-clear-highlight" class="btn-pill btn-pill-orange main-only">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
@@ -763,6 +838,11 @@
                     <button id="btn-new" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1.5 rounded text-sm transition-colors border border-gray-300 shadow-sm">อัปโหลดใหม่</button>
 
                     <!-- แสดงว่าตอนนี้ Login ด้วย User ไหน/Role อะไร (มาจาก users.js) -->
+                    <!-- ปุ่มขอข้อมูล: แสดงเฉพาะผู้ใช้ External (ดู applyAccessMode) -->
+                    <button type="button" id="btn-request-info" class="hidden bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-full text-sm font-semibold shadow-sm flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        ขอข้อมูลเพิ่มเติม
+                    </button>
                     <span id="whoami-badge" class="hidden text-xs text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-3 py-1.5"></span>
                     <button id="btn-logout" class="text-sm text-gray-400 hover:text-red-600 underline" title="ออกจากระบบ">ออกจากระบบ</button>
                 </div>
@@ -875,6 +955,91 @@
         โดยไม่ต้องยุ่งกับโค้ดหลักของ Dashboard — ไฟล์ users.js ต้องอยู่โฟลเดอร์เดียวกันนี้เสมอ
         (ถ้าเอาไป Deploy ที่ GitHub Pages หรือที่อื่น ต้องอัปโหลดไฟล์ users.js ขึ้นไปคู่กันด้วย)
     -->
+    <!-- ฟอร์มขอข้อมูลสินค้า (เฉพาะผู้ใช้ External) — ปลายทางการส่งตั้งที่ LEAD_FORM_CONFIG ใน <script> -->
+    <div id="lead-overlay" class="lead-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="lead-title">
+        <div class="lead-box">
+            <button type="button" class="lead-close" id="lead-close" aria-label="ปิด">✕</button>
+            <div class="lead-header">
+                <img src="GreenChoice.png" alt="">
+                <div class="lead-title" id="lead-title">ขอข้อมูลสินค้า SCG Green Products</div>
+                <div class="lead-sub">กรอกข้อมูลด้านล่าง ทีมงานจะติดต่อกลับภายใน 1–2 วันทำการ</div>
+            </div>
+            <div id="lead-mock" class="lead-mock hidden">โหมดทดสอบ: ยังไม่ได้ตั้งปลายทางรับข้อมูล — กดส่งแล้วข้อมูลจะยังไม่ถูกส่งไปที่ใด</div>
+            <div id="lead-chat-row" class="hidden">
+                <div class="lead-chat"><a id="lead-chat-link" href="#" target="_blank" rel="noopener noreferrer">💬 สอบถามทาง LINE</a></div>
+                <div class="lead-or">หรือ</div>
+            </div>
+            <form id="lead-form" novalidate>
+                <div class="lead-grid">
+                    <div class="lead-field"><input id="lead-firstname" name="firstName" type="text" placeholder=" " required autocomplete="given-name"><label class="fl" for="lead-firstname">ชื่อ*</label><span class="lead-err">กรุณาระบุข้อมูล</span></div>
+                    <div class="lead-field"><input id="lead-lastname" name="lastName" type="text" placeholder=" " required autocomplete="family-name"><label class="fl" for="lead-lastname">นามสกุล*</label><span class="lead-err">กรุณาระบุข้อมูล</span></div>
+                    <div class="lead-field"><input id="lead-email" name="email" type="email" placeholder=" " required autocomplete="email"><label class="fl" for="lead-email">อีเมล*</label><span class="lead-err">กรุณาระบุอีเมลให้ถูกต้อง</span></div>
+                    <div class="lead-field"><input id="lead-phone" name="phone" type="tel" inputmode="numeric" maxlength="10" placeholder=" " required autocomplete="tel"><label class="fl" for="lead-phone">เบอร์มือถือ 10 หลัก* (เช่น 0810000000)</label><span class="lead-err">กรุณาระบุเบอร์มือถือ 10 หลัก</span></div>
+                    <div class="lead-field"><input id="lead-company" name="company" type="text" placeholder=" " autocomplete="organization"><label class="fl" for="lead-company">บริษัท / หน่วยงาน</label></div>
+                    <div class="lead-field">
+                        <select id="lead-role" name="role" required>
+                            <option value="">— เลือก —</option>
+                            <option>สถาปนิก / นักออกแบบ</option>
+                            <option>ผู้รับเหมา</option>
+                            <option>เจ้าของโครงการ / Developer</option>
+                            <option>ที่ปรึกษาอาคารเขียว (LEED / TREES / WELL)</option>
+                            <option>ตัวแทนจำหน่าย / ร้านค้า</option>
+                            <option>เจ้าของบ้าน / ผู้ใช้งาน</option>
+                            <option>อื่นๆ</option>
+                        </select><label class="fl" for="lead-role">คุณคือ*</label><span class="lead-err">กรุณาเลือกข้อมูล</span>
+                    </div>
+                    <div class="lead-field full">
+                        <select id="lead-province" name="province" required><option value="">— เลือกจังหวัด —</option><option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option><option value="กระบี่">กระบี่</option><option value="กาญจนบุรี">กาญจนบุรี</option><option value="กาฬสินธุ์">กาฬสินธุ์</option><option value="กำแพงเพชร">กำแพงเพชร</option><option value="ขอนแก่น">ขอนแก่น</option><option value="จันทบุรี">จันทบุรี</option><option value="ฉะเชิงเทรา">ฉะเชิงเทรา</option><option value="ชลบุรี">ชลบุรี</option><option value="ชัยนาท">ชัยนาท</option><option value="ชัยภูมิ">ชัยภูมิ</option><option value="ชุมพร">ชุมพร</option><option value="เชียงราย">เชียงราย</option><option value="เชียงใหม่">เชียงใหม่</option><option value="ตรัง">ตรัง</option><option value="ตราด">ตราด</option><option value="ตาก">ตาก</option><option value="นครนายก">นครนายก</option><option value="นครปฐม">นครปฐม</option><option value="นครพนม">นครพนม</option><option value="นครราชสีมา">นครราชสีมา</option><option value="นครศรีธรรมราช">นครศรีธรรมราช</option><option value="นครสวรรค์">นครสวรรค์</option><option value="นนทบุรี">นนทบุรี</option><option value="นราธิวาส">นราธิวาส</option><option value="น่าน">น่าน</option><option value="บึงกาฬ">บึงกาฬ</option><option value="บุรีรัมย์">บุรีรัมย์</option><option value="ปทุมธานี">ปทุมธานี</option><option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์</option><option value="ปราจีนบุรี">ปราจีนบุรี</option><option value="ปัตตานี">ปัตตานี</option><option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา</option><option value="พะเยา">พะเยา</option><option value="พังงา">พังงา</option><option value="พัทลุง">พัทลุง</option><option value="พิจิตร">พิจิตร</option><option value="พิษณุโลก">พิษณุโลก</option><option value="เพชรบุรี">เพชรบุรี</option><option value="เพชรบูรณ์">เพชรบูรณ์</option><option value="แพร่">แพร่</option><option value="ภูเก็ต">ภูเก็ต</option><option value="มหาสารคาม">มหาสารคาม</option><option value="มุกดาหาร">มุกดาหาร</option><option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option><option value="ยะลา">ยะลา</option><option value="ยโสธร">ยโสธร</option><option value="ระนอง">ระนอง</option><option value="ระยอง">ระยอง</option><option value="ราชบุรี">ราชบุรี</option><option value="ร้อยเอ็ด">ร้อยเอ็ด</option><option value="ลพบุรี">ลพบุรี</option><option value="ลำปาง">ลำปาง</option><option value="ลำพูน">ลำพูน</option><option value="เลย">เลย</option><option value="ศรีสะเกษ">ศรีสะเกษ</option><option value="สกลนคร">สกลนคร</option><option value="สงขลา">สงขลา</option><option value="สตูล">สตูล</option><option value="สมุทรปราการ">สมุทรปราการ</option><option value="สมุทรสงคราม">สมุทรสงคราม</option><option value="สมุทรสาคร">สมุทรสาคร</option><option value="สระบุรี">สระบุรี</option><option value="สระแก้ว">สระแก้ว</option><option value="สิงห์บุรี">สิงห์บุรี</option><option value="สุพรรณบุรี">สุพรรณบุรี</option><option value="สุราษฎร์ธานี">สุราษฎร์ธานี</option><option value="สุรินทร์">สุรินทร์</option><option value="สุโขทัย">สุโขทัย</option><option value="หนองคาย">หนองคาย</option><option value="หนองบัวลำภู">หนองบัวลำภู</option><option value="อ่างทอง">อ่างทอง</option><option value="อำนาจเจริญ">อำนาจเจริญ</option><option value="อุดรธานี">อุดรธานี</option><option value="อุตรดิตถ์">อุตรดิตถ์</option><option value="อุทัยธานี">อุทัยธานี</option><option value="อุบลราชธานี">อุบลราชธานี</option></select>
+                        <label class="fl" for="lead-province">จังหวัดของโครงการ / ที่อยู่*</label><span class="lead-err">กรุณาเลือกจังหวัด</span>
+                    </div>
+                </div>
+
+                <div class="lead-section">ต้องการข้อมูลเรื่องใด* <span style="font-weight:400;color:#6b7280">(เลือกได้มากกว่า 1 ข้อ)</span></div>
+                <div class="lead-checks" id="lead-topics">
+                    <label><input type="checkbox" name="topics" value="ข้อมูลสินค้า / สเปก">ข้อมูลสินค้า / สเปก</label>
+                    <label><input type="checkbox" name="topics" value="เอกสาร EPD / CFP / ฉลากเขียว">เอกสาร EPD / CFP / ฉลากเขียว</label>
+                    <label><input type="checkbox" name="topics" value="การใช้สินค้าเพื่อขอคะแนนอาคารเขียว (LEED / TREES / WELL)">การใช้สินค้าเพื่อขอคะแนนอาคารเขียว (LEED / TREES / WELL)</label>
+                    <label><input type="checkbox" name="topics" value="ใบเสนอราคา / ช่องทางสั่งซื้อ">ใบเสนอราคา / ช่องทางสั่งซื้อ</label>
+                    <span class="lead-err">กรุณาเลือกอย่างน้อย 1 ข้อ</span>
+                </div>
+
+                <div class="lead-grid" style="margin-top:14px">
+                    <div class="lead-field full"><textarea id="lead-products" name="products" placeholder=" "></textarea><label class="fl" for="lead-products">สินค้าที่สนใจ</label></div>
+                    <div class="lead-field full"><textarea id="lead-message" name="message" placeholder=" "></textarea><label class="fl" for="lead-message">รายละเอียดเพิ่มเติม (เช่น ชื่อโครงการ ปริมาณที่ต้องการ)</label></div>
+                </div>
+
+                <div class="lead-section">วันและช่วงเวลาที่สะดวกให้ติดต่อกลับ</div>
+                <div class="lead-grid">
+                    <div class="lead-field">
+                        <select id="lead-contact-day" name="contactDay"><option>วันจันทร์ - ศุกร์</option><option>วันเสาร์ - อาทิตย์</option><option>วันใดก็ได้</option></select>
+                        <label class="fl" for="lead-contact-day">วันที่สะดวก</label>
+                    </div>
+                    <div class="lead-field">
+                        <select id="lead-contact-time" name="contactTime"><option>ทุกช่วงในเวลาทำการ (08:00 - 17:00 น.)</option><option>08.00 - 12.00</option><option>13.00 - 17.00</option></select>
+                        <label class="fl" for="lead-contact-time">ช่วงเวลาที่สะดวก</label>
+                    </div>
+                </div>
+
+                <div class="lead-consent" id="lead-consent-wrap">
+                    <label><input type="checkbox" id="lead-consent" name="consent">ข้าพเจ้ายินยอมให้ SCG เก็บและใช้ข้อมูลข้างต้น เพื่อติดต่อกลับและให้ข้อมูลตามที่ร้องขอ*</label>
+                    <span class="lead-err">กรุณายืนยันความยินยอม</span>
+                </div>
+                <!-- กันบอท: ช่องนี้คนมองไม่เห็น ถ้ามีค่าแปลว่าเป็นบอท -->
+                <div class="lead-hp" aria-hidden="true"><label>Website <input type="text" id="lead-website" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+                <p class="lead-privacy" id="lead-privacy">ข้อมูลของท่านจะใช้เพื่อการติดต่อกลับตามคำขอนี้เท่านั้น</p>
+                <button type="submit" class="lead-submit" id="lead-submit">ส่งคำขอข้อมูล</button>
+            </form>
+            <div id="lead-done" class="lead-done hidden">
+                <div class="ic">✓</div>
+                <div class="lead-title">ได้รับคำขอของคุณแล้ว</div>
+                <div class="lead-sub" id="lead-done-sub">ทีมงานจะติดต่อกลับตามช่องทางและเวลาที่ท่านสะดวก</div>
+                <button type="button" class="lead-submit" style="margin-top:18px" id="lead-done-close">ปิด</button>
+            </div>
+            <div class="lead-footer" id="lead-footer"></div>
+        </div>
+    </div>
+
     <script src="users.js"></script>
 
     <script>
@@ -893,6 +1058,74 @@
         // อัปเดตไฟล์ได้จากหน้า Convert โหมด Linked Master — ถ้าเปลี่ยนไฟล์ ต้องแก้ค่าเดียวกันที่ Convert/index.html ด้วย
         // ถ้าตั้งเป็น '' หน้า Document จะแสดงข้อมูลตัวอย่าง (Mock) แทน
         const LINKED_DRIVE_FILE_ID = '1uPABIAxwXlKCWoCCqLmUUvLCe897_rj8';
+
+        // ============================================================================
+        // จำไฟล์จาก Google Drive ไว้ในเบราว์เซอร์ (IndexedDB) — เปิดหน้าครั้งถัดไปแสดงข้อมูลที่จำไว้ทันที
+        // แล้วถาม Drive เบื้องหลังแค่ "แก้ไขล่าสุดเมื่อไหร่" (เร็วกว่าดาวน์โหลดทั้งไฟล์มาก) โหลดใหม่เฉพาะเมื่อไฟล์เปลี่ยน
+        // ปุ่มรีเฟรชยังบังคับโหลดใหม่ได้ · กด "ออกจากระบบ" = ลบข้อมูลที่จำไว้ทั้งหมด
+        // ถ้าเบราว์เซอร์ปิด IndexedDB (เช่นบางโหมด Private) ทุกฟังก์ชันด้านล่างจะคืนค่าว่าง → ทำงานแบบเดิม (โหลดใหม่ทุกครั้ง)
+        // ============================================================================
+        const DATA_CACHE_DB = 'greencat-cache';
+        const DATA_CACHE_STORE = 'files';
+        let masterTouched = false;      // ผู้ใช้เริ่มใช้ตาราง (กรอง/ค้นหา/Highlight) แล้วหรือยัง — ถ้าใช่ จะไม่สลับข้อมูลใหม่ให้เอง
+        let pendingMaster = null;       // ข้อมูลใหม่ที่รอผู้ใช้กดอัปเดต { rows, modifiedTime }
+
+        function idbOpen() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) { reject(new Error('IndexedDB ไม่พร้อมใช้งาน')); return; }
+                const req = indexedDB.open(DATA_CACHE_DB, 1);
+                req.onupgradeneeded = () => req.result.createObjectStore(DATA_CACHE_STORE);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+        async function cacheGet(key) {
+            try {
+                const db = await idbOpen();
+                return await new Promise((resolve, reject) => {
+                    const q = db.transaction(DATA_CACHE_STORE).objectStore(DATA_CACHE_STORE).get(key);
+                    q.onsuccess = () => resolve(q.result || null);
+                    q.onerror = () => reject(q.error);
+                });
+            } catch (e) { return null; }
+        }
+        async function cacheSet(key, value) {
+            try {
+                const db = await idbOpen();
+                await new Promise((resolve, reject) => {
+                    const tx = db.transaction(DATA_CACHE_STORE, 'readwrite');
+                    tx.objectStore(DATA_CACHE_STORE).put(value, key);
+                    tx.oncomplete = resolve;
+                    tx.onerror = () => reject(tx.error);
+                });
+            } catch (e) { /* จำไม่ได้ก็ไม่เป็นไร ครั้งหน้าโหลดใหม่ */ }
+        }
+        async function cacheClear() {
+            try {
+                const db = await idbOpen();
+                await new Promise(resolve => {
+                    const tx = db.transaction(DATA_CACHE_STORE, 'readwrite');
+                    tx.objectStore(DATA_CACHE_STORE).clear();
+                    tx.oncomplete = resolve;
+                    tx.onerror = resolve;
+                });
+            } catch (e) { /* ignore */ }
+        }
+        async function driveModifiedTime(fileId) {
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?fields=modifiedTime&key=${GOOGLE_API_KEY}&_=${Date.now()}`, { cache: 'no-store' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return (await res.json()).modifiedTime;
+        }
+        async function driveDownload(fileId) {
+            // ใส่ timestamp ต่อท้าย URL กัน Google/เบราว์เซอร์ส่งไฟล์เก่าที่ cache ไว้กลับมา
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${GOOGLE_API_KEY}&_=${Date.now()}`, { cache: 'no-store' });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.arrayBuffer();
+        }
+        function fmtDataTime(iso) {
+            if (!iso) return '';
+            return new Date(iso).toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' น.';
+        }
 
         const GREEN_ATTRS = [
             { id: 'Low Corbon Emission', label: 'Low\nCarbon\nEmission' }, // สะกดตามไฟล์ต้นฉบับ
@@ -1010,6 +1243,10 @@
         const GATE_SESSION_KEY = 'lowcarb_gate_unlocked';
         const GATE_SESSION_USER_KEY = 'lowcarb_gate_user'; // เก็บ username ปัจจุบัน
         const GATE_SESSION_ROLE_KEY = 'lowcarb_gate_role'; // เก็บ role ปัจจุบัน
+        const GATE_SESSION_MODE_KEY = 'lowcarb_gate_mode'; // 'internal' (Login ด้วยบัญชี) | 'external' (ไม่ใช้บัญชี)
+        // External = เห็นเฉพาะตารางหน้า Main (ซ่อนเมนู Burger + showPage() ไม่ยอมเปิดหน้าอื่น)
+        // หมายเหตุ: เป็นการซ่อนฝั่ง Client เท่านั้น เหมือน Login Gate — ไม่ใช่การกันสิทธิ์จริง
+        let gateAccessMode = 'internal';
 
         const elGate = document.getElementById('login-gate');
         const elGateUserInput = document.getElementById('login-gate-username');
@@ -1030,13 +1267,53 @@
             elWhoami.classList.remove('hidden');
         }
 
-        function unlockGate(username, role) {
+        function applyAccessMode(mode) {
+            gateAccessMode = mode === 'external' ? 'external' : 'internal';
+            document.body.dataset.access = gateAccessMode;
+            // อ้าง element ตรงๆ (ตัวแปร elNavMenuBtn ประกาศทีหลัง — initGate() ทำงานก่อนถึงบรรทัดนั้น)
+            document.getElementById('nav-menu-btn').classList.toggle('page-hidden', gateAccessMode === 'external');
+            document.getElementById('btn-request-info').classList.toggle('hidden', gateAccessMode !== 'external');
+        }
+
+        function unlockGate(username, role, mode) {
             elGate.style.display = 'none';
             elGateUserInput.value = '';
             elGateInput.value = '';
-            showWhoami(username, role);
+            applyAccessMode(mode);
+            if (gateAccessMode === 'external') {
+                elWhoami.textContent = '🌐 External (Read-only)';
+                elWhoami.classList.remove('hidden');
+            } else {
+                showWhoami(username, role);
+            }
             loadMasterFile();
         }
+
+        function saveGateSession(user, role, mode) {
+            try {
+                sessionStorage.setItem(GATE_SESSION_KEY, '1');
+                sessionStorage.setItem(GATE_SESSION_USER_KEY, user);
+                sessionStorage.setItem(GATE_SESSION_ROLE_KEY, role);
+                sessionStorage.setItem(GATE_SESSION_MODE_KEY, mode);
+            } catch (e) { /* บาง browser อาจปิด storage ไว้ ไม่เป็นไร แค่ต้องกรอกใหม่ทุกครั้ง */ }
+        }
+
+        // สลับแท็บ Internal / External ในหน้า Login
+        function setGateTab(tab) {
+            document.querySelectorAll('[data-gate-tab]').forEach(b => {
+                const on = b.dataset.gateTab === tab;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            document.getElementById('login-gate-internal').classList.toggle('hidden', tab !== 'internal');
+            document.getElementById('login-gate-external').classList.toggle('hidden', tab !== 'external');
+            if (tab === 'internal') elGateUserInput.focus();
+        }
+        document.querySelectorAll('[data-gate-tab]').forEach(b => b.addEventListener('click', () => setGateTab(b.dataset.gateTab)));
+        document.getElementById('login-gate-guest').addEventListener('click', () => {
+            saveGateSession('', 'external', 'external');
+            unlockGate('', 'external', 'external');
+        });
 
         function tryUnlock() {
             const enteredUser = elGateUserInput.value;
@@ -1044,12 +1321,8 @@
             const user = findUser(enteredUser);
 
             if (user && enteredPass === user.password) {
-                try {
-                    sessionStorage.setItem(GATE_SESSION_KEY, '1');
-                    sessionStorage.setItem(GATE_SESSION_USER_KEY, user.username);
-                    sessionStorage.setItem(GATE_SESSION_ROLE_KEY, user.role || '');
-                } catch (e) { /* บาง browser อาจปิด storage ไว้ ไม่เป็นไร แค่ต้องกรอกใหม่ทุกครั้ง */ }
-                unlockGate(user.name || user.username, user.role);
+                saveGateSession(user.username, user.role || '', 'internal');
+                unlockGate(user.name || user.username, user.role, 'internal');
             } else {
                 elGateError.classList.remove('hidden');
                 elGateInput.classList.add('shake');
@@ -1071,22 +1344,25 @@
                 sessionStorage.removeItem(GATE_SESSION_KEY);
                 sessionStorage.removeItem(GATE_SESSION_USER_KEY);
                 sessionStorage.removeItem(GATE_SESSION_ROLE_KEY);
+                sessionStorage.removeItem(GATE_SESSION_MODE_KEY);
             } catch (e) { /* ignore */ }
-            location.reload();
+            // ลบข้อมูลที่จำไว้ในเบราว์เซอร์ด้วย (กันข้อมูลค้างในเครื่องที่ใช้ร่วมกัน)
+            cacheClear().finally(() => location.reload());
         });
 
         // ถ้าเคย unlock ไว้แล้วในเซสชันนี้ (ยังไม่ปิดแท็บ) ให้ข้ามหน้า Login ไปเลย
         (function initGate() {
-            let alreadyUnlocked = false, savedUser = '', savedRole = '';
+            let alreadyUnlocked = false, savedUser = '', savedRole = '', savedMode = 'internal';
             try {
                 alreadyUnlocked = sessionStorage.getItem(GATE_SESSION_KEY) === '1';
                 savedUser = sessionStorage.getItem(GATE_SESSION_USER_KEY) || '';
                 savedRole = sessionStorage.getItem(GATE_SESSION_ROLE_KEY) || '';
+                savedMode = sessionStorage.getItem(GATE_SESSION_MODE_KEY) || 'internal';
             } catch (e) { /* ignore */ }
             if (alreadyUnlocked) {
-                unlockGate(savedUser, savedRole);
+                unlockGate(savedUser, savedRole, savedMode);
             } else {
-                elGateUserInput.focus();
+                document.getElementById('login-gate-guest').focus(); // แท็บ External เป็นค่าเริ่มต้น
             }
         })();
 
@@ -1148,17 +1424,76 @@
             }
         }
 
-        async function loadMasterFile() {
+        // แสดงที่มาของข้อมูลตาราง (มุมขวาบน) — state: checking | fresh | updated | update-available | offline
+        function setDataStamp(modifiedTime, state) {
+            const el = document.getElementById('data-stamp');
+            if (!el) return;
+            const t = fmtDataTime(modifiedTime);
+            if (state === 'update-available') {
+                el.innerHTML = `<button type="button" id="btn-apply-update" class="btn-pill btn-pill-orange" title="ข้อมูลบน Google Drive มีการแก้ไข — คลิกเพื่อแสดงข้อมูลใหม่ (ตัวกรอง/Highlight ที่ทำไว้จะถูกล้าง)">🔄 มีข้อมูลใหม่ คลิกเพื่ออัปเดต</button>`;
+                return;
+            }
+            const text = {
+                checking: `ข้อมูล ณ ${t} · กำลังตรวจหาข้อมูลใหม่...`,
+                fresh: `ข้อมูลล่าสุด ณ ${t}`,
+                updated: `อัปเดตเป็นข้อมูลใหม่แล้ว (${t})`,
+                offline: `ข้อมูล ณ ${t} (ตรวจหาข้อมูลใหม่ไม่ได้)`
+            }[state] || '';
+            el.textContent = t ? text : '';
+            el.title = 'วันเวลาที่ไฟล์ Master.xlsx บน Google Drive ถูกแก้ไขล่าสุด';
+        }
+
+        function applyMasterRows(rows, modifiedTime, state) {
+            processData(rows); // renderDashboard() ในนี้จะซ่อน loading-section เองตอนจบ
+            masterTouched = false;
+            pendingMaster = null;
+            setDataStamp(modifiedTime, state);
+        }
+
+        // ถาม Drive ว่าไฟล์เปลี่ยนไหม (ทำเบื้องหลัง หลังแสดงข้อมูลที่จำไว้แล้ว)
+        async function checkMasterUpdate(key, cachedTime) {
+            try {
+                const modifiedTime = await driveModifiedTime(DRIVE_FILE_ID);
+                if (modifiedTime === cachedTime) { setDataStamp(cachedTime, 'fresh'); return; }
+                const buffer = await driveDownload(DRIVE_FILE_ID);
+                const rows = parseXlsxArrayBuffer(buffer);
+                await cacheSet(key, { modifiedTime, fetchedAt: Date.now(), buffer });
+                if (!masterTouched) {
+                    applyMasterRows(rows, modifiedTime, 'updated');
+                } else {
+                    // ผู้ใช้กำลังกรอง/Highlight อยู่ — ไม่สลับข้อมูลใต้มือ ให้กดอัปเดตเอง
+                    pendingMaster = { rows, modifiedTime };
+                    setDataStamp(cachedTime, 'update-available');
+                }
+            } catch (err) {
+                console.error('ตรวจหาข้อมูลใหม่ของ Master.xlsx ไม่สำเร็จ:', err);
+                setDataStamp(cachedTime, 'offline');
+            }
+        }
+
+        // force = true (ปุ่มรีเฟรช) → ข้ามข้อมูลที่จำไว้ ดาวน์โหลดใหม่จาก Drive เสมอ
+        async function loadMasterFile(force) {
+            const key = `master:${DRIVE_FILE_ID}`;
+            let cached = force ? null : await cacheGet(key);
+            if (cached) {
+                try {
+                    applyMasterRows(parseXlsxArrayBuffer(cached.buffer), cached.modifiedTime, 'checking');
+                    checkMasterUpdate(key, cached.modifiedTime);
+                    return;
+                } catch (e) {
+                    cached = null; // ข้อมูลที่จำไว้เสีย → โหลดใหม่จาก Drive
+                }
+            }
             elDash.classList.add('hidden');
             elUpload.classList.add('hidden');
             elLoadingScreen.classList.remove('hidden');
             try {
-                // ใส่ timestamp ต่อท้าย URL ทุกครั้ง กัน Google/เบราว์เซอร์ cache response ของไฟล์เดิมไว้
-                const url = `https://www.googleapis.com/drive/v3/files/${DRIVE_FILE_ID}?alt=media&key=${GOOGLE_API_KEY}&_=${Date.now()}`;
-                const res = await fetch(url, { cache: 'no-store' });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const buffer = await res.arrayBuffer();
-                processData(parseXlsxArrayBuffer(buffer)); // renderDashboard() ในนี้จะซ่อน loading-section เองตอนจบ
+                const [buffer, modifiedTime] = await Promise.all([
+                    driveDownload(DRIVE_FILE_ID),
+                    driveModifiedTime(DRIVE_FILE_ID).catch(() => null)
+                ]);
+                applyMasterRows(parseXlsxArrayBuffer(buffer), modifiedTime, 'fresh');
+                if (modifiedTime) cacheSet(key, { modifiedTime, fetchedAt: Date.now(), buffer });
             } catch (err) {
                 elLoadingScreen.classList.add('hidden');
                 console.error('โหลด Master.xlsx จาก Google Drive ไม่สำเร็จ:', err);
@@ -1983,6 +2318,7 @@
 
         function showPage(page) {
             if (!NAV_PAGES[page]) return;
+            if (gateAccessMode === 'external' && page !== 'main') return; // External เห็นเฉพาะตารางหน้า Main
             const isMain = page === 'main';
             elPageTitle.textContent = NAV_PAGES[page];
             document.querySelectorAll('.main-only').forEach(el => el.classList.toggle('page-hidden', !isMain));
@@ -2382,11 +2718,24 @@
                         docState.docs = buildMockDocs();
                         docState.source = { kind: 'mock', label: 'ข้อมูลตัวอย่าง (Mock) — ยังไม่ได้เชื่อมไฟล์ Linked Master บน Google Drive' };
                     } else {
-                        const url = `https://www.googleapis.com/drive/v3/files/${LINKED_DRIVE_FILE_ID}?alt=media&key=${GOOGLE_API_KEY}&_=${Date.now()}`;
-                        const res = await fetch(url, { cache: 'no-store' });
-                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                        docState.docs = parseLinkedMasterBuffer(await res.arrayBuffer());
-                        docState.source = { kind: 'live', label: 'Link Master.xlsx จาก Google Drive' };
+                        const key = `linked:${LINKED_DRIVE_FILE_ID}`;
+                        let cached = force ? null : await cacheGet(key);
+                        if (cached) {
+                            try {
+                                docState.docs = parseLinkedMasterBuffer(cached.buffer);
+                                docState.source = { kind: 'live', label: linkedSourceLabel(cached.modifiedTime) };
+                                checkLinkedUpdate(key, cached.modifiedTime);
+                            } catch (e) { cached = null; }
+                        }
+                        if (!cached) {
+                            const [buffer, modifiedTime] = await Promise.all([
+                                driveDownload(LINKED_DRIVE_FILE_ID),
+                                driveModifiedTime(LINKED_DRIVE_FILE_ID).catch(() => null)
+                            ]);
+                            docState.docs = parseLinkedMasterBuffer(buffer);
+                            docState.source = { kind: 'live', label: linkedSourceLabel(modifiedTime) };
+                            if (modifiedTime) cacheSet(key, { modifiedTime, fetchedAt: Date.now(), buffer });
+                        }
                     }
                 } catch (err) {
                     console.error('โหลด Linked Master จาก Google Drive ไม่สำเร็จ:', err);
@@ -2401,6 +2750,29 @@
                 onDocsChanged();
             })();
             return docState.promise;
+        }
+
+        function linkedSourceLabel(modifiedTime) {
+            return `Link Master.xlsx จาก Google Drive${modifiedTime ? ` · ข้อมูล ณ ${fmtDataTime(modifiedTime)}` : ''}`;
+        }
+
+        // ตรวจเบื้องหลังว่า Link Master บน Drive เปลี่ยนไหม — ถ้าเปลี่ยน โหลดใหม่แล้ววาดหน้า Document / Health Check / Setting ใหม่
+        async function checkLinkedUpdate(key, cachedTime) {
+            try {
+                const modifiedTime = await driveModifiedTime(LINKED_DRIVE_FILE_ID);
+                if (modifiedTime === cachedTime) return;
+                const buffer = await driveDownload(LINKED_DRIVE_FILE_ID);
+                const docs = parseLinkedMasterBuffer(buffer);
+                await cacheSet(key, { modifiedTime, fetchedAt: Date.now(), buffer });
+                if (docState.loading) return; // มีการโหลดใหม่ซ้อน (เช่นกดรีเฟรช) — ใช้ผลจากตัวนั้นแทน
+                docState.docs = docs;
+                docState.source = { kind: 'live', label: linkedSourceLabel(modifiedTime) };
+                buildDocFilterOptions();
+                onDocsChanged();
+                if (!elDocPage.classList.contains('page-hidden')) renderDocumentPage();
+            } catch (err) {
+                console.error('ตรวจหาข้อมูลใหม่ของ Link Master ไม่สำเร็จ:', err);
+            }
         }
 
         async function ensureDocumentData(force) {
@@ -2945,8 +3317,8 @@
                     <td>${hcSevPill(i.sev)}</td>
                     <td style="white-space:nowrap">${escAttr(hcCatLabel(i.cat))}</td>
                     <td>${i.scope !== 'file' ? `<span class="doc-bu">${escAttr(i.bu)}</span>` : '-'}</td>
-                    <td>${escAttr(i.product)}${i.typeCode ? ` ${docTypeBadge(i.typeCode)}` : ''}</td>
-                    <td><b>${escAttr(i.label)}</b><div class="mono">${escAttr(i.docName)}</div></td>
+                    <td>${i.product ? `<div class="copy-cell"><span>${escAttr(i.product)}${i.typeCode ? ` ${docTypeBadge(i.typeCode)}` : ''}</span>${copyBtn(i.product, 'ชื่อสินค้า')}</div>` : ''}</td>
+                    <td><b>${escAttr(i.label)}</b>${i.docName ? `<div class="copy-cell"><span class="mono">${escAttr(i.docName)}</span>${copyBtn(i.docName, 'ชื่อเอกสาร')}</div>` : ''}</td>
                     <td>${escAttr(i.detail)}</td>
                     <td style="color:#4b5563">${escAttr(i.fix)}</td>
                     <td class="mono" style="text-align:right">${i.row || ''}</td>
@@ -3025,7 +3397,7 @@
                 const have = pc.required.length - pc.missing.length;
                 return `<tr class="hc-issue-row" data-hc-product="${escAttr(pc.p.pkey)}" title="คลิกเพื่อดูเอกสารที่สินค้านี้มีอยู่ในหน้า Document">
                         <td><span class="doc-bu">${escAttr(pc.p.bu)}</span></td>
-                        <td>${escAttr(pc.p.group)}</td>
+                        <td><div class="copy-cell"><span>${escAttr(pc.p.group)}</span>${copyBtn(pc.p.group, 'ชื่อสินค้า')}</div></td>
                         <td><div class="hc-needs">${chips}</div></td>
                         <td>${extra.map(docTypeBadge).join(' ')}</td>
                         <td style="text-align:right;white-space:nowrap"><b class="${hcScoreClass(Math.round(100 * have / pc.required.length))}">${have}/${pc.required.length}</b></td>
@@ -3105,7 +3477,45 @@
             XLSX.writeFile(wb, `Health_Check_${stamp}.xlsx`);
         }
 
+        // ปุ่มคัดลอกข้อความ (ใช้ในตารางหน้า Health Check — แถวคลิกได้ จึงลากเลือกข้อความเพื่อ Copy ไม่สะดวก)
+        const COPY_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+        const COPIED_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        function copyBtn(text, what) {
+            return `<button type="button" class="copy-btn" data-copy="${escAttr(text)}" title="คัดลอก${escAttr(what)}" aria-label="คัดลอก${escAttr(what)}">${COPY_ICON}</button>`;
+        }
+        async function copyText(text) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (e) {
+                // สำรองสำหรับเบราว์เซอร์/หน้าที่ไม่อนุญาต Clipboard API
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.cssText = 'position:fixed;opacity:0;left:-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                let ok = false;
+                try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+                ta.remove();
+                return ok;
+            }
+        }
+
         elHcBody.addEventListener('click', (e) => {
+            const cp = e.target.closest('[data-copy]');
+            if (cp) {
+                e.stopPropagation();
+                const title = cp.title;
+                copyText(cp.dataset.copy).then(ok => {
+                    cp.innerHTML = ok ? COPIED_ICON : COPY_ICON;
+                    cp.classList.toggle('copied', ok);
+                    cp.title = ok ? 'คัดลอกแล้ว' : 'คัดลอกไม่สำเร็จ';
+                    setTimeout(() => { cp.innerHTML = COPY_ICON; cp.classList.remove('copied'); cp.title = title; }, 1500);
+                });
+                return;
+            }
+            // กำลังลากเลือกข้อความในแถว → ไม่พาไปหน้า Document (ให้ Ctrl+C ได้ตามปกติ)
+            if (window.getSelection && String(window.getSelection()).trim()) return;
             const catBtn = e.target.closest('[data-hc-cat]');
             if (catBtn) { elHcCat.value = elHcCat.value === catBtn.dataset.hcCat ? '' : catBtn.dataset.hcCat; hcState.rule = ''; hcState.showAll = false; renderHealthPage(); return; }
             const ruleBtn = e.target.closest('[data-hc-rule]');
@@ -3575,6 +3985,136 @@
             elSettingPage.scrollTop = y;
         });
 
+        // ============================================================================
+        // ฟอร์มขอข้อมูลสินค้า (เฉพาะผู้ใช้ External)
+        // ปลายทาง: ตั้ง endpoint เป็น URL ของ Google Apps Script Web App / Power Automate (HTTP trigger)
+        //          ที่รับ JSON แล้วบันทึกลง Sheet/ส่งอีเมล — ถ้าเว้นว่าง ฟอร์มจะทำงานแบบทดสอบ (ไม่ส่งข้อมูลไปที่ใด)
+        // ============================================================================
+        const LEAD_FORM_CONFIG = {
+            endpoint: '',      // URL ปลายทางรับข้อมูล
+            lineUrl: '',       // ลิงก์ LINE Official Account (ถ้ามี จะแสดงปุ่ม "สอบถามทาง LINE")
+            privacyUrl: '',    // ลิงก์ Privacy Notice (ถ้ามี จะแสดงลิงก์ "คลิก" ใต้ฟอร์ม)
+            contactText: ''    // ข้อความติดต่อท้ายฟอร์ม เช่น เวลาทำการ / เบอร์โทร / อีเมลกลาง
+        };
+        const elLeadOverlay = document.getElementById('lead-overlay');
+        const elLeadForm = document.getElementById('lead-form');
+        const elLeadDone = document.getElementById('lead-done');
+
+        (function initLeadForm() {
+            const c = LEAD_FORM_CONFIG;
+            document.getElementById('lead-mock').classList.toggle('hidden', !!c.endpoint);
+            if (c.lineUrl) {
+                document.getElementById('lead-chat-link').href = c.lineUrl;
+                document.getElementById('lead-chat-row').classList.remove('hidden');
+            }
+            if (c.privacyUrl) {
+                document.getElementById('lead-privacy').innerHTML = `ข้อมูลของท่านจะใช้เพื่อการติดต่อกลับตามคำขอนี้เท่านั้น ศึกษารายละเอียดแบบแจ้งเกี่ยวกับข้อมูลส่วนบุคคล (Privacy Notice) ได้ที่นี่ <a href="${escAttr(c.privacyUrl)}" target="_blank" rel="noopener noreferrer">คลิก</a>`;
+            }
+            const footer = document.getElementById('lead-footer');
+            footer.textContent = c.contactText;
+            footer.classList.toggle('hidden', !c.contactText);
+        })();
+
+        // สินค้าที่ผู้ใช้ Highlight ไว้ในตาราง → เติมให้ในช่อง "สินค้าที่สนใจ" อัตโนมัติ
+        function highlightedProductNames() {
+            return masterData.filter(r => selectedRows.has(rowKeyOf(r))).map(r => `${r.name} (${r.bu})`);
+        }
+
+        function openLeadForm() {
+            elLeadForm.classList.remove('hidden');
+            elLeadDone.classList.add('hidden');
+            const prod = document.getElementById('lead-products');
+            const picked = highlightedProductNames();
+            if (picked.length && !prod.value.trim()) prod.value = picked.join('\n');
+            elLeadOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            document.getElementById('lead-firstname').focus();
+        }
+        function closeLeadForm() {
+            elLeadOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        function validateLeadForm() {
+            let ok = true;
+            const mark = (el, bad) => { el.classList.toggle('invalid', bad); if (bad) ok = false; };
+            const val = id => document.getElementById(id).value.trim();
+            const field = id => document.getElementById(id).closest('.lead-field');
+            mark(field('lead-firstname'), !val('lead-firstname'));
+            mark(field('lead-lastname'), !val('lead-lastname'));
+            mark(field('lead-email'), !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('lead-email')));
+            mark(field('lead-phone'), !/^0\d{9}$/.test(val('lead-phone')));
+            mark(field('lead-role'), !val('lead-role'));
+            mark(field('lead-province'), !val('lead-province'));
+            mark(document.getElementById('lead-topics'), !elLeadForm.querySelector('input[name="topics"]:checked'));
+            mark(document.getElementById('lead-consent-wrap'), !document.getElementById('lead-consent').checked);
+            if (!ok) {
+                const first = elLeadForm.querySelector('.invalid');
+                if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return ok;
+        }
+
+        function collectLeadData() {
+            const fd = new FormData(elLeadForm);
+            return {
+                submittedAt: new Date().toISOString(),
+                firstName: fd.get('firstName').trim(), lastName: fd.get('lastName').trim(),
+                email: fd.get('email').trim(), phone: fd.get('phone').trim(),
+                company: fd.get('company').trim(), role: fd.get('role'), province: fd.get('province'),
+                topics: fd.getAll('topics'), products: fd.get('products').trim(), message: fd.get('message').trim(),
+                contactDay: fd.get('contactDay'), contactTime: fd.get('contactTime'),
+                consent: true, source: location.href
+            };
+        }
+
+        elLeadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!validateLeadForm()) return;
+            if (document.getElementById('lead-website').value) { closeLeadForm(); return; } // บอท
+            const data = collectLeadData();
+            const btn = document.getElementById('lead-submit');
+            btn.disabled = true;
+            btn.textContent = 'กำลังส่ง...';
+            try {
+                if (LEAD_FORM_CONFIG.endpoint) {
+                    // text/plain + no-cors: ส่งไป Google Apps Script ได้โดยไม่ติด CORS (อ่านผลตอบกลับไม่ได้ แต่ข้อมูลถึงปลายทาง)
+                    await fetch(LEAD_FORM_CONFIG.endpoint, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+                    document.getElementById('lead-done-sub').textContent = 'ทีมงานจะติดต่อกลับตามช่องทางและเวลาที่ท่านสะดวก';
+                } else {
+                    console.info('Lead form (โหมดทดสอบ — ไม่ได้ส่งไปที่ใด):', data);
+                    document.getElementById('lead-done-sub').textContent = 'โหมดทดสอบ: ข้อมูลยังไม่ได้ถูกส่งไปที่ใด (ยังไม่ได้ตั้งปลายทางรับข้อมูล)';
+                }
+                elLeadForm.reset();
+                elLeadForm.classList.add('hidden');
+                elLeadDone.classList.remove('hidden');
+            } catch (err) {
+                alert(`ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง (${err.message})`);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'ส่งคำขอข้อมูล';
+            }
+        });
+        // แก้ช่องที่ขึ้นแดงแล้ว → เอาสีแดงออกทันที
+        elLeadForm.addEventListener('input', (e) => { const w = e.target.closest('.invalid'); if (w) w.classList.remove('invalid'); });
+        elLeadForm.addEventListener('change', (e) => { const w = e.target.closest('.invalid'); if (w) w.classList.remove('invalid'); });
+        document.getElementById('lead-phone').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
+        document.getElementById('btn-request-info').addEventListener('click', openLeadForm);
+        document.getElementById('lead-close').addEventListener('click', closeLeadForm);
+        document.getElementById('lead-done-close').addEventListener('click', closeLeadForm);
+        elLeadOverlay.addEventListener('click', (e) => { if (e.target === elLeadOverlay) closeLeadForm(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !elLeadOverlay.classList.contains('hidden')) closeLeadForm(); });
+
+        // ผู้ใช้เริ่มใช้ตาราง → ถ้ามีข้อมูลใหม่เข้ามาทีหลัง จะไม่สลับให้เอง (แสดงปุ่ม "มีข้อมูลใหม่" แทน)
+        ['click', 'input', 'change'].forEach(ev => elDash.addEventListener(ev, (e) => {
+            if (e.target.closest && e.target.closest('#data-stamp')) return;
+            masterTouched = true;
+        }, true));
+        document.getElementById('data-stamp').addEventListener('click', (e) => {
+            if (!e.target.closest('#btn-apply-update') || !pendingMaster) return;
+            applyMasterRows(pendingMaster.rows, pendingMaster.modifiedTime, 'updated');
+        });
+
         // Event Listeners สำหรับ Filter
         // ค้นหาข้อความ: debounce ไว้ เพราะการ re-render ตารางทั้งชุดทุกครั้งที่กดคีย์บอร์ดจะหน่วงมากบนข้อมูลจำนวนมาก
         elSearch.addEventListener('input', debounce(applyFilters, 200));
@@ -3611,7 +4151,7 @@
 
         // ปุ่มรีเฟรชข้อมูล: ดึง Master.xlsx จาก repo มาโหลดใหม่โดยไม่ต้อง Logout/อัปโหลดเอง
         document.getElementById('btn-refresh-master').addEventListener('click', () => {
-            loadMasterFile();
+            loadMasterFile(true);
         });
 
         // เพิ่มฟังก์ชัน Export Excel
