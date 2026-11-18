@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Certification Map Converter</title>
+<link rel="icon" type="image/png" href="../GreenChoice.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -820,7 +821,7 @@ function buildMasterWorkbook(records) {
 
 document.getElementById("downloadBtn").addEventListener("click", () => {
   if (!lastResult) return;
-  XLSX.writeFile(lastResult.buildWorkbook(), mode().downloadName);
+  XLSX.writeFile(lastResult.buildWorkbook(), mode().downloadName, XLSX_WRITE_OPTS);
 });
 
 // ============================================================================
@@ -831,6 +832,11 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
 // ใช้ scope เต็ม (ไม่ใช่ drive.file) เพราะไฟล์ปลายทางถูกอัปโหลดขึ้น Drive มาก่อนแล้ว ไม่ได้ถูกสร้าง/เปิดผ่านแอปนี้
 // (scope drive.file จะเข้าไฟล์นี้ไม่ได้ถ้าไม่ผ่าน Google Picker ให้ผู้ใช้เลือกไฟล์เองก่อน)
 const DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive";
+// ตัวเลือกตอนสร้างไฟล์ .xlsx (ใช้ทั้งปุ่มดาวน์โหลดและบันทึกไป Drive)
+// .xlsx คือไฟล์ ZIP — SheetJS ไม่บีบอัดเป็นค่าเริ่มต้น ทำให้ Master ใหญ่ ~17 MB (Excel บันทึกได้ < 1 MB)
+// compression: บีบอัดแบบเดียวกับ Excel · bookSST: เก็บข้อความที่ซ้ำกันไว้ที่เดียว → เหลือ ~2.9 MB ข้อมูลข้างในเหมือนเดิมทุกตัว
+const XLSX_WRITE_OPTS = { bookType: "xlsx", compression: true, bookSST: true };
+
 let driveTokenClient = null;
 
 function uint8ArrayFromBase64(base64) {
@@ -841,7 +847,7 @@ function uint8ArrayFromBase64(base64) {
 }
 
 async function uploadResultToDrive(accessToken, fileId, wb) {
-  const base64Content = XLSX.write(wb, { bookType: "xlsx", type: "base64" });
+  const base64Content = XLSX.write(wb, { ...XLSX_WRITE_OPTS, type: "base64" });
   const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
     method: "PATCH",
     headers: {
