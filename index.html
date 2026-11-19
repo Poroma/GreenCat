@@ -676,6 +676,38 @@
         .lead-done .ic { width: 56px; height: 56px; border-radius: 9999px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 1.6rem; }
         .lead-mock { font-size: 0.75rem; background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; text-align: center; }
         .lead-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+        .lead-hint { font-size: 0.75rem; color: #6b7280; margin-top: 8px; }
+        /* ช่องเลือกสินค้าแบบค้นหาได้ (หลายรายการ) */
+        .lead-section:first-child { margin-top: 0; }
+        .lead-pick { position: relative; border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 8px; background: white; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; cursor: text; transition: border-color .15s, box-shadow .15s; }
+        .lead-pick:focus-within { border-color: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+        .lead-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; border-radius: 9999px; padding: 3px 4px 3px 10px; font-size: 0.8rem; line-height: 1.3; }
+        .lead-chip.custom { background: #f9fafb; border-color: #e5e7eb; color: #374151; }
+        .lead-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .lead-chip small { color: #6b7280; }
+        .lead-chip button { flex-shrink: 0; width: 18px; height: 18px; border: none; border-radius: 9999px; background: transparent; color: #6b7280; cursor: pointer; font-size: 0.7rem; line-height: 1; }
+        .lead-chip button:hover { background: #dcfce7; color: #b91c1c; }
+        .lead-pick input { flex: 1; min-width: 180px; border: none; outline: none; padding: 6px 4px; font-size: 0.9rem; background: transparent; }
+        .lead-pick-list { position: absolute; left: -1px; right: -1px; top: calc(100% + 4px); z-index: 5; max-height: 260px; overflow-y: auto; background: white; border: 1px solid #d1d5db; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); padding: 4px; }
+        .lead-opt { display: flex; align-items: baseline; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: #111827; }
+        .lead-opt.active, .lead-opt:hover { background: #f0fdf4; }
+        .lead-opt .bu { flex-shrink: 0; min-width: 44px; font-size: 0.7rem; font-weight: 700; color: #15803d; }
+        .lead-opt small { color: #6b7280; }
+        .lead-opt.add { color: #15803d; font-weight: 600; }
+        .lead-opt-empty { padding: 8px; font-size: 0.8rem; color: #6b7280; }
+        /* External: ช่องติ๊กหน้าชื่อสินค้า (ใช้การเลือกแถวเดิมของตาราง) */
+        /* ห้ามตั้ง position ที่ td นี้ — ต้องคงเป็น sticky (.sticky-col) ไม่งั้นค่า left ที่ใช้ตรึงคอลัมน์จะกลายเป็นการเลื่อนเซลล์ออกไป
+           (sticky + transform เป็น containing block ให้ ::before แบบ absolute อยู่แล้ว) */
+        body[data-access="external"] #table-body td[data-col="name"] { padding-left: 30px; }
+        body[data-access="external"] #table-body td[data-col="name"]::before { content: ""; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid #9ca3af; border-radius: 4px; background: white center / 12px no-repeat; }
+        body[data-access="external"] #table-body tr.selected-row td[data-col="name"]::before { border-color: #16a34a; background-color: #16a34a; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-4.9' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+        /* แถบลอย "เลือกแล้ว N รายการ" */
+        .lead-bar { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 80; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); background: #111827; color: white; border-radius: 9999px; padding: 8px 8px 8px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 0.9rem; }
+        .lead-bar b { color: #86efac; }
+        .lead-bar .clr { border: none; background: none; color: #d1d5db; cursor: pointer; font-size: 0.8rem; text-decoration: underline; padding: 4px; }
+        .lead-bar .go { border: none; background: #16a34a; color: white; border-radius: 9999px; padding: 8px 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .lead-bar .go:hover { background: #15803d; }
+        @media (max-width: 600px) { .lead-bar { font-size: 0.8rem; padding-left: 14px; gap: 6px; } .lead-bar .go { padding: 8px 12px; } }
 
         /* ปุ่มคัดลอก (Health Check) — กดแล้วไม่พาไปหน้า Document */
         .copy-btn { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-left: 4px; border: 1px solid transparent; border-radius: 5px; background: none; color: #9ca3af; cursor: pointer; vertical-align: middle; flex-shrink: 0; }
@@ -955,6 +987,12 @@
         โดยไม่ต้องยุ่งกับโค้ดหลักของ Dashboard — ไฟล์ users.js ต้องอยู่โฟลเดอร์เดียวกันนี้เสมอ
         (ถ้าเอาไป Deploy ที่ GitHub Pages หรือที่อื่น ต้องอัปโหลดไฟล์ users.js ขึ้นไปคู่กันด้วย)
     -->
+    <!-- แถบลอยเมื่อผู้ใช้ External ติ๊กสินค้าในตาราง -->
+    <div id="lead-bar" class="lead-bar hidden" role="region" aria-label="สินค้าที่เลือก">
+        <span>เลือกแล้ว <b id="lead-bar-count">0</b> รายการ</span>
+        <button type="button" class="clr" id="lead-bar-clear">ล้าง</button>
+        <button type="button" class="go" id="lead-bar-go">ขอข้อมูลสินค้านี้ →</button>
+    </div>
     <!-- ฟอร์มขอข้อมูลสินค้า (เฉพาะผู้ใช้ External) — ปลายทางการส่งตั้งที่ LEAD_FORM_CONFIG ใน <script> -->
     <div id="lead-overlay" class="lead-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="lead-title">
         <div class="lead-box">
@@ -970,14 +1008,23 @@
                 <div class="lead-or">หรือ</div>
             </div>
             <form id="lead-form" novalidate>
+                <div class="lead-section">สินค้าที่สนใจ <span style="font-weight:400;color:#6b7280">(ติ๊กเลือกจากตาราง หรือพิมพ์ค้นหาเพิ่มที่นี่)</span></div>
+                <div class="lead-pick" id="lead-pick">
+                    <div id="lead-chips" style="display:contents"></div>
+                    <input id="lead-pick-input" type="text" placeholder="🔍 พิมพ์ชื่อสินค้า / กลุ่มสินค้า / BU เพื่อค้นหา" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="lead-pick-list" aria-label="ค้นหาสินค้าที่สนใจ">
+                    <div class="lead-pick-list hidden" id="lead-pick-list" role="listbox"></div>
+                </div>
+
+                <div class="lead-section">ข้อมูลติดต่อ</div>
                 <div class="lead-grid">
-                    <div class="lead-field"><input id="lead-firstname" name="firstName" type="text" placeholder=" " required autocomplete="given-name"><label class="fl" for="lead-firstname">ชื่อ*</label><span class="lead-err">กรุณาระบุข้อมูล</span></div>
-                    <div class="lead-field"><input id="lead-lastname" name="lastName" type="text" placeholder=" " required autocomplete="family-name"><label class="fl" for="lead-lastname">นามสกุล*</label><span class="lead-err">กรุณาระบุข้อมูล</span></div>
-                    <div class="lead-field"><input id="lead-email" name="email" type="email" placeholder=" " required autocomplete="email"><label class="fl" for="lead-email">อีเมล*</label><span class="lead-err">กรุณาระบุอีเมลให้ถูกต้อง</span></div>
-                    <div class="lead-field"><input id="lead-phone" name="phone" type="tel" inputmode="numeric" maxlength="10" placeholder=" " required autocomplete="tel"><label class="fl" for="lead-phone">เบอร์มือถือ 10 หลัก* (เช่น 0810000000)</label><span class="lead-err">กรุณาระบุเบอร์มือถือ 10 หลัก</span></div>
+                    <div class="lead-field"><input id="lead-firstname" name="firstName" type="text" placeholder=" " required autocomplete="given-name"><label class="fl" for="lead-firstname">ชื่อ*</label><span class="lead-err">กรุณาระบุชื่อ</span></div>
+                    <div class="lead-field"><input id="lead-lastname" name="lastName" type="text" placeholder=" " autocomplete="family-name"><label class="fl" for="lead-lastname">นามสกุล</label></div>
+                    <div class="lead-field"><input id="lead-email" name="email" type="email" placeholder=" " autocomplete="email"><label class="fl" for="lead-email">อีเมล</label><span class="lead-err"></span></div>
+                    <div class="lead-field"><input id="lead-phone" name="phone" type="tel" inputmode="numeric" maxlength="10" placeholder=" " autocomplete="tel"><label class="fl" for="lead-phone">เบอร์มือถือ 10 หลัก (เช่น 0810000000)</label><span class="lead-err"></span></div>
+                    <div class="lead-hint full" style="margin-top:-6px">* กรอกอีเมลหรือเบอร์มือถืออย่างน้อย 1 ช่อง</div>
                     <div class="lead-field"><input id="lead-company" name="company" type="text" placeholder=" " autocomplete="organization"><label class="fl" for="lead-company">บริษัท / หน่วยงาน</label></div>
                     <div class="lead-field">
-                        <select id="lead-role" name="role" required>
+                        <select id="lead-role" name="role">
                             <option value="">— เลือก —</option>
                             <option>สถาปนิก / นักออกแบบ</option>
                             <option>ผู้รับเหมา</option>
@@ -986,25 +1033,23 @@
                             <option>ตัวแทนจำหน่าย / ร้านค้า</option>
                             <option>เจ้าของบ้าน / ผู้ใช้งาน</option>
                             <option>อื่นๆ</option>
-                        </select><label class="fl" for="lead-role">คุณคือ*</label><span class="lead-err">กรุณาเลือกข้อมูล</span>
+                        </select><label class="fl" for="lead-role">คุณคือ</label>
                     </div>
                     <div class="lead-field full">
-                        <select id="lead-province" name="province" required><option value="">— เลือกจังหวัด —</option><option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option><option value="กระบี่">กระบี่</option><option value="กาญจนบุรี">กาญจนบุรี</option><option value="กาฬสินธุ์">กาฬสินธุ์</option><option value="กำแพงเพชร">กำแพงเพชร</option><option value="ขอนแก่น">ขอนแก่น</option><option value="จันทบุรี">จันทบุรี</option><option value="ฉะเชิงเทรา">ฉะเชิงเทรา</option><option value="ชลบุรี">ชลบุรี</option><option value="ชัยนาท">ชัยนาท</option><option value="ชัยภูมิ">ชัยภูมิ</option><option value="ชุมพร">ชุมพร</option><option value="เชียงราย">เชียงราย</option><option value="เชียงใหม่">เชียงใหม่</option><option value="ตรัง">ตรัง</option><option value="ตราด">ตราด</option><option value="ตาก">ตาก</option><option value="นครนายก">นครนายก</option><option value="นครปฐม">นครปฐม</option><option value="นครพนม">นครพนม</option><option value="นครราชสีมา">นครราชสีมา</option><option value="นครศรีธรรมราช">นครศรีธรรมราช</option><option value="นครสวรรค์">นครสวรรค์</option><option value="นนทบุรี">นนทบุรี</option><option value="นราธิวาส">นราธิวาส</option><option value="น่าน">น่าน</option><option value="บึงกาฬ">บึงกาฬ</option><option value="บุรีรัมย์">บุรีรัมย์</option><option value="ปทุมธานี">ปทุมธานี</option><option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์</option><option value="ปราจีนบุรี">ปราจีนบุรี</option><option value="ปัตตานี">ปัตตานี</option><option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา</option><option value="พะเยา">พะเยา</option><option value="พังงา">พังงา</option><option value="พัทลุง">พัทลุง</option><option value="พิจิตร">พิจิตร</option><option value="พิษณุโลก">พิษณุโลก</option><option value="เพชรบุรี">เพชรบุรี</option><option value="เพชรบูรณ์">เพชรบูรณ์</option><option value="แพร่">แพร่</option><option value="ภูเก็ต">ภูเก็ต</option><option value="มหาสารคาม">มหาสารคาม</option><option value="มุกดาหาร">มุกดาหาร</option><option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option><option value="ยะลา">ยะลา</option><option value="ยโสธร">ยโสธร</option><option value="ระนอง">ระนอง</option><option value="ระยอง">ระยอง</option><option value="ราชบุรี">ราชบุรี</option><option value="ร้อยเอ็ด">ร้อยเอ็ด</option><option value="ลพบุรี">ลพบุรี</option><option value="ลำปาง">ลำปาง</option><option value="ลำพูน">ลำพูน</option><option value="เลย">เลย</option><option value="ศรีสะเกษ">ศรีสะเกษ</option><option value="สกลนคร">สกลนคร</option><option value="สงขลา">สงขลา</option><option value="สตูล">สตูล</option><option value="สมุทรปราการ">สมุทรปราการ</option><option value="สมุทรสงคราม">สมุทรสงคราม</option><option value="สมุทรสาคร">สมุทรสาคร</option><option value="สระบุรี">สระบุรี</option><option value="สระแก้ว">สระแก้ว</option><option value="สิงห์บุรี">สิงห์บุรี</option><option value="สุพรรณบุรี">สุพรรณบุรี</option><option value="สุราษฎร์ธานี">สุราษฎร์ธานี</option><option value="สุรินทร์">สุรินทร์</option><option value="สุโขทัย">สุโขทัย</option><option value="หนองคาย">หนองคาย</option><option value="หนองบัวลำภู">หนองบัวลำภู</option><option value="อ่างทอง">อ่างทอง</option><option value="อำนาจเจริญ">อำนาจเจริญ</option><option value="อุดรธานี">อุดรธานี</option><option value="อุตรดิตถ์">อุตรดิตถ์</option><option value="อุทัยธานี">อุทัยธานี</option><option value="อุบลราชธานี">อุบลราชธานี</option></select>
-                        <label class="fl" for="lead-province">จังหวัดของโครงการ / ที่อยู่*</label><span class="lead-err">กรุณาเลือกจังหวัด</span>
+                        <select id="lead-province" name="province"><option value="">— เลือกจังหวัด —</option><option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option><option value="กระบี่">กระบี่</option><option value="กาญจนบุรี">กาญจนบุรี</option><option value="กาฬสินธุ์">กาฬสินธุ์</option><option value="กำแพงเพชร">กำแพงเพชร</option><option value="ขอนแก่น">ขอนแก่น</option><option value="จันทบุรี">จันทบุรี</option><option value="ฉะเชิงเทรา">ฉะเชิงเทรา</option><option value="ชลบุรี">ชลบุรี</option><option value="ชัยนาท">ชัยนาท</option><option value="ชัยภูมิ">ชัยภูมิ</option><option value="ชุมพร">ชุมพร</option><option value="เชียงราย">เชียงราย</option><option value="เชียงใหม่">เชียงใหม่</option><option value="ตรัง">ตรัง</option><option value="ตราด">ตราด</option><option value="ตาก">ตาก</option><option value="นครนายก">นครนายก</option><option value="นครปฐม">นครปฐม</option><option value="นครพนม">นครพนม</option><option value="นครราชสีมา">นครราชสีมา</option><option value="นครศรีธรรมราช">นครศรีธรรมราช</option><option value="นครสวรรค์">นครสวรรค์</option><option value="นนทบุรี">นนทบุรี</option><option value="นราธิวาส">นราธิวาส</option><option value="น่าน">น่าน</option><option value="บึงกาฬ">บึงกาฬ</option><option value="บุรีรัมย์">บุรีรัมย์</option><option value="ปทุมธานี">ปทุมธานี</option><option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์</option><option value="ปราจีนบุรี">ปราจีนบุรี</option><option value="ปัตตานี">ปัตตานี</option><option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา</option><option value="พะเยา">พะเยา</option><option value="พังงา">พังงา</option><option value="พัทลุง">พัทลุง</option><option value="พิจิตร">พิจิตร</option><option value="พิษณุโลก">พิษณุโลก</option><option value="เพชรบุรี">เพชรบุรี</option><option value="เพชรบูรณ์">เพชรบูรณ์</option><option value="แพร่">แพร่</option><option value="ภูเก็ต">ภูเก็ต</option><option value="มหาสารคาม">มหาสารคาม</option><option value="มุกดาหาร">มุกดาหาร</option><option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option><option value="ยะลา">ยะลา</option><option value="ยโสธร">ยโสธร</option><option value="ระนอง">ระนอง</option><option value="ระยอง">ระยอง</option><option value="ราชบุรี">ราชบุรี</option><option value="ร้อยเอ็ด">ร้อยเอ็ด</option><option value="ลพบุรี">ลพบุรี</option><option value="ลำปาง">ลำปาง</option><option value="ลำพูน">ลำพูน</option><option value="เลย">เลย</option><option value="ศรีสะเกษ">ศรีสะเกษ</option><option value="สกลนคร">สกลนคร</option><option value="สงขลา">สงขลา</option><option value="สตูล">สตูล</option><option value="สมุทรปราการ">สมุทรปราการ</option><option value="สมุทรสงคราม">สมุทรสงคราม</option><option value="สมุทรสาคร">สมุทรสาคร</option><option value="สระบุรี">สระบุรี</option><option value="สระแก้ว">สระแก้ว</option><option value="สิงห์บุรี">สิงห์บุรี</option><option value="สุพรรณบุรี">สุพรรณบุรี</option><option value="สุราษฎร์ธานี">สุราษฎร์ธานี</option><option value="สุรินทร์">สุรินทร์</option><option value="สุโขทัย">สุโขทัย</option><option value="หนองคาย">หนองคาย</option><option value="หนองบัวลำภู">หนองบัวลำภู</option><option value="อ่างทอง">อ่างทอง</option><option value="อำนาจเจริญ">อำนาจเจริญ</option><option value="อุดรธานี">อุดรธานี</option><option value="อุตรดิตถ์">อุตรดิตถ์</option><option value="อุทัยธานี">อุทัยธานี</option><option value="อุบลราชธานี">อุบลราชธานี</option></select>
+                        <label class="fl" for="lead-province">จังหวัดของโครงการ / ที่อยู่</label>
                     </div>
                 </div>
 
-                <div class="lead-section">ต้องการข้อมูลเรื่องใด* <span style="font-weight:400;color:#6b7280">(เลือกได้มากกว่า 1 ข้อ)</span></div>
+                <div class="lead-section">ต้องการข้อมูลเรื่องใด <span style="font-weight:400;color:#6b7280">(เลือกได้มากกว่า 1 ข้อ)</span></div>
                 <div class="lead-checks" id="lead-topics">
                     <label><input type="checkbox" name="topics" value="ข้อมูลสินค้า / สเปก">ข้อมูลสินค้า / สเปก</label>
                     <label><input type="checkbox" name="topics" value="เอกสาร EPD / CFP / ฉลากเขียว">เอกสาร EPD / CFP / ฉลากเขียว</label>
                     <label><input type="checkbox" name="topics" value="การใช้สินค้าเพื่อขอคะแนนอาคารเขียว (LEED / TREES / WELL)">การใช้สินค้าเพื่อขอคะแนนอาคารเขียว (LEED / TREES / WELL)</label>
                     <label><input type="checkbox" name="topics" value="ใบเสนอราคา / ช่องทางสั่งซื้อ">ใบเสนอราคา / ช่องทางสั่งซื้อ</label>
-                    <span class="lead-err">กรุณาเลือกอย่างน้อย 1 ข้อ</span>
                 </div>
 
                 <div class="lead-grid" style="margin-top:14px">
-                    <div class="lead-field full"><textarea id="lead-products" name="products" placeholder=" "></textarea><label class="fl" for="lead-products">สินค้าที่สนใจ</label></div>
                     <div class="lead-field full"><textarea id="lead-message" name="message" placeholder=" "></textarea><label class="fl" for="lead-message">รายละเอียดเพิ่มเติม (เช่น ชื่อโครงการ ปริมาณที่ต้องการ)</label></div>
                 </div>
 
@@ -2220,6 +2265,7 @@
             // อัปโหลดไฟล์ใหม่ = ล้างสถานะ Highlight เดิมทิ้ง (คีย์ของแถว/คอลัมน์อาจไม่ตรงกับข้อมูลชุดใหม่)
             selectedRows.clear();
             selectedCols.clear();
+            updateLeadBar();
 
             renderDashboard();
         }
@@ -4015,38 +4061,163 @@
             footer.classList.toggle('hidden', !c.contactText);
         })();
 
-        // สินค้าที่ผู้ใช้ Highlight ไว้ในตาราง → เติมให้ในช่อง "สินค้าที่สนใจ" อัตโนมัติ
-        function highlightedProductNames() {
-            return masterData.filter(r => selectedRows.has(rowKeyOf(r))).map(r => `${r.name} (${r.bu})`);
+        // ---- สินค้าที่สนใจ: ใช้ชุดเดียวกับแถวที่ติ๊กในตาราง (selectedRows) + รายการที่ลูกค้าพิมพ์เอง ----
+        let leadCustomProducts = [];      // ชื่อสินค้าที่ค้นไม่เจอแล้วพิมพ์เพิ่มเอง
+        let leadPickActive = 0;           // ตัวเลือกที่ไฮไลต์อยู่ในรายการค้นหา (ใช้ปุ่มลูกศร)
+        const LEAD_PICK_MAX_RESULTS = 30;
+        const elLeadPickInput = document.getElementById('lead-pick-input');
+        const elLeadPickList = document.getElementById('lead-pick-list');
+
+        function selectedProductRows() {
+            return masterData.filter(r => selectedRows.has(rowKeyOf(r)));
         }
+        function leadProductLabel(r) { return `${r.name} (${r.bu})`; }
+
+        // ติ๊ก/เอาติ๊กออกจาก Pop-up → แถวในตาราง + ตัวนับ + แถบลอยเปลี่ยนตาม
+        function setRowSelected(key, on) {
+            if (on) selectedRows.add(key); else selectedRows.delete(key);
+            const tr = [...elTbody.querySelectorAll('tr[data-rowkey]')].find(t => t.dataset.rowkey === key);
+            if (tr) tr.classList.toggle('selected-row', on);
+            elSelectedCount.textContent = selectedRows.size;
+            updateLeadBar();
+        }
+
+        function updateLeadBar() {
+            const bar = document.getElementById('lead-bar');
+            const n = selectedRows.size;
+            document.getElementById('lead-bar-count').textContent = n;
+            const overlayOpen = !document.getElementById('lead-overlay').classList.contains('hidden');
+            bar.classList.toggle('hidden', gateAccessMode !== 'external' || n === 0 || overlayOpen);
+        }
+
+        function renderLeadChips() {
+            const chips = selectedProductRows().map(r =>
+                `<span class="lead-chip" title="${escAttr(leadProductLabel(r))}"><span>${escAttr(r.name)} <small>${escAttr(r.bu)}</small></span><button type="button" data-lead-remove="${escAttr(rowKeyOf(r))}" aria-label="เอาออก">✕</button></span>`)
+                .concat(leadCustomProducts.map((t, i) =>
+                    `<span class="lead-chip custom" title="พิมพ์เอง"><span>${escAttr(t)}</span><button type="button" data-lead-remove-custom="${i}" aria-label="เอาออก">✕</button></span>`));
+            document.getElementById('lead-chips').innerHTML = chips.join('');
+            elLeadPickInput.placeholder = chips.length ? '🔍 ค้นหาเพื่อเพิ่มสินค้า' : '🔍 พิมพ์ชื่อสินค้า / กลุ่มสินค้า / BU เพื่อค้นหา';
+        }
+
+        function leadPickMatches(q) {
+            const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+            if (!words.length) return [];
+            const seen = new Set(), out = [];
+            for (const r of masterData) {
+                const key = rowKeyOf(r);
+                if (seen.has(key) || selectedRows.has(key)) continue;
+                const hay = `${r.name} ${r.group} ${r.bu} ${r.cat}`.toLowerCase();
+                if (words.every(w => hay.includes(w))) { seen.add(key); out.push(r); }
+                if (out.length >= LEAD_PICK_MAX_RESULTS) break;
+            }
+            return out;
+        }
+
+        function renderLeadPickList() {
+            const q = elLeadPickInput.value.trim();
+            if (!q) { closeLeadPickList(); return; }
+            const rows = leadPickMatches(q);
+            const opts = rows.map((r, i) =>
+                `<div class="lead-opt" role="option" data-lead-add="${escAttr(rowKeyOf(r))}" data-i="${i}"><span class="bu">${escAttr(r.bu)}</span><span>${escAttr(r.name)} <small>· ${escAttr(r.group)}</small></span></div>`);
+            const exists = leadCustomProducts.some(t => t.toLowerCase() === q.toLowerCase());
+            if (!exists) opts.push(`<div class="lead-opt add" role="option" data-lead-add-custom="1" data-i="${rows.length}">+ เพิ่ม "${escAttr(q)}" (พิมพ์เอง)</div>`);
+            if (!rows.length) opts.unshift('<div class="lead-opt-empty">ไม่พบสินค้าที่ตรงกัน — เพิ่มเป็นข้อความที่พิมพ์เองได้</div>');
+            elLeadPickList.innerHTML = opts.join('');
+            leadPickActive = 0;
+            highlightLeadOpt();
+            elLeadPickList.classList.remove('hidden');
+            elLeadPickInput.setAttribute('aria-expanded', 'true');
+        }
+        function closeLeadPickList() {
+            elLeadPickList.classList.add('hidden');
+            elLeadPickList.innerHTML = '';
+            elLeadPickInput.setAttribute('aria-expanded', 'false');
+        }
+        function highlightLeadOpt() {
+            elLeadPickList.querySelectorAll('.lead-opt').forEach(o => o.classList.toggle('active', +o.dataset.i === leadPickActive));
+            const a = elLeadPickList.querySelector('.lead-opt.active');
+            if (a && a.scrollIntoView) a.scrollIntoView({ block: 'nearest' });
+        }
+        function chooseLeadOpt(opt) {
+            if (!opt) return;
+            if (opt.dataset.leadAdd) setRowSelected(opt.dataset.leadAdd, true);
+            else if (opt.dataset.leadAddCustom) leadCustomProducts.push(elLeadPickInput.value.trim());
+            elLeadPickInput.value = '';
+            closeLeadPickList();
+            renderLeadChips();
+            elLeadPickInput.focus();
+        }
+
+        elLeadPickInput.addEventListener('input', renderLeadPickList);
+        elLeadPickInput.addEventListener('focus', () => { if (elLeadPickInput.value.trim()) renderLeadPickList(); });
+        elLeadPickInput.addEventListener('keydown', (e) => {
+            const open = !elLeadPickList.classList.contains('hidden');
+            const count = elLeadPickList.querySelectorAll('.lead-opt').length;
+            if (e.key === 'ArrowDown' && open) { e.preventDefault(); leadPickActive = (leadPickActive + 1) % count; highlightLeadOpt(); }
+            else if (e.key === 'ArrowUp' && open) { e.preventDefault(); leadPickActive = (leadPickActive - 1 + count) % count; highlightLeadOpt(); }
+            else if (e.key === 'Enter') { e.preventDefault(); if (open) chooseLeadOpt(elLeadPickList.querySelector('.lead-opt.active')); }
+            else if (e.key === 'Escape' && open) { e.stopPropagation(); closeLeadPickList(); }
+            else if (e.key === 'Backspace' && !elLeadPickInput.value) {
+                // ลบรายการล่าสุด (พิมพ์เองก่อน แล้วค่อยสินค้าจากตาราง)
+                if (leadCustomProducts.length) leadCustomProducts.pop();
+                else { const rows = selectedProductRows(); if (rows.length) setRowSelected(rowKeyOf(rows[rows.length - 1]), false); }
+                renderLeadChips();
+            }
+        });
+        // mousedown (ไม่ใช่ click) เพื่อเลือกก่อนช่องค้นหาเสียโฟกัส
+        elLeadPickList.addEventListener('mousedown', (e) => { e.preventDefault(); chooseLeadOpt(e.target.closest('.lead-opt')); });
+        document.getElementById('lead-pick').addEventListener('click', (e) => {
+            const rm = e.target.closest('[data-lead-remove]');
+            const rmc = e.target.closest('[data-lead-remove-custom]');
+            if (rm) setRowSelected(rm.dataset.leadRemove, false);
+            else if (rmc) leadCustomProducts.splice(+rmc.dataset.leadRemoveCustom, 1);
+            else if (!e.target.closest('.lead-pick-list')) { elLeadPickInput.focus(); return; }
+            else return;
+            renderLeadChips();
+            elLeadPickInput.focus();
+        });
+        elLeadPickInput.addEventListener('blur', () => setTimeout(closeLeadPickList, 120));
+
+        document.getElementById('lead-bar-go').addEventListener('click', () => openLeadForm());
+        document.getElementById('lead-bar-clear').addEventListener('click', () => document.getElementById('btn-clear-highlight').click());
 
         function openLeadForm() {
             elLeadForm.classList.remove('hidden');
             elLeadDone.classList.add('hidden');
-            const prod = document.getElementById('lead-products');
-            const picked = highlightedProductNames();
-            if (picked.length && !prod.value.trim()) prod.value = picked.join('\n');
+            renderLeadChips();
+            closeLeadPickList();
             elLeadOverlay.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
-            document.getElementById('lead-firstname').focus();
+            updateLeadBar();
+            // ยังไม่ได้เลือกสินค้า → เริ่มที่ช่องค้นหาสินค้า, เลือกแล้ว → เริ่มกรอกชื่อ
+            (selectedRows.size || leadCustomProducts.length ? document.getElementById('lead-firstname') : elLeadPickInput).focus();
         }
         function closeLeadForm() {
             elLeadOverlay.classList.add('hidden');
             document.body.style.overflow = '';
+            updateLeadBar();
         }
 
+        // บังคับกรอก: ชื่อ, อีเมลหรือเบอร์มือถืออย่างน้อย 1 ช่อง (ถ้ากรอกต้องถูกรูปแบบ), ความยินยอม PDPA
         function validateLeadForm() {
             let ok = true;
-            const mark = (el, bad) => { el.classList.toggle('invalid', bad); if (bad) ok = false; };
+            const mark = (el, bad, msg) => {
+                el.classList.toggle('invalid', bad);
+                if (msg !== undefined) el.querySelector('.lead-err').textContent = msg;
+                if (bad) ok = false;
+            };
             const val = id => document.getElementById(id).value.trim();
             const field = id => document.getElementById(id).closest('.lead-field');
+            const email = val('lead-email'), phone = val('lead-phone');
             mark(field('lead-firstname'), !val('lead-firstname'));
-            mark(field('lead-lastname'), !val('lead-lastname'));
-            mark(field('lead-email'), !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('lead-email')));
-            mark(field('lead-phone'), !/^0\d{9}$/.test(val('lead-phone')));
-            mark(field('lead-role'), !val('lead-role'));
-            mark(field('lead-province'), !val('lead-province'));
-            mark(document.getElementById('lead-topics'), !elLeadForm.querySelector('input[name="topics"]:checked'));
+            if (!email && !phone) {
+                const msg = 'กรุณากรอกอีเมลหรือเบอร์มือถืออย่างน้อย 1 ช่อง';
+                mark(field('lead-email'), true, msg);
+                mark(field('lead-phone'), true, msg);
+            } else {
+                mark(field('lead-email'), !!email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email), 'รูปแบบอีเมลไม่ถูกต้อง');
+                mark(field('lead-phone'), !!phone && !/^0\d{9}$/.test(phone), 'กรุณาระบุเบอร์มือถือ 10 หลัก');
+            }
             mark(document.getElementById('lead-consent-wrap'), !document.getElementById('lead-consent').checked);
             if (!ok) {
                 const first = elLeadForm.querySelector('.invalid');
@@ -4057,12 +4228,13 @@
 
         function collectLeadData() {
             const fd = new FormData(elLeadForm);
+            const productList = selectedProductRows().map(leadProductLabel).concat(leadCustomProducts);
             return {
                 submittedAt: new Date().toISOString(),
                 firstName: fd.get('firstName').trim(), lastName: fd.get('lastName').trim(),
                 email: fd.get('email').trim(), phone: fd.get('phone').trim(),
                 company: fd.get('company').trim(), role: fd.get('role'), province: fd.get('province'),
-                topics: fd.getAll('topics'), products: fd.get('products').trim(), message: fd.get('message').trim(),
+                topics: fd.getAll('topics'), products: productList.join('\n'), productList, message: fd.get('message').trim(),
                 contactDay: fd.get('contactDay'), contactTime: fd.get('contactTime'),
                 consent: true, source: location.href
             };
@@ -4086,6 +4258,8 @@
                     document.getElementById('lead-done-sub').textContent = 'โหมดทดสอบ: ข้อมูลยังไม่ได้ถูกส่งไปที่ใด (ยังไม่ได้ตั้งปลายทางรับข้อมูล)';
                 }
                 elLeadForm.reset();
+                leadCustomProducts = [];
+                document.getElementById('btn-clear-highlight').click(); // ส่งแล้ว → ล้างสินค้าที่ติ๊กไว้
                 elLeadForm.classList.add('hidden');
                 elLeadDone.classList.remove('hidden');
             } catch (err) {
@@ -4096,7 +4270,11 @@
             }
         });
         // แก้ช่องที่ขึ้นแดงแล้ว → เอาสีแดงออกทันที
-        elLeadForm.addEventListener('input', (e) => { const w = e.target.closest('.invalid'); if (w) w.classList.remove('invalid'); });
+        elLeadForm.addEventListener('input', (e) => {
+            const w = e.target.closest('.invalid'); if (w) w.classList.remove('invalid');
+            // อีเมล/เบอร์ใช้แทนกันได้ → พิมพ์ช่องใดช่องหนึ่งแล้วเอาสีแดงออกทั้งคู่
+            if (e.target.id === 'lead-email' || e.target.id === 'lead-phone') ['lead-email', 'lead-phone'].forEach(id => document.getElementById(id).closest('.lead-field').classList.remove('invalid'));
+        });
         elLeadForm.addEventListener('change', (e) => { const w = e.target.closest('.invalid'); if (w) w.classList.remove('invalid'); });
         document.getElementById('lead-phone').addEventListener('input', (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
         document.getElementById('btn-request-info').addEventListener('click', openLeadForm);
@@ -4140,6 +4318,8 @@
             document.querySelectorAll('.selected-row').forEach(el => el.classList.remove('selected-row'));
             document.querySelectorAll('.col-selected').forEach(el => el.classList.remove('col-selected'));
             elSelectedCount.textContent = '0';
+            updateLeadBar();
+            if (!elLeadOverlay.classList.contains('hidden')) renderLeadChips();
         });
 
         // ปุ่มอัปโหลดใหม่
@@ -4187,6 +4367,7 @@
                 tr.classList.add('selected-row');
             }
             elSelectedCount.textContent = selectedRows.size;
+            updateLeadBar();
         });
 
         elThead.addEventListener('click', (e) => {
