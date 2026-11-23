@@ -695,12 +695,39 @@
         .lead-opt small { color: #6b7280; }
         .lead-opt.add { color: #15803d; font-weight: 600; }
         .lead-opt-empty { padding: 8px; font-size: 0.8rem; color: #6b7280; }
-        /* External: ช่องติ๊กหน้าชื่อสินค้า (ใช้การเลือกแถวเดิมของตาราง) */
-        /* ห้ามตั้ง position ที่ td นี้ — ต้องคงเป็น sticky (.sticky-col) ไม่งั้นค่า left ที่ใช้ตรึงคอลัมน์จะกลายเป็นการเลื่อนเซลล์ออกไป
-           (sticky + transform เป็น containing block ให้ ::before แบบ absolute อยู่แล้ว) */
-        body[data-access="external"] #table-body td[data-col="name"] { padding-left: 30px; }
-        body[data-access="external"] #table-body td[data-col="name"]::before { content: ""; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid #9ca3af; border-radius: 4px; background: white center / 12px no-repeat; }
-        body[data-access="external"] #table-body tr.selected-row td[data-col="name"]::before { border-color: #16a34a; background-color: #16a34a; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-4.9' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+        /* ช่องติ๊กหน้าชื่อสินค้า (.row-check) — ติ๊กอยู่ = แถวถูกเลือก (selectedRows เดียวกับการ Highlight แถว)
+           แล้วแถบลอยด้านล่างมีปุ่ม: External = "ขอข้อมูลสินค้านี้", Internal = "ดูเอกสาร" (Pop-up เอกสารของทุกสินค้าที่เลือก)
+           ห้ามตั้ง position ที่ td นี้ — ต้องคงเป็น sticky (.sticky-col) ไม่งั้นค่า left ที่ใช้ตรึงคอลัมน์จะกลายเป็นการเลื่อนเซลล์ออกไป
+           (sticky + transform เป็น containing block ให้ .row-check แบบ absolute อยู่แล้ว) */
+        #table-body td[data-col="name"] { padding-left: 30px; }
+        .row-check { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; border: 2px solid #9ca3af; border-radius: 4px; background: white center / 12px no-repeat; cursor: pointer; }
+        .row-check:hover { border-color: #16a34a; }
+        body:not([data-access]) .row-check { display: none; }
+        body[data-access] #table-body tr.selected-row .row-check { border-color: #16a34a; background-color: #16a34a; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-4.9' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+        /* Pop-up เอกสารของสินค้า (Internal) — ใช้กรอบเดียวกับฟอร์มขอข้อมูล (.lead-overlay / .lead-box) */
+        .pdoc-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 6px; font-size: 0.78rem; color: #6b7280; }
+        .pdoc-note { font-size: 0.75rem; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; }
+        .pdoc-note.warn { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
+        .pdoc-note.info { background: #f9fafb; color: #4b5563; border: 1px solid #e5e7eb; }
+        .pdoc-need { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 0.8rem; color: #374151; margin-bottom: 12px; }
+        .pdoc-list { display: flex; flex-direction: column; gap: 6px; }
+        .pdoc-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.84rem; color: #111827; text-decoration: none; }
+        a.pdoc-row:hover { border-color: #86efac; background: #f0fdf4; }
+        .pdoc-row .nm { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+        .pdoc-row .exp { flex-shrink: 0; font-size: 0.72rem; color: #6b7280; white-space: nowrap; }
+        .pdoc-row .open { flex-shrink: 0; font-size: 0.75rem; color: #15803d; font-weight: 600; white-space: nowrap; }
+        .pdoc-row.no-url { background: #f9fafb; color: #6b7280; }
+        .pdoc-empty { text-align: center; padding: 24px 10px; color: #6b7280; font-size: 0.88rem; }
+        .pdoc-actions { display: flex; justify-content: center; gap: 10px; margin-top: 16px; }
+        .pdoc-actions button { border: 1px solid #d1d5db; background: white; color: #374151; border-radius: 9999px; padding: 8px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .pdoc-actions button.primary { background: #16a34a; border-color: #16a34a; color: white; }
+        .pdoc-summary { text-align: center; font-size: 0.8rem; color: #4b5563; margin-bottom: 12px; }
+        .pdoc-prod { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .pdoc-prod-head { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+        .pdoc-prod-head .t { flex: 1; min-width: 0; font-weight: 700; font-size: 0.92rem; color: #111827; overflow-wrap: anywhere; }
+        .pdoc-prod-head .t small { display: block; font-weight: 400; font-size: 0.72rem; color: #6b7280; margin-top: 2px; }
+        .pdoc-goto { flex-shrink: 0; border: none; background: none; color: #15803d; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 2px; }
+        .pdoc-prod .pdoc-empty { padding: 10px; text-align: left; font-size: 0.8rem; }
         /* แถบลอย "เลือกแล้ว N รายการ" */
         .lead-bar { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 80; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); background: #111827; color: white; border-radius: 9999px; padding: 8px 8px 8px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); font-size: 0.9rem; }
         .lead-bar b { color: #86efac; }
@@ -987,6 +1014,22 @@
         โดยไม่ต้องยุ่งกับโค้ดหลักของ Dashboard — ไฟล์ users.js ต้องอยู่โฟลเดอร์เดียวกันนี้เสมอ
         (ถ้าเอาไป Deploy ที่ GitHub Pages หรือที่อื่น ต้องอัปโหลดไฟล์ users.js ขึ้นไปคู่กันด้วย)
     -->
+    <!-- Pop-up เอกสารของสินค้า (Internal: กดช่องติ๊กหน้าชื่อสินค้า) — เนื้อหาสร้างจาก JS (openProductDocs) -->
+    <div id="pdoc-overlay" class="lead-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pdoc-title">
+        <div class="lead-box">
+            <button type="button" class="lead-close" id="pdoc-close" aria-label="ปิด">✕</button>
+            <div class="lead-header">
+                <img src="GreenChoice.png" alt="">
+                <div class="lead-title" id="pdoc-title"></div>
+                <div class="pdoc-meta" id="pdoc-meta"></div>
+            </div>
+            <div id="pdoc-body"></div>
+            <div class="pdoc-actions">
+                <button type="button" class="primary" id="pdoc-open-doc">เปิดในหน้า Document</button>
+                <button type="button" id="pdoc-close2">ปิด</button>
+            </div>
+        </div>
+    </div>
     <!-- แถบลอยเมื่อผู้ใช้ External ติ๊กสินค้าในตาราง -->
     <div id="lead-bar" class="lead-bar hidden" role="region" aria-label="สินค้าที่เลือก">
         <span>เลือกแล้ว <b id="lead-bar-count">0</b> รายการ</span>
@@ -1022,19 +1065,6 @@
                     <div class="lead-field"><input id="lead-email" name="email" type="email" placeholder=" " autocomplete="email"><label class="fl" for="lead-email">อีเมล</label><span class="lead-err"></span></div>
                     <div class="lead-field"><input id="lead-phone" name="phone" type="tel" inputmode="numeric" maxlength="10" placeholder=" " autocomplete="tel"><label class="fl" for="lead-phone">เบอร์มือถือ 10 หลัก (เช่น 0810000000)</label><span class="lead-err"></span></div>
                     <div class="lead-hint full" style="margin-top:-6px">* กรอกอีเมลหรือเบอร์มือถืออย่างน้อย 1 ช่อง</div>
-                    <div class="lead-field"><input id="lead-company" name="company" type="text" placeholder=" " autocomplete="organization"><label class="fl" for="lead-company">บริษัท / หน่วยงาน</label></div>
-                    <div class="lead-field">
-                        <select id="lead-role" name="role">
-                            <option value="">— เลือก —</option>
-                            <option>สถาปนิก / นักออกแบบ</option>
-                            <option>ผู้รับเหมา</option>
-                            <option>เจ้าของโครงการ / Developer</option>
-                            <option>ที่ปรึกษาอาคารเขียว (LEED / TREES / WELL)</option>
-                            <option>ตัวแทนจำหน่าย / ร้านค้า</option>
-                            <option>เจ้าของบ้าน / ผู้ใช้งาน</option>
-                            <option>อื่นๆ</option>
-                        </select><label class="fl" for="lead-role">คุณคือ</label>
-                    </div>
                     <div class="lead-field full">
                         <select id="lead-province" name="province"><option value="">— เลือกจังหวัด —</option><option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option><option value="กระบี่">กระบี่</option><option value="กาญจนบุรี">กาญจนบุรี</option><option value="กาฬสินธุ์">กาฬสินธุ์</option><option value="กำแพงเพชร">กำแพงเพชร</option><option value="ขอนแก่น">ขอนแก่น</option><option value="จันทบุรี">จันทบุรี</option><option value="ฉะเชิงเทรา">ฉะเชิงเทรา</option><option value="ชลบุรี">ชลบุรี</option><option value="ชัยนาท">ชัยนาท</option><option value="ชัยภูมิ">ชัยภูมิ</option><option value="ชุมพร">ชุมพร</option><option value="เชียงราย">เชียงราย</option><option value="เชียงใหม่">เชียงใหม่</option><option value="ตรัง">ตรัง</option><option value="ตราด">ตราด</option><option value="ตาก">ตาก</option><option value="นครนายก">นครนายก</option><option value="นครปฐม">นครปฐม</option><option value="นครพนม">นครพนม</option><option value="นครราชสีมา">นครราชสีมา</option><option value="นครศรีธรรมราช">นครศรีธรรมราช</option><option value="นครสวรรค์">นครสวรรค์</option><option value="นนทบุรี">นนทบุรี</option><option value="นราธิวาส">นราธิวาส</option><option value="น่าน">น่าน</option><option value="บึงกาฬ">บึงกาฬ</option><option value="บุรีรัมย์">บุรีรัมย์</option><option value="ปทุมธานี">ปทุมธานี</option><option value="ประจวบคีรีขันธ์">ประจวบคีรีขันธ์</option><option value="ปราจีนบุรี">ปราจีนบุรี</option><option value="ปัตตานี">ปัตตานี</option><option value="พระนครศรีอยุธยา">พระนครศรีอยุธยา</option><option value="พะเยา">พะเยา</option><option value="พังงา">พังงา</option><option value="พัทลุง">พัทลุง</option><option value="พิจิตร">พิจิตร</option><option value="พิษณุโลก">พิษณุโลก</option><option value="เพชรบุรี">เพชรบุรี</option><option value="เพชรบูรณ์">เพชรบูรณ์</option><option value="แพร่">แพร่</option><option value="ภูเก็ต">ภูเก็ต</option><option value="มหาสารคาม">มหาสารคาม</option><option value="มุกดาหาร">มุกดาหาร</option><option value="แม่ฮ่องสอน">แม่ฮ่องสอน</option><option value="ยะลา">ยะลา</option><option value="ยโสธร">ยโสธร</option><option value="ระนอง">ระนอง</option><option value="ระยอง">ระยอง</option><option value="ราชบุรี">ราชบุรี</option><option value="ร้อยเอ็ด">ร้อยเอ็ด</option><option value="ลพบุรี">ลพบุรี</option><option value="ลำปาง">ลำปาง</option><option value="ลำพูน">ลำพูน</option><option value="เลย">เลย</option><option value="ศรีสะเกษ">ศรีสะเกษ</option><option value="สกลนคร">สกลนคร</option><option value="สงขลา">สงขลา</option><option value="สตูล">สตูล</option><option value="สมุทรปราการ">สมุทรปราการ</option><option value="สมุทรสงคราม">สมุทรสงคราม</option><option value="สมุทรสาคร">สมุทรสาคร</option><option value="สระบุรี">สระบุรี</option><option value="สระแก้ว">สระแก้ว</option><option value="สิงห์บุรี">สิงห์บุรี</option><option value="สุพรรณบุรี">สุพรรณบุรี</option><option value="สุราษฎร์ธานี">สุราษฎร์ธานี</option><option value="สุรินทร์">สุรินทร์</option><option value="สุโขทัย">สุโขทัย</option><option value="หนองคาย">หนองคาย</option><option value="หนองบัวลำภู">หนองบัวลำภู</option><option value="อ่างทอง">อ่างทอง</option><option value="อำนาจเจริญ">อำนาจเจริญ</option><option value="อุดรธานี">อุดรธานี</option><option value="อุตรดิตถ์">อุตรดิตถ์</option><option value="อุทัยธานี">อุทัยธานี</option><option value="อุบลราชธานี">อุบลราชธานี</option></select>
                         <label class="fl" for="lead-province">จังหวัดของโครงการ / ที่อยู่</label>
@@ -1047,10 +1077,6 @@
                     <label><input type="checkbox" name="topics" value="เอกสาร EPD / CFP / ฉลากเขียว">เอกสาร EPD / CFP / ฉลากเขียว</label>
                     <label><input type="checkbox" name="topics" value="การใช้สินค้าเพื่อขอคะแนนอาคารเขียว (LEED / TREES / WELL)">การใช้สินค้าเพื่อขอคะแนนอาคารเขียว (LEED / TREES / WELL)</label>
                     <label><input type="checkbox" name="topics" value="ใบเสนอราคา / ช่องทางสั่งซื้อ">ใบเสนอราคา / ช่องทางสั่งซื้อ</label>
-                </div>
-
-                <div class="lead-grid" style="margin-top:14px">
-                    <div class="lead-field full"><textarea id="lead-message" name="message" placeholder=" "></textarea><label class="fl" for="lead-message">รายละเอียดเพิ่มเติม (เช่น ชื่อโครงการ ปริมาณที่ต้องการ)</label></div>
                 </div>
 
                 <div class="lead-section">วันและช่วงเวลาที่สะดวกให้ติดต่อกลับ</div>
@@ -1318,6 +1344,12 @@
             // อ้าง element ตรงๆ (ตัวแปร elNavMenuBtn ประกาศทีหลัง — initGate() ทำงานก่อนถึงบรรทัดนั้น)
             document.getElementById('nav-menu-btn').classList.toggle('page-hidden', gateAccessMode === 'external');
             document.getElementById('btn-request-info').classList.toggle('hidden', gateAccessMode !== 'external');
+            // ตารางอาจ render ไปก่อน Login (โหลดจาก Cache) → ปรับคำอธิบายช่องติ๊ก + ปุ่มบนแถบลอยให้ตรงโหมด
+            document.querySelectorAll('#table-body .row-check').forEach(el => { el.title = rowCheckTip(); });
+            document.getElementById('lead-bar-go').textContent = gateAccessMode === 'internal' ? 'ดูเอกสาร →' : 'ขอข้อมูลสินค้านี้ →';
+        }
+        function rowCheckTip() {
+            return gateAccessMode === 'internal' ? 'เลือกสินค้านี้เพื่อดูเอกสาร' : 'เลือกสินค้านี้เพื่อขอข้อมูล';
         }
 
         function unlockGate(username, role, mode) {
@@ -2065,7 +2097,7 @@
                 chunks.push(`<td class="sticky-col text-left" data-col="group" data-colkey="p:group">${row.group}</td>`);
                 chunks.push(`<td class="sticky-col" data-col="bu" data-colkey="p:bu">${row.bu}</td>`);
                 chunks.push(`<td class="sticky-col text-left" data-col="cat" data-colkey="p:cat">${row.cat}</td>`);
-                chunks.push(`<td class="sticky-col text-left font-medium" data-col="name" data-colkey="p:name" style="white-space:normal;">${row.name}</td>`);
+                chunks.push(`<td class="sticky-col text-left font-medium" data-col="name" data-colkey="p:name" style="white-space:normal;"><span class="row-check" title="${rowCheckTip()}"></span>${row.name}</td>`);
 
                 // คอลัมน์ Green Attributes
                 GREEN_ATTRS.forEach(attr => {
@@ -4086,8 +4118,8 @@
             const bar = document.getElementById('lead-bar');
             const n = selectedRows.size;
             document.getElementById('lead-bar-count').textContent = n;
-            const overlayOpen = !document.getElementById('lead-overlay').classList.contains('hidden');
-            bar.classList.toggle('hidden', gateAccessMode !== 'external' || n === 0 || overlayOpen);
+            const overlayOpen = ['lead-overlay', 'pdoc-overlay'].some(id => !document.getElementById(id).classList.contains('hidden'));
+            bar.classList.toggle('hidden', !document.body.dataset.access || n === 0 || overlayOpen);
         }
 
         function renderLeadChips() {
@@ -4178,7 +4210,9 @@
         });
         elLeadPickInput.addEventListener('blur', () => setTimeout(closeLeadPickList, 120));
 
-        document.getElementById('lead-bar-go').addEventListener('click', () => openLeadForm());
+        document.getElementById('lead-bar-go').addEventListener('click', () => {
+            if (gateAccessMode === 'internal') openProductDocs(); else openLeadForm();
+        });
         document.getElementById('lead-bar-clear').addEventListener('click', () => document.getElementById('btn-clear-highlight').click());
 
         function openLeadForm() {
@@ -4233,8 +4267,8 @@
                 submittedAt: new Date().toISOString(),
                 firstName: fd.get('firstName').trim(), lastName: fd.get('lastName').trim(),
                 email: fd.get('email').trim(), phone: fd.get('phone').trim(),
-                company: fd.get('company').trim(), role: fd.get('role'), province: fd.get('province'),
-                topics: fd.getAll('topics'), products: productList.join('\n'), productList, message: fd.get('message').trim(),
+                province: fd.get('province'),
+                topics: fd.getAll('topics'), products: productList.join('\n'), productList,
                 contactDay: fd.get('contactDay'), contactTime: fd.get('contactTime'),
                 consent: true, source: location.href
             };
@@ -4282,6 +4316,146 @@
         document.getElementById('lead-done-close').addEventListener('click', closeLeadForm);
         elLeadOverlay.addEventListener('click', (e) => { if (e.target === elLeadOverlay) closeLeadForm(); });
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !elLeadOverlay.classList.contains('hidden')) closeLeadForm(); });
+
+        // ============================================================================
+        // Pop-up เอกสารของสินค้า (Internal) — กดช่องติ๊กหน้าชื่อสินค้าในตาราง Main
+        // จับคู่สินค้า Main (คอลัมน์ Products) กับ Link Master ด้วย "ชื่อ" เพราะรหัส BU สองไฟล์ไม่ตรงกัน (เช่น SCG ↔ CGS)
+        //   1) ชื่อตรงกับ Group Name / [TH] / [EN] Product Name (ไม่สนตัวพิมพ์/ช่องว่าง)
+        //   2) ไม่ตรง → ตัดข้อความในวงเล็บออกแล้วเทียบ (เช่น "สกิมโคท... (สีเทา)")
+        //   3) ยังไม่ตรง → คำต่างกันได้ 1 คำ แบบใดแบบหนึ่ง:
+        //      ก) ชื่อ Link Master มีคำเกินมา 1 คำ (เช่น "ผนังตกแต่ง เอสซีจี decaar รุ่น modeena m1")
+        //      ข) สลับ 1 คำระหว่างภาษาไทย ↔ อังกฤษ ที่ไม่มีตัวเลข (เช่น "เดคาร์" ↔ "decaar")
+        //      ไม่ยอมให้สลับคำที่มีตัวเลข กันจับผิดรุ่น เช่น "ชั้นคุณภาพ 5" ↔ "8.5", "m1" ↔ "m2"
+        //   ข้อ 2–3 แสดงป้าย "จับคู่โดยประมาณ" ให้ผู้ใช้รู้
+        // ============================================================================
+        const elPdocOverlay = document.getElementById('pdoc-overlay');
+        const pdocNorm = s => String(s || '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
+        const pdocNoParen = s => pdocNorm(String(s || '').replace(/\([^)]*\)|\[[^\]]*\]/g, ' '));
+        const pdocTokens = s => new Set(pdocNoParen(s).split(' ').filter(Boolean));
+        let pdocIndex = null, pdocIndexFor = null, pdocCurrent = null;
+
+        function pdocTokensClose(m, l) {
+            const onlyM = [...m].filter(w => !l.has(w)), onlyL = [...l].filter(w => !m.has(w));
+            if (!onlyM.length) return onlyL.length <= 1;
+            if (onlyM.length !== 1 || onlyL.length !== 1 || m.size < 3) return false;
+            const a = onlyM[0], b = onlyL[0], thai = /[฀-๿]/, latin = /[a-z]/;
+            return !/\d/.test(a + b) && ((thai.test(a) && !thai.test(b) && latin.test(b)) || (thai.test(b) && !thai.test(a) && latin.test(a)));
+        }
+
+        function pdocBuildIndex() {
+            if (pdocIndexFor === docState.docs) return pdocIndex;
+            pdocIndex = groupDocsByProduct(docState.docs).map(p => {
+                const names = [p.group, ...p.names];
+                return { p, exact: new Set(names.map(pdocNorm)), loose: new Set(names.map(pdocNoParen)), tokens: names.map(pdocTokens) };
+            });
+            pdocIndexFor = docState.docs;
+            return pdocIndex;
+        }
+
+        function findProductDocs(row) {
+            const idx = pdocBuildIndex();
+            const exact = idx.filter(e => e.exact.has(pdocNorm(row.name)));
+            if (exact.length) return { products: exact.map(e => e.p), approx: false };
+            const nl = pdocNoParen(row.name);
+            let hits = nl ? idx.filter(e => e.loose.has(nl)) : [];
+            if (!hits.length) {
+                const mt = pdocTokens(row.name);
+                if (mt.size >= 2) hits = idx.filter(e => e.tokens.some(t => pdocTokensClose(mt, t)));
+            }
+            return { products: hits.map(e => e.p), approx: hits.length > 0 };
+        }
+
+        function pdocDocRow(d) {
+            const exp = d.expiry ? `หมดอายุ ${fmtThaiDate(d.expiry)}` : '';
+            const pill = (d.status === 'expired' || d.status === 'soon') ? docStatusPill(d.status) : '';
+            const inner = `${docTypeBadge(d.typeCode)}<span class="nm">${escAttr(d.docName || '(ไม่มีชื่อไฟล์)')}</span>${pill}<span class="exp">${exp}</span>`;
+            return d.url
+                ? `<a class="pdoc-row" href="${escAttr(d.url)}" target="_blank" rel="noopener noreferrer" title="${escAttr(d.typeFull)}">${inner}<span class="open">เปิด ↗</span></a>`
+                : `<div class="pdoc-row no-url" title="ไม่มีลิงก์ URL">${inner}<span class="exp">ไม่มีลิงก์</span></div>`;
+        }
+
+        // เอกสารบังคับของ BU (ตามหน้า Setting) — มีแล้ว / หมดอายุ / ขาด
+        function pdocRequiredLine(p) {
+            const pc = productCompleteness(p.docs, appSettings)[0];
+            if (!pc) return '';
+            const chips = pc.required.map(t => pc.expired.includes(t) ? `<span class="hc-need exp">${docTypeBadge(t)} หมดอายุ</span>`
+                : pc.missing.includes(t) ? `<span class="hc-need miss">${docTypeBadge(t)} ขาด</span>`
+                : `<span class="hc-need ok">${docTypeBadge(t)} ✓</span>`).join('');
+            return `<div class="pdoc-need"><span>เอกสารบังคับของ BU ${escAttr(p.bu)}:</span>${chips}</div>`;
+        }
+
+        const pdocCleanName = s => String(s || '').replace(/\s+/g, ' ').trim();
+        const pdocSortDocs = docs => docs.slice().sort((a, b) => a.typeCode.localeCompare(b.typeCode) || DOC_STATUS_RANK[a.status] - DOC_STATUS_RANK[b.status]);
+
+        // 1 กล่องต่อ 1 สินค้าที่ติ๊กไว้: หัว (ชื่อ + BU/หมวด) → ป้ายจับคู่โดยประมาณ → เอกสารบังคับ → รายการเอกสาร
+        function pdocProductSection(row, found, single) {
+            const { products, approx } = found;
+            const goto = products.length ? `<button type="button" class="pdoc-goto" data-pdoc-goto="${escAttr(products[0].pkey)}">ดูในหน้า Document</button>` : '';
+            const head = single ? '' : `<div class="pdoc-prod-head"><div class="t">${escAttr(pdocCleanName(row.name))}<small>${[row.bu, row.cat].filter(Boolean).map(escAttr).join(' · ')}</small></div>${goto}</div>`;
+            const note = approx ? `<div class="pdoc-note info">จับคู่โดยประมาณกับ: ${products.map(p => `<b>${escAttr(p.group)}</b> (${escAttr(p.bu)})`).join(', ')} — ชื่อในไฟล์ Link Master ไม่ตรงกับตารางทุกตัวอักษร</div>` : '';
+            const content = products.length
+                ? products.map(p => `${products.length > 1 ? `<div class="lead-section">${escAttr(p.group)} <span class="doc-bu">${escAttr(p.bu)}</span></div>` : ''}${pdocRequiredLine(p)}<div class="pdoc-list">${pdocSortDocs(p.docs).map(pdocDocRow).join('')}</div>`).join('')
+                : `<div class="pdoc-empty">ยังไม่พบเอกสารของสินค้านี้ใน Link Master${single ? '<br><span style="font-size:0.75rem">ระบบจับคู่จากชื่อสินค้า (คอลัมน์ Products) กับ Group Name / ชื่อสินค้าใน Sheet "Link เอกสาร"</span>' : ''}</div>`;
+            return single ? note + content : `<div class="pdoc-prod">${head}${note}${content}</div>`;
+        }
+
+        function renderProductDocs() {
+            const rows = pdocCurrent.rows;
+            const single = rows.length === 1;
+            const body = document.getElementById('pdoc-body');
+            const btnDoc = document.getElementById('pdoc-open-doc');
+            btnDoc.classList.add('hidden');
+            if (!docState.loaded) { body.innerHTML = '<div class="pdoc-empty">กำลังโหลดรายการเอกสาร…</div>'; return; }
+            const founds = rows.map(findProductDocs);
+            const withDocs = founds.filter(f => f.products.length).length;
+            const warn = docState.source.kind === 'mock' ? `<div class="pdoc-note warn">${escAttr(docState.source.label)}</div>` : '';
+            const summary = single ? '' : `<div class="pdoc-summary">พบเอกสาร ${withDocs} จาก ${rows.length} สินค้าที่เลือก</div>`;
+            // สินค้าที่มีเอกสารขึ้นก่อน
+            const order = rows.map((r, i) => i).sort((a, b) => (founds[b].products.length > 0) - (founds[a].products.length > 0));
+            body.innerHTML = warn + summary + order.map(i => pdocProductSection(rows[i], founds[i], single)).join('');
+            // ปุ่มล่าง "เปิดในหน้า Document" ใช้เมื่อเลือกสินค้าเดียว (หลายสินค้าใช้ลิงก์ในแต่ละกล่อง)
+            if (single && founds[0].products.length) {
+                btnDoc.dataset.pdocGoto = founds[0].products[0].pkey;
+                btnDoc.classList.remove('hidden');
+            }
+        }
+
+        // เปิดจากปุ่ม "ดูเอกสาร" บนแถบลอย — แสดงเอกสารของทุกสินค้าที่ติ๊กไว้ในตาราง
+        function openProductDocs() {
+            const rows = selectedProductRows();
+            if (!rows.length) return;
+            pdocCurrent = { rows };
+            const single = rows.length === 1, row = rows[0];
+            document.getElementById('pdoc-title').textContent = single ? pdocCleanName(row.name) : `เอกสารของสินค้าที่เลือก (${rows.length} รายการ)`;
+            document.getElementById('pdoc-meta').innerHTML = single
+                ? [row.bu && `<span class="doc-bu">${escAttr(row.bu)}</span>`, row.cat && `<span>${escAttr(row.cat)}</span>`, row.group && `<span>${escAttr(row.group)}</span>`].filter(Boolean).join('<span>·</span>')
+                : '';
+            renderProductDocs();
+            elPdocOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            updateLeadBar();
+            if (!docState.loaded) {
+                const cur = pdocCurrent;
+                loadDocs().then(() => { if (pdocCurrent === cur) renderProductDocs(); });
+            }
+        }
+        function closeProductDocs() {
+            pdocCurrent = null;
+            elPdocOverlay.classList.add('hidden');
+            document.body.style.overflow = '';
+            updateLeadBar();
+        }
+        document.getElementById('pdoc-close').addEventListener('click', closeProductDocs);
+        document.getElementById('pdoc-close2').addEventListener('click', closeProductDocs);
+        elPdocOverlay.addEventListener('click', (e) => {
+            if (e.target === elPdocOverlay) { closeProductDocs(); return; }
+            const go = e.target.closest('[data-pdoc-goto]');
+            if (!go) return;
+            const pkey = go.dataset.pdocGoto;
+            closeProductDocs();
+            openProductInDocument(pkey);
+        });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !elPdocOverlay.classList.contains('hidden')) closeProductDocs(); });
 
         // ผู้ใช้เริ่มใช้ตาราง → ถ้ามีข้อมูลใหม่เข้ามาทีหลัง จะไม่สลับให้เอง (แสดงปุ่ม "มีข้อมูลใหม่" แทน)
         ['click', 'input', 'change'].forEach(ev => elDash.addEventListener(ev, (e) => {
