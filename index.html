@@ -130,9 +130,27 @@
             position: sticky;
             z-index: 10;
             background-color: white;
-            transform: translateZ(0);
-            will-change: transform;
+            /* ไม่ใช้ transform: translateZ(0) / will-change แล้ว — ทำให้แต่ละเซลล์เป็นเลเยอร์แยกที่ถูกปัดตำแหน่งเป็นพิกเซล
+               เกิดช่องว่างเศษพิกเซลระหว่างแถว (แถวที่สูงไม่ลงตัว เช่น ชื่อ 2 บรรทัด) เห็นเส้นของคอลัมน์ด้านหลังลอดเป็นจุดๆ */
+            /* เส้นแบ่งคอลัมน์ของคอลัมน์ที่ตรึงไว้: วาดด้วย box-shadow แบบ inset แทน border
+               เพราะ Chrome/Edge ไม่วาด border ซ้าย-ขวาของเซลล์ sticky (ช่องกว้าง 2px นั้นโปร่ง) ตอนเลื่อนตารางไปด้านข้าง
+               จึงเห็นหัวตาราง/ข้อมูลของคอลัมน์ที่เลื่อนผ่านลอดขึ้นมาเป็นเส้นสีเหลือง/เขียว/ตัวอักษร — shadow ถูกวาดพร้อมพื้นขาวของเซลล์ จึงทึบเสมอ */
+            border-left-width: 0;
+            border-right-width: 0;
+            box-shadow: inset -2px 0 0 #000;
         }
+        .sticky-col[data-col="group"] { border-left-width: 0; box-shadow: inset -2px 0 0 #000, inset 1px 0 0 #000; }
+        /* เส้นล่างก็โดนแบบเดียวกัน (เห็นเส้นดำของคอลัมน์ที่เลื่อนผ่านลอดเป็นจุดๆ ตามแนวแถว) → วาดเส้นประใต้แถวเป็นพื้นหลังแทน border */
+        tbody .sticky-col {
+            border-bottom-width: 0;
+            background-image: repeating-linear-gradient(to right, #999 0 1px, transparent 1px 2px);
+            background-size: 100% 1px;
+            background-position: left bottom;
+            background-repeat: no-repeat;
+        }
+        tbody tr:last-child .sticky-col { background-image: linear-gradient(#000, #000); }
+        thead .sticky-col { border-bottom-width: 0 !important; box-shadow: inset -2px 0 0 #000, inset 0 -2px 0 #000; }
+        thead .sticky-col[data-col="group"] { box-shadow: inset -2px 0 0 #000, inset 1px 0 0 #000, inset 0 -2px 0 #000; }
         
         /* เมื่อ Sticky คอลัมน์ และ Header ตัดกัน */
         thead .sticky-col {
@@ -176,7 +194,11 @@
             position: relative;
         }
 
-        tbody tr:hover td { background-color: #f0fdf4 !important; }
+        /* Hover แถว: เดิมใช้สีเขียวอ่อนมาก (#f0fdf4) แทบไม่ต่างจากพื้นขาว และ specificity สูงกว่าทุกสี จึงทับ
+           สีแถวที่เลือก (เหลือง) / เซลล์ Cert (ฟ้า) / Green Attributes (ส้ม) / คอลัมน์ที่เลือก จนดูเหมือนไม่ได้เลือก
+           ตอนนี้: แถวปกติ = เขียวชัดขึ้น เฉพาะเซลล์ว่าง (เซลล์ที่มีสีอยู่แล้วคงสีเดิม) · แถวที่เลือก = เหลืองเข้มขึ้น */
+        tbody tr:not(.selected-row):hover td:not(.cell-highlight-attr):not(.cell-highlight-cert):not(.col-selected) { background-color: #dcfce7 !important; }
+        tbody tr.selected-row:hover td:not(.col-selected) { background-color: #fde047 !important; }
 
         /* เพิ่ม: ไฮไลท์แถวเมื่อคลิก (เอา transition ออกเพื่อแก้ปัญหาความหน่วงบนตารางขนาดใหญ่) */
         /* รองรับการเลือกได้หลายแถวพร้อมกัน (toggle ทีละแถว ไม่ล้างแถวอื่น) */
@@ -1850,9 +1872,7 @@
                 if (th) {
                     const width = th.offsetWidth;
                     css += `[data-col="${colId}"] { left: ${left}px; }\n`;
-                    if (index === cols.length - 1) {
-                        css += `[data-col="${colId}"] { border-right: 2px solid black; }\n`; // ขอบหนาขวาสุดของส่วนข้อมูล
-                    }
+                    // เส้นขอบขวาของคอลัมน์ที่ตรึงไว้ (รวมคอลัมน์สุดท้าย) วาดด้วย box-shadow ใน .sticky-col แล้ว — ห้ามใส่ border-right กลับ
                     left += width;
                 }
             });
